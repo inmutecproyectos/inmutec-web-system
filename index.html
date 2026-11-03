@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Web - INMUTEC E.I.R.L.</title>
+  
+  <link rel="icon" type="image/png" href="./public/assets/brand/logo-inmutec.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#002b49',
+              cyan: '#00a8e8',
+              dark: '#0f172a',
+              fiberGreen: '#10b981',
+              fiberYellow: '#f59e0b',
+              fiberRed: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Indicador visual de elemento editable en modo admin */
+    .admin-editable-active {
+      outline: 2px dashed #00a8e8 !important;
+      outline-offset: 4px;
+      cursor: pointer;
+      position: relative;
+    }
+    .admin-editable-active:hover::after {
+      content: "✎ Editar";
+      position: absolute;
+      top: -12px;
+      right: 0;
+      background: #002b49;
+      color: #00a8e8;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: bold;
+      border: 1px solid #00a8e8;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+  <!-- ==================== BARRA FLOTANTE DE ADMINISTRACIÓN ==================== -->
+  <div id="adminTopBar" class="hidden bg-[#001d32] border-b border-[#00a8e8]/40 text-white px-4 py-2 sticky top-0 z-[60] flex items-center justify-between text-xs">
+    <div class="flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="font-bold">MODO ADMINISTRADOR ACTIVO</span>
+      <span class="text-slate-400">| Haz clic en cualquier recuadro con borde celeste para editar textos o imágenes</span>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button id="btnAdminCerrarSesion" class="bg-rose-500 hover:bg-rose-600 px-3 py-1 rounded-lg font-bold transition">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar Sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="bg-gradient-to-r from-[#002b49] via-[#003c66] to-[#002038] text-white shadow-xl sticky top-0 z-50 border-b-2 border-brand-cyan">
+    <div class="max-w-[1550px] mx-auto px-4 h-16 flex items-center justify-between">
+      
+      <!-- LOGO -->
+      <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="window.location.hash='inicio'">
+        <div class="bg-white px-2.5 py-1 rounded-xl shadow-md flex items-center border border-brand-cyan/40">
+          <img 
+            src="./public/assets/brand/logo-inmutec.png" 
+            alt="INMUTEC Logo" 
+            class="h-9 w-auto object-contain"
+            onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
+          />
+          <div id="logo-fallback" class="hidden items-center space-x-1 font-black text-lg">
+            <span class="text-[#002b49]">INMU</span><span class="text-[#00a8e8]">TEC</span>
+          </div>
+        </div>
+        <div class="hidden sm:block leading-tight">
+          <p class="text-xs font-black tracking-wider text-white uppercase drop-shadow">TELECOMUNICACIONES E INTERNET</p>
+          <span class="text-[10px] text-cyan-200 font-semibold tracking-wide">Multiservicios Generales E.I.R.L.</span>
+        </div>
+      </div>
+
+      <!-- NAVEGACIÓN -->
+      <nav class="flex items-center space-x-1 sm:space-x-2 text-xs lg:text-sm font-bold uppercase tracking-wide">
+        <button id="btn-inicio" data-module="inicio" class="nav-tab px-4 py-2 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Inicio</button>
+        <button id="btn-quienes-somos" data-module="quienes-somos" class="nav-tab px-4 py-2 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Quiénes Somos</button>
+        <button id="btn-servicios" data-module="servicios" class="nav-tab px-4 py-2 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Servicios</button>
+        <button id="btn-portafolio" data-module="portafolio" class="nav-tab px-4 py-2 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Portafolio</button>
+        <button id="btn-cotizacion" data-module="cotizacion" class="nav-tab px-4 py-2 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Cotización</button>
+      </nav>
+
+      <!-- BOTÓN LOGIN / ESTADO -->
+      <div>
+        <button id="btnOpenLoginModal" class="bg-[#00a8e8] hover:bg-[#0092ca] text-white text-xs font-black uppercase px-4 py-2 rounded-xl shadow-md border border-cyan-300 transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-lock text-[11px]"></i>
+          <span id="txtLoginBtn">Login</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENEDOR DE VISTAS DINÁMICAS -->
+  <main id="moduleContainer" class="max-w-[1550px] w-full mx-auto p-4 lg:p-6 flex-1">
+  </main>
+
+  <!-- ==================== MODAL LOGIN ADMINISTRADOR ==================== -->
+  <div id="loginModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative text-xs border border-slate-200">
+      <button id="btnCloseLoginModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 bg-sky-50 text-brand-navy rounded-2xl flex items-center justify-center mx-auto text-xl mb-2 border border-sky-100">
+          <i class="fa-solid fa-shield-halved text-brand-cyan"></i>
+        </div>
+        <h3 class="font-black text-brand-navy text-base">Panel de Gestión CMS</h3>
+        <p class="text-[11px] text-slate-500">Inicia sesión con tu cuenta de Supabase</p>
+      </div>
+      <form id="adminLoginForm" class="space-y-3">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Correo Electrónico</label>
+          <input id="loginEmail" type="email" required placeholder="admin@inmutec.com.pe" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8]">
+        </div>
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Contraseña</label>
+          <input id="loginPass" type="password" required placeholder="••••••••" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8]">
+        </div>
+        <span id="loginErrorMsg" class="hidden text-rose-500 font-bold text-[11px] block text-center"></span>
+        <button type="submit" id="btnSubmitLogin" class="w-full bg-[#002b49] hover:bg-[#00a8e8] text-white font-bold py-2.5 rounded-xl transition shadow cursor-pointer">
+          INGRESAR AL PANEL
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE EDICIÓN CMS (TEXTO E IMÁGENES) ==================== -->
+  <div id="cmsEditorModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl relative text-xs border border-slate-200 space-y-4">
+      <button id="btnCloseCmsModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div>
+        <span class="text-[10px] font-black uppercase text-[#00a8e8] tracking-wider block">Editor de Contenido Directo</span>
+        <h3 id="cmsModalFieldTitle" class="text-base font-black text-[#002b49]">Editar Sección</h3>
+      </div>
+
+      <!-- Opción A: Editor de Texto -->
+      <div id="cmsTextEditorBlock" class="space-y-2">
+        <label class="font-bold text-slate-700 block">Texto / Párrafo:</label>
+        <textarea id="cmsTextInput" rows="5" class="w-full p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8]"></textarea>
+      </div>
+
+      <!-- Opción B: Editor de Imagen -->
+      <div id="cmsImageEditorBlock" class="hidden space-y-3">
+        <label class="font-bold text-slate-700 block">Reemplazar Imagen:</label>
+        <div class="h-40 w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative flex items-center justify-center">
+          <img id="cmsImagePreview" src="" class="w-full h-full object-cover hidden">
+          <span id="cmsImagePlaceholder" class="text-slate-400 font-medium">Ningún archivo seleccionado</span>
+        </div>
+        <input type="file" id="cmsFileInput" accept="image/*" class="w-full text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-50 file:text-[#00a8e8] hover:file:bg-cyan-100 cursor-pointer">
+      </div>
+
+      <div class="pt-2 flex justify-end space-x-2 border-t border-slate-100">
+        <button id="btnCancelCms" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 transition">Cancelar</button>
+        <button id="btnSaveCms" class="px-5 py-2 rounded-xl bg-[#00a8e8] hover:bg-[#0092ca] text-[#002b49] font-black transition shadow">
+          Guardar Cambios en Base de Datos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-brand-navy text-slate-400 text-xs py-3 text-center border-t border-brand-cyan/30">
+    <p>© 2026 INMUTEC E.I.R.L. - RUC: 20568327692 | Telecomunicaciones & Internet | www.inmutec.com.pe</p>
+  </footer>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

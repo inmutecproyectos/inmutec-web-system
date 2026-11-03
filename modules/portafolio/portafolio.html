@@ -1,0 +1,476 @@
+<div class="space-y-10 animate-fadeIn">
+
+  <!-- ================= 1. CABECERA PRINCIPAL ================= -->
+  <section class="relative bg-gradient-to-br from-[#001d32] via-[#002b49] to-[#081b2a] rounded-3xl p-8 lg:p-12 text-white shadow-2xl overflow-hidden border border-[#00a8e8]/30">
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      
+      <div class="space-y-3 max-w-2xl">
+        <div class="inline-flex items-center space-x-2 bg-[#00a8e8]/15 border border-[#00a8e8]/40 px-3.5 py-1 rounded-full text-xs font-semibold text-cyan-200">
+          <i class="fa-solid fa-folder-closed text-[#00a8e8]"></i>
+          <span>Registro Histórico & Homologación de Contratos</span>
+        </div>
+        <h1 data-cms-key="port_hero_titulo" class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+          Experiencia Técnica <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00a8e8] via-sky-300 to-emerald-400">Comprobada</span>
+        </h1>
+        <p data-cms-key="port_hero_subtitulo" class="text-slate-300 text-xs sm:text-sm lg:text-base leading-relaxed font-normal">
+          Expediente de obras ejecutadas con certificación técnica, despliegue georreferenciado en alta montaña y contratos concluidos con operadores e instituciones del Estado.
+        </p>
+      </div>
+
+      <!-- Resumen Cuantitativo de Experiencia -->
+      <div class="grid grid-cols-2 gap-3 shrink-0">
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-2xl text-center">
+          <span data-cms-key="port_kpi_km" class="text-2xl lg:text-3xl font-black text-[#00a8e8] font-mono block">+120 km</span>
+          <span class="text-[10px] text-slate-300 uppercase font-bold tracking-wider">Fibra Instalada</span>
+        </div>
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-2xl text-center">
+          <span data-cms-key="port_kpi_conformes" class="text-2xl lg:text-3xl font-black text-[#10b981] font-mono block">100%</span>
+          <span class="text-[10px] text-slate-300 uppercase font-bold tracking-wider">Obras Conformes</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 2. BARRA DE FILTROS ================= -->
+  <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div class="flex flex-wrap gap-2" id="portfolioFilterContainer">
+      <button type="button" data-filter="all" class="port-tab-btn active-tab px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer">
+        Todos los Proyectos
+      </button>
+      <button type="button" data-filter="macro" class="port-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+        Gran Envergadura (Troncales / Dorsal)
+      </button>
+      <button type="button" data-filter="satelital" class="port-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+        Enlaces Satelitales & Gasoducto
+      </button>
+      <button type="button" data-filter="supervision" class="port-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+        Supervisión & Entidades Públicas
+      </button>
+    </div>
+    <span class="text-xs font-mono text-slate-400 font-semibold" id="portCounterText">Mostrando 6 obras principales</span>
+  </div>
+
+  <!-- ================= 3. LISTADO DE OBRAS AL DETALLE ================= -->
+  <section class="space-y-6" id="portfolioList">
+
+    <!-- PROYECTO 1: WOW TEL (TRONCAL TR-35 Y TR-14) -->
+    <article class="project-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300" data-cat="macro">
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="lg:col-span-4 relative min-h-[220px] bg-slate-900 overflow-hidden group">
+          <img data-cms-key="obra_wow_img" src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80" alt="Tendido Fibra Óptica WOW Tel" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-cyan-100 text-[#002b49] font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Gran Escala • Troncales</span>
+          <div class="absolute bottom-3 left-4 right-4 text-white text-xs">
+            <span class="font-mono text-[11px] text-cyan-300 block"><i class="fa-solid fa-location-dot mr-1"></i>Huancayo, Junín (-12.0919, -75.2125)</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 p-6 lg:p-7 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 data-cms-key="obra_wow_titulo" class="text-xl font-black text-[#002b49]">Despliegue de Red Troncal TR-35 y TR-14</h3>
+                <p data-cms-key="obra_wow_cliente" class="text-xs font-bold text-[#00a8e8]">Cliente / Operador: WOW Tel / LPS GROUP S.A.C.</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span data-cms-key="obra_wow_fecha" class="text-xs font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  <i class="fa-regular fa-calendar-days mr-1"></i>Jul 2023 - Ago 2023
+                </span>
+                <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>Concluido y Operativo</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Alcance del Proyecto:</span>
+                <p data-cms-key="obra_wow_alcance" class="leading-relaxed">Planta Interna y Externa para transporte de fibra óptica de alta densidad en zonas urbanas densas.</p>
+              </div>
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Labores Técnicas:</span>
+                <ul class="space-y-1">
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Tendido aéreo de cable troncal de F.O.</span></li>
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Fusionado y sangrado de mufas troncales.</span></li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Métrica / Rendimiento:</span>
+                <span data-cms-key="obra_wow_metrica" class="font-mono text-[#002b49] font-black text-sm block">120 km de Red Troncal</span>
+                <span class="text-[11px] text-slate-500">Pruebas reflectométricas OTDR aprobadas al 100%.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="button" onclick="window.openProjectModal('wow')" class="text-xs font-bold text-[#002b49] hover:text-[#00a8e8] flex items-center space-x-1.5 transition cursor-pointer">
+              <span>Ver Expediente Técnico y Equipamiento</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- PROYECTO 2: RED DORSAL (TELRAD) -->
+    <article class="project-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300" data-cat="macro">
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="lg:col-span-4 relative min-h-[220px] bg-slate-900 overflow-hidden group">
+          <img data-cms-key="obra_dorsal_img" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="Red Dorsal Nacional" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-emerald-100 text-emerald-900 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Red Dorsal Nacional</span>
+          <div class="absolute bottom-3 left-4 right-4 text-white text-xs">
+            <span class="font-mono text-[11px] text-cyan-300 block"><i class="fa-solid fa-mountain mr-1"></i>Cordillera y Alta Montaña (+4,200 msnm)</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 p-6 lg:p-7 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 data-cms-key="obra_dorsal_titulo" class="text-xl font-black text-[#002b49]">Mantenimiento Red Dorsal Nacional de Fibra Óptica</h3>
+                <p data-cms-key="obra_dorsal_cliente" class="text-xs font-bold text-[#00a8e8]">Cliente Contratista: TELRAD S.A.C.</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span data-cms-key="obra_dorsal_fecha" class="text-xs font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  <i class="fa-regular fa-calendar-days mr-1"></i>Operación Continua
+                </span>
+                <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>Certificación Vigente</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Alcance del Proyecto:</span>
+                <p data-cms-key="obra_dorsal_alcance" class="leading-relaxed">Mantenimiento preventivo y de emergencia sobre la troncal interregional en condiciones climáticas extremas.</p>
+              </div>
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Labores Técnicas:</span>
+                <ul class="space-y-1">
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Reemplazo de vanos y empalmes bajo nieve.</span></li>
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Cuadrillas con EPP y vehículos 4x4 equipados.</span></li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Métrica / Rendimiento:</span>
+                <span data-cms-key="obra_dorsal_metrica" class="font-mono text-[#002b49] font-black text-sm block">SLA 99.8% Disponibilidad</span>
+                <span class="text-[11px] text-slate-500">Tiempo de respuesta ante corte menor a 4 horas.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="button" onclick="window.openProjectModal('dorsal')" class="text-xs font-bold text-[#002b49] hover:text-[#00a8e8] flex items-center space-x-1.5 transition cursor-pointer">
+              <span>Ver Expediente Técnico y Equipamiento</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- PROYECTO 3: GASODUCTO TGP (GILAT / TELSAT) -->
+    <article class="project-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300" data-cat="satelital">
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="lg:col-span-4 relative min-h-[220px] bg-slate-900 overflow-hidden group">
+          <img data-cms-key="obra_tgp_img" src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80" alt="Gasoducto TGP Satelital" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-amber-100 text-amber-900 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Gasoducto & Satelital</span>
+          <div class="absolute bottom-3 left-4 right-4 text-white text-xs">
+            <span class="font-mono text-[11px] text-cyan-300 block"><i class="fa-solid fa-gas-pump mr-1"></i>Estaciones PS #4, PS #6 y Válvula 10016</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 p-6 lg:p-7 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 data-cms-key="obra_tgp_titulo" class="text-xl font-black text-[#002b49]">Interconexión Satelital en Estaciones de Gasoducto TGP</h3>
+                <p data-cms-key="obra_tgp_cliente" class="text-xs font-bold text-[#00a8e8]">Cliente: TELSAT S.R.L. / Gilat Perú (Transportadora de Gas del Perú)</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span data-cms-key="obra_tgp_fecha" class="text-xs font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  <i class="fa-regular fa-calendar-days mr-1"></i>Ejecución Contractual
+                </span>
+                <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>Conforme y Aceptado</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Alcance del Proyecto:</span>
+                <p data-cms-key="obra_tgp_alcance" class="leading-relaxed">Montaje electromecánico e interconexión satelital VSAT en plantas de compresión y bombeo críticas.</p>
+              </div>
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Labores Técnicas:</span>
+                <ul class="space-y-1">
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Alineamiento y apuntamiento de antenas VSAT.</span></li>
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Sistemas de energía ininterrumpida y gabinetes.</span></li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Métrica / Rendimiento:</span>
+                <span data-cms-key="obra_tgp_metrica" class="font-mono text-[#002b49] font-black text-sm block">100% Telemetría SCADA</span>
+                <span class="text-[11px] text-slate-500">Transmisión de datos operativa sin pérdida de paquetes.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="button" onclick="window.openProjectModal('tgp')" class="text-xs font-bold text-[#002b49] hover:text-[#00a8e8] flex items-center space-x-1.5 transition cursor-pointer">
+              <span>Ver Expediente Técnico y Equipamiento</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- PROYECTO 4: IFIT PERÚ (ESTACIONES RAN Y MÓVILES) -->
+    <article class="project-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300" data-cat="satelital">
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="lg:col-span-4 relative min-h-[220px] bg-slate-900 overflow-hidden group">
+          <img data-cms-key="obra_ifit_img" src="https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=800&q=80" alt="Estaciones Base Celular RAN" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-sky-100 text-[#002b49] font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Telefonía Móvil & RAN</span>
+          <div class="absolute bottom-3 left-4 right-4 text-white text-xs">
+            <span class="font-mono text-[11px] text-cyan-300 block"><i class="fa-solid fa-tower-cell mr-1"></i>Nodos Alto Polish y San Juan Potrero</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 p-6 lg:p-7 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 data-cms-key="obra_ifit_titulo" class="text-xl font-black text-[#002b49]">Estaciones Base Celular RAN y Gabinetes</h3>
+                <p data-cms-key="obra_ifit_cliente" class="text-xs font-bold text-[#00a8e8]">Cliente: IFIT PERÚ S.A.C. / OSC Telecoms</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span data-cms-key="obra_ifit_fecha" class="text-xs font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  <i class="fa-regular fa-calendar-days mr-1"></i>Nov 2021 - Oct 2025
+                </span>
+                <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>Operatividad Validada</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Alcance del Proyecto:</span>
+                <p data-cms-key="obra_ifit_alcance" class="leading-relaxed">Despliegue de red celular 3G/4G, levantamiento TSS, montaje de antenas y energización de sitios.</p>
+              </div>
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Labores Técnicas:</span>
+                <ul class="space-y-1">
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Instalación y cableado de gabinetes de intemperie.</span></li>
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Montaje de antenas sectoriales en torre.</span></li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Métrica / Rendimiento:</span>
+                <span data-cms-key="obra_ifit_metrica" class="font-mono text-[#002b49] font-black text-sm block">12 Estaciones Implementadas</span>
+                <span class="text-[11px] text-slate-500">Integración exitosa a la red troncal del operador.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="button" onclick="window.openProjectModal('ifit')" class="text-xs font-bold text-[#002b49] hover:text-[#00a8e8] flex items-center space-x-1.5 transition cursor-pointer">
+              <span>Ver Expediente Técnico y Equipamiento</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- PROYECTO 5: HUANCAVELICA (SUPERVISIÓN 24 ESTACIONES Y STP) -->
+    <article class="project-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300" data-cat="supervision">
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="lg:col-span-4 relative min-h-[220px] bg-slate-900 overflow-hidden group">
+          <img data-cms-key="obra_drth_img" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80" alt="Supervisión Estaciones Base y STP" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-purple-100 text-purple-900 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Supervisión Estatal</span>
+          <div class="absolute bottom-3 left-4 right-4 text-white text-xs">
+            <span class="font-mono text-[11px] text-cyan-300 block"><i class="fa-solid fa-bolt mr-1"></i>Región Huancavelica (Puituco y provincias)</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 p-6 lg:p-7 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 data-cms-key="obra_drth_titulo" class="text-xl font-black text-[#002b49]">Supervisión y Mantenimiento de 24 Estaciones Base y STP</h3>
+                <p data-cms-key="obra_drth_cliente" class="text-xs font-bold text-[#00a8e8]">Entidad: Dirección Regional de Transportes y Comunicaciones de Huancavelica</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span data-cms-key="obra_drth_fecha" class="text-xs font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  <i class="fa-regular fa-calendar-days mr-1"></i>Agosto 2022
+                </span>
+                <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>Dictamen Aprobado</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Alcance del Proyecto:</span>
+                <p data-cms-key="obra_drth_alcance" class="leading-relaxed">Auditoría técnica pericial y mantenimiento de sistemas de puesta a tierra en repetidoras de radio y TV nacional.</p>
+              </div>
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Labores Técnicas:</span>
+                <ul class="space-y-1">
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Medición de resistividad con telurómetro digital.</span></li>
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Tratamiento químico y reactivación de pozos a tierra.</span></li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Métrica / Rendimiento:</span>
+                <span data-cms-key="obra_drth_metrica" class="font-mono text-[#002b49] font-black text-sm block">Resistencia &lt; 5 Ohmios</span>
+                <span class="text-[11px] text-slate-500">Conformidad con Norma NTP 2050 y Código Eléctrico.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="button" onclick="window.openProjectModal('huancavelica')" class="text-xs font-bold text-[#002b49] hover:text-[#00a8e8] flex items-center space-x-1.5 transition cursor-pointer">
+              <span>Ver Expediente Técnico y Equipamiento</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- PROYECTO 6: EL TAMBO (VIDEOVIGILANCIA URBANA) -->
+    <article class="project-card bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300" data-cat="supervision">
+      <div class="grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="lg:col-span-4 relative min-h-[220px] bg-slate-900 overflow-hidden group">
+          <img data-cms-key="obra_tambo_img" src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80" alt="Videovigilancia Urbana El Tambo" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          <span class="absolute top-4 left-4 bg-rose-100 text-rose-900 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Seguridad Ciudadana</span>
+          <div class="absolute bottom-3 left-4 right-4 text-white text-xs">
+            <span class="font-mono text-[11px] text-cyan-300 block"><i class="fa-solid fa-video mr-1"></i>Distrito de El Tambo, Huancayo</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 p-6 lg:p-7 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 data-cms-key="obra_tambo_titulo" class="text-xl font-black text-[#002b49]">Mantenimiento Preventivo y Correctivo de Red de Videovigilancia</h3>
+                <p data-cms-key="obra_tambo_cliente" class="text-xs font-bold text-[#00a8e8]">Entidad: Municipalidad Distrital de El Tambo - Huancayo</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span data-cms-key="obra_tambo_fecha" class="text-xs font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  <i class="fa-regular fa-calendar-days mr-1"></i>Mantenimiento Periódico
+                </span>
+                <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>Red Operativa al 100%</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Alcance del Proyecto:</span>
+                <p data-cms-key="obra_tambo_alcance" class="leading-relaxed">Mantenimiento integral sobre la red óptica de cámaras de seguridad ciudadana del distrito.</p>
+              </div>
+              <div class="space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Labores Técnicas:</span>
+                <ul class="space-y-1">
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Revisión de cableado de fibra a postes y mufas.</span></li>
+                  <li class="flex items-start space-x-1.5"><i class="fa-solid fa-check text-[#00a8e8] mt-0.5 text-[10px]"></i><span>Alineación de domos y conmutadores ópticos.</span></li>
+                </ul>
+              </div>
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Métrica / Rendimiento:</span>
+                <span data-cms-key="obra_tambo_metrica" class="font-mono text-[#002b49] font-black text-sm block">48 Puntos de Monitoreo</span>
+                <span class="text-[11px] text-slate-500">Flujo de video en tiempo real hacia la central de serenazgo.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="button" onclick="window.openProjectModal('tambo')" class="text-xs font-bold text-[#002b49] hover:text-[#00a8e8] flex items-center space-x-1.5 transition cursor-pointer">
+              <span>Ver Expediente Técnico y Equipamiento</span>
+              <i class="fa-solid fa-arrow-right text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ================= 4. MODAL DE EXPEDIENTE TÉCNICO Y EQUIPAMIENTO ================= -->
+  <div id="projectDetailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative border border-slate-200 animate-fadeIn space-y-5">
+      <button onclick="window.closeProjectModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 text-lg cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div>
+        <span id="projModalTag" class="text-[10px] font-black uppercase tracking-wider text-[#00a8e8] block"></span>
+        <h3 id="projModalTitle" class="text-xl sm:text-2xl font-black text-[#002b49] mt-0.5"></h3>
+        <p id="projModalClient" class="text-xs font-bold text-slate-500"></p>
+      </div>
+
+      <div class="border-t border-slate-100 pt-3 space-y-4 text-xs">
+        <div class="space-y-1">
+          <span class="font-black text-[#002b49] uppercase text-[11px] block">Descripción de Ingeniería:</span>
+          <p id="projModalDesc" class="text-slate-600 leading-relaxed"></p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
+            <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Instrumental & Maquinaria Utilizada:</span>
+            <ul id="projModalTools" class="space-y-1 text-slate-600 list-disc list-inside"></ul>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
+            <span class="font-black text-[#002b49] uppercase text-[10px] tracking-wider block">Normativas y Protocolos Validados:</span>
+            <ul id="projModalStandards" class="space-y-1 text-slate-600 list-disc list-inside"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-between items-center border-t border-slate-100">
+        <span class="text-[11px] text-slate-400 font-medium">Multiservicios Generales INMUTEC E.I.R.L.</span>
+        <div class="flex space-x-2">
+          <button onclick="window.closeProjectModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition cursor-pointer">
+            Cerrar
+          </button>
+          <button onclick="window.quoteSimilarProject()" class="px-5 py-2 rounded-xl bg-[#00a8e8] text-[#002b49] font-black text-xs hover:bg-[#0092ca] hover:text-white transition shadow cursor-pointer">
+            Cotizar Proyecto Similar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

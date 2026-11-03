@@ -1,0 +1,19 @@
+.svc-card {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
+}
+
+.svc-card:hover {
+  transform: translateY(-4px);
+  border-color: #00a8e8;
+}
+
+.svc-tab-btn {
+  cursor: pointer;
+  user-select: none;
+}
+
+.svc-tab-btn.active-tab {
+  background-color: #00a8e8 !important;
+  color: #002b49 !important;
+  border-color: #00a8e8 !important;
+}
