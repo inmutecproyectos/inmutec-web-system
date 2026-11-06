@@ -123,23 +123,25 @@
       <p data-cms-key="qs_equipo_subtitulo" class="text-xs sm:text-sm text-slate-500">Ingenieros, supervisores y cuadrillas certificadas para trabajo seguro en altura y terreno agreste.</p>
     </div>
 
-    <!-- Fotografía Grupal Panorámica (Conectable a Supabase Storage) -->
-    <div class="relative w-full h-80 sm:h-96 rounded-3xl overflow-hidden shadow-lg border border-slate-200 group">
-      <img 
-        data-cms-key="foto_equipo_panoramica"
-        src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80" 
-        alt="Equipo de Trabajo INMUTEC" 
-        class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-      >
-      <div class="absolute inset-0 bg-gradient-to-t from-[#002b49]/90 via-black/20 to-transparent"></div>
-      <div class="absolute bottom-6 left-6 right-6 text-white max-w-2xl space-y-1">
-        <span class="text-[10px] font-black uppercase bg-[#10b981] text-white px-3 py-1 rounded-full inline-block">Personal de Campo & Planta</span>
-        <h4 data-cms-key="foto_equipo_subencabezado" class="text-xl sm:text-2xl font-black">Cuadrillas Homologadas en Altura y Redes Críticas</h4>
-        <p data-cms-key="foto_equipo_descripcion" class="text-xs text-slate-300">
-          Personal capacitado en normativas de seguridad industrial, fusiones de precisión de mufas y montaje electromecánico en Junín, Huancavelica y todo el Perú.
-        </p>
-      </div>
-    </div>
+<!-- Fotografía Grupal Panorámica (Conectable a Supabase Storage) -->
+<div class="relative w-full h-80 sm:h-96 rounded-3xl overflow-hidden shadow-lg border border-slate-200 group">
+  <img 
+    data-cms-key="foto_equipo_panoramica"
+    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80" 
+    alt="Equipo de Trabajo INMUTEC" 
+    class="w-full h-full object-cover group-hover:scale-105 transition duration-500 cursor-pointer"
+  >
+  <!-- pointer-events-none permite que el clic traspase el degradado y llegue a la foto -->
+  <div class="absolute inset-0 bg-gradient-to-t from-[#002b49]/90 via-black/20 to-transparent pointer-events-none"></div>
+  
+  <div class="absolute bottom-6 left-6 right-6 text-white max-w-2xl space-y-1">
+    <span class="text-[10px] font-black uppercase bg-[#10b981] text-white px-3 py-1 rounded-full inline-block">Personal de Campo & Planta</span>
+    <h4 data-cms-key="foto_equipo_subencabezado" class="text-xl sm:text-2xl font-black">Cuadrillas Homologadas en Altura y Redes Críticas</h4>
+    <p data-cms-key="foto_equipo_descripcion" class="text-xs text-slate-300">
+      Personal capacitado en normativas de seguridad industrial, fusiones de precisión de mufas y montaje electromecánico en Junín, Huancavelica y todo el Perú.
+    </p>
+  </div>
+</div>
 
     <!-- Carrusel Interactivo de Integrantes del Equipo -->
     <div class="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200 space-y-4">
