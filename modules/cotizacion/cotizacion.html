@@ -1,5 +1,10 @@
 <div class="space-y-10 animate-fadeIn">
 
+  <!-- ============================================================== -->
+  <!-- CONTENEDOR EXCLUSIVO: Solo se inyecta cuando hay sesión Admin  -->
+  <!-- ============================================================== -->
+  <div id="contenedor_modulo_admin_proforma"></div>
+
   <!-- CABECERA -->
   <section class="relative bg-gradient-to-br from-[#001d32] via-[#002b49] to-[#081b2a] rounded-3xl p-8 lg:p-12 text-white shadow-2xl overflow-hidden border border-[#00a8e8]/30">
     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -114,7 +119,7 @@
           </div>
         </div>
 
-        <!-- Fila 3: Selección de Servicio -->
+        <!-- Fila 3: Selección de Servicio (CON DOMÓTICA DESTACADO) -->
         <div>
           <label class="font-bold text-slate-700 block mb-2">Selecciona el Servicio Requerido *</label>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="serviceButtonsContainer">
@@ -139,9 +144,13 @@
               <span class="text-[10px] leading-tight">Laboratorio RF</span>
             </button>
 
-            <button type="button" data-svc="Domótica" class="svc-selector-btn p-3 rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-purple-500">
-              <i class="fa-solid fa-house-signal text-lg mb-1 text-purple-500"></i>
-              <span class="text-[10px] leading-tight">Domótica & Smart</span>
+            <!-- DOMÓTICA & SMART (DESTACADO CON BADGE Y ESTILO LLAMATIVO) -->
+            <button type="button" data-svc="Domótica" class="svc-selector-btn relative p-3 rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50/70 to-orange-50/70 text-center font-bold text-slate-800 flex flex-col items-center justify-center transition cursor-pointer hover:shadow-md col-span-2 sm:col-span-1">
+              <span class="absolute -top-2.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-500 text-white shadow animate-pulse">
+                ¡NUEVO SERVICIO!
+              </span>
+              <i class="fa-solid fa-house-signal text-xl mb-1 text-amber-600"></i>
+              <span class="text-[10px] font-black text-amber-950 leading-tight">Domótica & Smart</span>
             </button>
           </div>
           <input type="hidden" id="selectedServiceInput" value="Internet Dedicado">
