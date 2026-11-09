@@ -30,10 +30,10 @@
     </div>
   </div>
 
-  <!-- MESA DE TRABAJO Y DOCUMENTO (OCULTO HASTA PRESIONAR EL BOTÓN) -->
+  <!-- MESA DE TRABAJO Y DOCUMENTO -->
   <div id="proformaWorkspaceContainer" class="hidden w-full max-w-full space-y-4 animate-fadeIn">
 
-    <!-- PANEL DE CONTROL Y FILTROS TÉCNICOS -->
+    <!-- PANEL DE CONTROL Y ACCIONES RÁPIDAS -->
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white space-y-4 shadow-2xl">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div>
@@ -75,7 +75,7 @@
         </div>
       </div>
 
-      <!-- Datos Operativos del Documento (BLOQUEADOS AUTOMÁTICOS) -->
+      <!-- Datos Operativos del Documento (Protegidos) -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
         <div>
           <label class="block text-slate-400 font-semibold mb-1 text-[11px] flex items-center gap-1">
@@ -97,160 +97,190 @@
       </div>
     </div>
 
-    <!-- CONTENEDOR CON SCROLL RESPONSIVO PARA LA HOJA A4 -->
-    <div class="w-full max-w-full overflow-x-auto bg-slate-200/90 p-2 sm:p-6 rounded-2xl border border-slate-300">
-      
-      <div class="sm:hidden text-center text-[10px] text-slate-500 mb-2 font-bold flex items-center justify-center gap-1">
-        <i class="fa-solid fa-left-right text-[#00a8e8]"></i> Desliza horizontalmente para revisar la proforma
-      </div>
+    <!-- CONTENEDOR CON SCROLL RESPONSIVO -->
+    <div class="w-full max-w-full overflow-x-auto bg-slate-300/80 p-3 sm:p-6 rounded-2xl border border-slate-400/60 shadow-inner flex justify-center">
 
-      <!-- Hoja tamaño estándar de alta fidelidad -->
-      <div id="documento_proforma_imprimible" class="w-[780px] min-w-[780px] mx-auto bg-white p-8 text-slate-800 font-sans text-xs shadow-xl rounded-lg space-y-5">
+      <!-- HOJA OFICIAL A4 CORPORATIVA INMUTEC (ANCHO EXACTO 800px) -->
+      <div id="documento_proforma_imprimible" class="w-[800px] min-w-[800px] bg-white p-10 text-slate-800 font-sans text-xs shadow-2xl rounded-sm border border-slate-200 space-y-4">
         
-        <!-- ENCABEZADO CON LOGO Y CORRELATIVO -->
-        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3">
-          <div class="flex items-center space-x-3">
+        <!-- ENCABEZADO MEMBRETADO PREMIUM -->
+        <div class="flex items-start justify-between border-b-2 border-[#002b49] pb-4">
+          <div class="flex items-center space-x-4">
             <img 
               src="./public/assets/brand/logo-inmutec.png" 
               alt="Logo INMUTEC E.I.R.L." 
-              class="h-14 sm:h-16 w-auto object-contain"
+              class="h-16 w-auto object-contain"
               onerror="this.onerror=null; this.src='https://inmutecproyectos.github.io/inmutec-web-system/public/assets/brand/logo-inmutec.png';"
             >
-            <div>
-              <h2 class="text-sm sm:text-base font-black text-[#002b49] tracking-tight leading-tight">MULTISERVICIOS GENERALES INMUTEC E.I.R.L.</h2>
-              <p class="text-[10px] text-slate-600 font-medium">CENTRAL TELEFÓNICA : 954928201 TEL: 064595829</p>
-              <p class="text-[10px] text-slate-600 font-medium">EMAIL: inmuteceirl@gmail.com, gusmarbal@gmail.com</p>
+            <div class="space-y-0.5">
+              <h2 class="text-sm font-black text-[#002b49] tracking-tight uppercase">MULTISERVICIOS GENERALES INMUTEC E.I.R.L.</h2>
+              <p class="text-[10px] text-slate-700 font-bold"><span class="text-[#00a8e8]">RUC:</span> 20568327692</p>
+              <p class="text-[10px] text-slate-600">Central: 954 928 201 &bull; Fijo: (064) 595829</p>
+              <p class="text-[10px] text-slate-600">Email: <strong class="text-[#002b49]">inmutecproyectos@gmail.com</strong></p>
             </div>
           </div>
           
           <div class="text-right">
-            <div class="border-2 border-red-600 px-3 py-1 rounded-lg text-center bg-red-50/50">
-              <span class="text-[9px] font-black text-slate-600 block uppercase">PROFORMA</span>
-              <span id="prof_vista_numero" class="text-base font-black text-red-600 font-mono tracking-wider">001072</span>
+            <div class="border-2 border-red-600 rounded-xl overflow-hidden shadow-sm bg-white min-w-[150px]">
+              <div class="bg-red-600 text-white font-black text-[10px] uppercase py-1 px-3 text-center tracking-wider">
+                COTIZACIÓN / PROFORMA
+              </div>
+              <div class="py-1.5 px-3 text-center bg-red-50/40">
+                <span id="prof_vista_numero" class="text-lg font-black text-red-600 font-mono tracking-widest">001072</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- FECHA, CLIENTE Y DATOS EDITABLES -->
-        <div class="space-y-2.5">
-          <p class="font-bold text-right text-[10px] text-slate-700 tracking-wide font-mono" id="prof_vista_fecha">HUANCAYO, 9 DE NOVIEMBRE 2026 - 10:30 AM</p>
-          
-          <!-- Bloque de Cliente Editable -->
-          <div class="bg-slate-50 border border-slate-300 p-3 rounded-lg space-y-1.5">
-            <div class="flex items-center justify-between">
-              <span class="font-black text-slate-500 uppercase text-[9px]">SEÑORES:</span>
-              <span class="text-[9px] text-cyan-600 font-bold italic print:hidden"><i class="fa-solid fa-pen text-[8px]"></i> Puedes editar estos datos directamente</span>
-            </div>
+        <!-- FECHA DE EMISIÓN -->
+        <div class="flex justify-end">
+          <span class="inline-block bg-slate-100 text-slate-700 px-3 py-1 rounded font-mono font-bold text-[10px] uppercase border border-slate-200" id="prof_vista_fecha">
+            HUANCAYO, 9 DE NOVIEMBRE 2026 - 11:36 AM
+          </span>
+        </div>
 
-            <!-- Nombre de Cliente / Empresa Editable -->
+        <!-- TARJETA DEL CLIENTE (EDITABLE EN PANTALLA, TEXTO PLANO EN IMPRESIÓN) -->
+        <div class="bg-slate-50/80 border border-slate-300 rounded-xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-black text-[#002b49] text-[10px] tracking-wider uppercase">DATOS DEL CLIENTE / REQUERIMIENTO:</span>
+            <!-- La clase proforma-ui-tool se oculta al exportar PDF -->
+            <span class="proforma-ui-tool text-[10px] text-[#00a8e8] font-bold">
+              <i class="fa-solid fa-pen-to-square"></i> Edición directa activada
+            </span>
+          </div>
+
+          <!-- Nombre / Razón Social -->
+          <div>
             <input 
               type="text" 
               id="prof_edit_cliente" 
               value="EMPRESA / CLIENTE REGISTRADO" 
-              placeholder="Ingresa Nombre o Razón Social del Cliente"
-              class="w-full font-black text-sm uppercase text-[#002b49] bg-white border border-slate-300 focus:border-[#00a8e8] focus:ring-1 focus:ring-[#00a8e8] rounded px-2 py-1 outline-none transition"
+              placeholder="Nombre o Razón Social del Cliente"
+              class="w-full font-black text-sm uppercase text-[#002b49] bg-white border border-slate-300 focus:border-[#00a8e8] rounded-lg px-2.5 py-1 outline-none transition"
               oninput="window.sincronizarCamposInversos('cliente')"
             >
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px] text-slate-700">
-              <div class="flex items-center gap-1.5">
-                <span class="font-bold w-16">DOC / RUC:</span>
-                <input 
-                  type="text" 
-                  id="prof_edit_doc" 
-                  value="-" 
-                  placeholder="Ej. RUC 20568327692 o DNI"
-                  class="flex-1 bg-white border border-slate-300 focus:border-[#00a8e8] rounded px-2 py-0.5 font-mono text-xs outline-none"
-                  oninput="window.sincronizarCamposInversos('doc')"
-                >
-              </div>
-
-              <div class="flex items-center gap-1.5">
-                <span class="font-bold w-20">Lugar Obra:</span>
-                <input 
-                  type="text" 
-                  id="prof_edit_lugar" 
-                  value="Huancayo" 
-                  placeholder="Lugar de Implementación"
-                  class="flex-1 bg-white border border-slate-300 focus:border-[#00a8e8] rounded px-2 py-0.5 text-xs outline-none"
-                  oninput="window.sincronizarCamposInversos('lugar')"
-                >
-              </div>
-            </div>
-
-            <p class="font-bold text-slate-800 pt-1 text-[11px]">PRESENTE.-</p>
+            <div id="prof_print_cliente" class="hidden font-black text-sm uppercase text-[#002b49]"></div>
           </div>
 
-          <p class="text-[10px] text-slate-700 leading-relaxed text-justify">
-            ESTIMADOS SEÑORES:<br>
-            EN ATENCIÓN A SU SOLICITUD. SÍRVASE A ENCONTRAR EN LA PRESENTE NUESTRA PROPUESTA POR LOS SERVICIOS REQUERIDOS. QUEDAMOS EN LA ESPERA DE SU AMABLE RESPUESTA CONFIRMÁNDONOS SU ACEPTACIÓN.
-          </p>
+          <!-- RUC y Lugar -->
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded-lg px-2.5 py-1">
+              <span class="font-bold text-slate-500 text-[10px] uppercase w-16">DOC / RUC:</span>
+              <input 
+                type="text" 
+                id="prof_edit_doc" 
+                value="-" 
+                placeholder="Ej. 20568327692"
+                class="flex-1 bg-transparent font-mono text-xs font-bold text-slate-800 outline-none"
+                oninput="window.sincronizarCamposInversos('doc')"
+              >
+              <span id="prof_print_doc" class="hidden font-mono text-xs font-bold text-slate-800"></span>
+            </div>
+
+            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded-lg px-2.5 py-1">
+              <span class="font-bold text-slate-500 text-[10px] uppercase w-16">UBICACIÓN:</span>
+              <input 
+                type="text" 
+                id="prof_edit_lugar" 
+                value="Huancayo" 
+                placeholder="Lugar de Implementación"
+                class="flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none"
+                oninput="window.sincronizarCamposInversos('lugar')"
+              >
+              <span id="prof_print_lugar" class="hidden text-xs font-semibold text-slate-800"></span>
+            </div>
+          </div>
+
+          <p class="font-black text-[#002b49] text-[11px] pt-0.5">PRESENTE.-</p>
         </div>
 
-        <!-- TABLA DINÁMICA DE CONCEPTOS E IMPORTES -->
+        <!-- TEXTO INTRODUCTORIO FORMAL -->
+        <p class="text-[10px] text-slate-600 leading-relaxed text-justify">
+          De nuestra mayor consideración: Por medio de la presente ponemos a su disposición nuestra propuesta técnica y económica para la ejecución de los servicios solicitados. Agradeciendo de antemano su confianza en nuestras soluciones de telecomunicaciones y obras electromecánicas.
+        </p>
+
+        <!-- TABLA DE VALORIZACIÓN DE PARTIDAS -->
         <table class="w-full border-collapse border border-slate-400 text-xs">
           <thead>
-            <tr class="bg-slate-100 text-slate-900 font-bold uppercase text-[9px]">
-              <th class="border border-slate-400 px-2 py-1.5 text-center w-10">ITEM</th>
-              <th class="border border-slate-400 px-3 py-1.5 text-left">DESCRIPCION</th>
-              <th class="border border-slate-400 px-2 py-1.5 text-center w-14">CANT.</th>
-              <th class="border border-slate-400 px-2 py-1.5 text-center w-14">UNIDAD</th>
-              <th class="border border-slate-400 px-3 py-1.5 text-right w-20">PRECIO</th>
-              <th class="border border-slate-400 px-3 py-1.5 text-right w-20">IMPORTE</th>
-              <th class="border border-slate-400 px-1 py-1 text-center w-6 print:hidden"></th>
+            <tr class="bg-[#002b49] text-white font-bold uppercase text-[9px] tracking-wider">
+              <th class="border border-[#002b49] px-2 py-2 text-center w-10">ITEM</th>
+              <th class="border border-[#002b49] px-3 py-2 text-left">DESCRIPCIÓN DEL SERVICIO / SUMINISTRO</th>
+              <th class="border border-[#002b49] px-2 py-2 text-center w-14">CANT.</th>
+              <th class="border border-[#002b49] px-2 py-2 text-center w-14">UNIDAD</th>
+              <th class="border border-[#002b49] px-3 py-2 text-right w-24">P. UNIT (S/)</th>
+              <th class="border border-[#002b49] px-3 py-2 text-right w-24">IMPORTE (S/)</th>
+              <th class="border border-[#002b49] px-1 py-1 text-center w-6 proforma-ui-tool"></th>
             </tr>
           </thead>
           <tbody id="tabla_items_body_admin">
-            <!-- Renglones inyectados por JavaScript -->
+            <!-- Filas inyectadas por JS -->
           </tbody>
         </table>
 
-        <!-- DESGLOSE ECONÓMICO, CUENTAS BANCARIAS Y TÉRMINOS -->
-        <div class="grid grid-cols-12 gap-3 items-start pt-1">
-          <div class="col-span-7 space-y-1.5 text-[9px] text-slate-700">
-            <p><span class="font-bold">Forma de pago:</span> 50% INICIAL y 50 % validación de la documentación en un plazo de 5 días calendarios.</p>
-            
-            <div class="bg-slate-50 border border-slate-300 p-2 rounded space-y-0.5">
-              <p class="font-bold text-slate-900 uppercase">Cuentas de Depósito / Transferencia Bancaria:</p>
-              <p><span class="font-bold">BANCO DE LA NACIÓN:</span> 00-421-038902 <br> <span class="font-semibold text-slate-600">CCI:</span> 018-421-00421038902-81</p>
-              <p><span class="font-bold">BANCO BBVA:</span> 00110235930201930055 <br> <span class="font-semibold text-slate-600">CCI:</span> 01123500020193005593</p>
+        <!-- DESGLOSE ECONÓMICO Y CONDICIONES COMERCIALES -->
+        <div class="grid grid-cols-12 gap-4 items-start pt-1">
+          
+          <!-- Condiciones Comerciales y Cuentas -->
+          <div class="col-span-7 space-y-2 text-[9px] text-slate-700">
+            <div class="border border-slate-300 rounded-lg p-2.5 bg-slate-50/70 space-y-1">
+              <p class="font-bold text-[#002b49] uppercase">Cuentas Bancarias Autorizadas (INMUTEC E.I.R.L.):</p>
+              <div class="grid grid-cols-1 gap-1 text-[9px]">
+                <p><strong>BANCO DE LA NACIÓN:</strong> 00-421-038902 &nbsp;|&nbsp; <strong>CCI:</strong> 018-421-00421038902-81</p>
+                <p><strong>BANCO BBVA:</strong> 0011-0235-9302019300-55 &nbsp;|&nbsp; <strong>CCI:</strong> 011-235-000201930055-93</p>
+              </div>
             </div>
 
-            <div class="pt-0.5 space-y-0.5">
-              <p class="font-bold text-slate-800">Consideraciones:</p>
-              <p>• Validez de cotización: 05 días calendario.</p>
-              <p>• Precios sujetos a cambios de acuerdo a evaluación definitiva en terreno.</p>
-              <p class="font-black text-red-600">NOTA: COTIZACIÓN AL 100 % FACTURADO.</p>
+            <div class="space-y-0.5 text-[9px]">
+              <p><strong class="text-slate-900">Forma de Pago:</strong> 50% de adelanto y 50% al finalizar la entrega o conformidad del servicio.</p>
+              <p><strong class="text-slate-900">Validez de la Oferta:</strong> 15 días calendario a partir de la fecha de emisión.</p>
+              <p class="font-black text-red-600 uppercase pt-0.5">&bull; Todos los precios cotizados incluyen I.G.V. (100% Facturado).</p>
             </div>
           </div>
 
-          <div class="col-span-5 border border-slate-400 rounded overflow-hidden text-xs">
+          <!-- Cuadro de Totales -->
+          <div class="col-span-5 border border-slate-400 rounded-lg overflow-hidden text-xs shadow-sm">
             <table class="w-full">
               <tr class="border-b border-slate-300">
-                <td class="px-2 py-1 font-bold text-slate-700 bg-slate-50 text-[10px]">NETO</td>
-                <td class="px-2 py-1 text-right font-bold text-slate-800 text-[10px]" id="calc_neto_admin">S/ 0.00</td>
+                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">SUBTOTAL NETO</td>
+                <td class="px-3 py-1.5 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_neto_admin">S/ 0.00</td>
               </tr>
               <tr class="border-b border-slate-300">
-                <td class="px-2 py-1 font-bold text-slate-700 bg-slate-50 text-[10px]">DCTO</td>
-                <td class="px-2 py-1 text-right">
+                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">DESCUENTO</td>
+                <td class="px-3 py-1.5 text-right">
                   <input type="number" id="input_descuento_admin" value="0.00" step="10" min="0" 
-                         class="w-16 text-right border border-slate-300 rounded px-1 py-0.5 font-mono text-[10px] focus:outline-none" 
+                         class="w-20 text-right border border-slate-300 rounded px-1.5 py-0.5 font-mono text-[11px] outline-none proforma-input-edit" 
                          oninput="calcularTotalesProformaAdmin()">
+                  <span id="print_descuento_admin" class="hidden font-mono text-[11px] font-bold text-slate-800">S/ 0.00</span>
                 </td>
               </tr>
               <tr class="border-b border-slate-300">
-                <td class="px-2 py-1 font-bold text-slate-700 bg-slate-50 text-[10px]">SUBTOTAL</td>
-                <td class="px-2 py-1 text-right font-bold text-slate-800 text-[10px]" id="calc_subtotal_admin">S/ 0.00</td>
+                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">BASE IMPONIBLE</td>
+                <td class="px-3 py-1.5 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_subtotal_admin">S/ 0.00</td>
               </tr>
               <tr class="border-b border-slate-300">
-                <td class="px-2 py-1 font-bold text-slate-700 bg-slate-50 text-[10px]">I.G.V. (18%)</td>
-                <td class="px-2 py-1 text-right font-bold text-slate-800 text-[10px]" id="calc_igv_admin">S/ 0.00</td>
+                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">I.G.V. (18%)</td>
+                <td class="px-3 py-1.5 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_igv_admin">S/ 0.00</td>
               </tr>
-              <tr class="bg-slate-100 font-bold">
-                <td class="px-2 py-1.5 text-xs text-[#002b49]">TOTAL</td>
-                <td class="px-2 py-1.5 text-right text-xs text-red-600 font-black font-mono" id="calc_total_admin">S/ 0.00</td>
+              <tr class="bg-gradient-to-r from-[#002b49] to-[#00385e] text-white">
+                <td class="px-3 py-2 font-black text-xs uppercase tracking-wider">TOTAL A FACTURAR</td>
+                <td class="px-3 py-2 text-right text-sm font-black font-mono text-cyan-300" id="calc_total_admin">S/ 0.00</td>
               </tr>
             </table>
+          </div>
+
+        </div>
+
+        <!-- PIE DE FIRMA INSTITUCIONAL -->
+        <div class="pt-6 flex justify-between items-end border-t border-slate-200">
+          <div class="text-[9px] text-slate-500 space-y-0.5">
+            <p class="font-bold text-slate-700">INMUTEC E.I.R.L. &bull; Calidad y Garantía Certificada</p>
+            <p>Huancayo: Jr. Salcantay 148, El Tambo &bull; Huancavelica: Av. Avelino Cáceres 698</p>
+          </div>
+          <div class="text-center w-56">
+            <div class="border-t border-slate-400 pt-1 text-[9px] text-slate-700 font-bold">
+              ING. GUSTAVO MARMANILLO B.<br>
+              <span class="text-[8px] font-normal text-slate-500">Gerencia General &bull; CIP Colegiado</span>
+            </div>
           </div>
         </div>
 

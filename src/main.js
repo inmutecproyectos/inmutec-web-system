@@ -1,27 +1,50 @@
-﻿// ========================================================
-// SISTEMA WEB INMUTEC E.I.R.L. - CONTROLADOR GLOBAL MAESTRO CON SUPABASE CMS
-// ========================================================
+﻿// =============================================================================
+// SISTEMA WEB INMUTEC E.I.R.L. - CONTROLADOR GLOBAL MAESTRO
+// =============================================================================
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// 1. Configuración de Conexión a Supabase
+// =============================================================================
+// MODULO 0: PARÁMETROS GLOBALES Y CONFIGURACIÓN EDITABLE
+// (Cambia aquí teléfonos, correos y claves fácilmente)
+// =============================================================================
+export const CONFIG_INMUTEC = {
+  // Teléfonos oficiales
+  whatsappGeneral: "51954928201",
+  telefonoFijo: "(064) 595829",
+  centralMovil: "+51 954 928 201",
+  
+  // Correos oficiales
+  correoPrincipal: "inmutecproyectos@gmail.com",
+  correoSecundario: "inmuteceirl@gmail.com",
+  correoGerencia: "gusmarbal@hotmail.com",
+
+  // Datos legales de la empresa
+  empresaNombre: "MULTISERVICIOS GENERALES INMUTEC E.I.R.L.",
+  ruc: "20568327692",
+  gerenteGeneral: "Ing. Gustavo Marmanillo Baldeón",
+  direccionHuancayo: "Jr. Salcantay 148 – El Tambo – Huancayo",
+  direccionHuancavelica: "Av. Andrés Avelino Cáceres # 698 – Huancavelica"
+};
+
+// Conexión a Base de Datos Supabase
 const SUPABASE_URL = "https://qcnsrlsolmhbsxlqpqpc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbnNybHNvbG1oYnN4bHFwcXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1ODA2NDcsImV4cCI6MjEwOTE1NjY0N30.Tsc8SkXyQiA0tl8P890yFpKw-2j1eMS1AHJxkfUzlRw";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const WHATSAPP_PHONE = "51954928201";
-
-// Estado de la sesión del administrador
+// Variables de estado interno
 let isAdminLoggedIn = false;
 let currentEditingElement = null;
 let currentEditingKey = null;
 let isEditingImage = false;
+let carouselTimer = null;
+let currentSlideIndex = 0;
 
-// Estado reactivo de ítems de la Proforma Admin
+// Estado reactivo de ítems de la Proforma Administrativa
 window.itemsProformaAdmin = [];
 
-// 2. Configuración de Rutas de Plantillas
+// Rutas de archivos por módulo
 const modulesConfig = {
   inicio: {
     html: "./modules/inicio/inicio.html",
@@ -45,42 +68,177 @@ const modulesConfig = {
   }
 };
 
-let carouselTimer = null;
-let currentSlideIndex = 0;
 
-// Base de conocimientos del Asistente Virtual
-const BOT_KNOWLEDGE = [
-  {
-    keys: ["hola", "buen dia", "buenas", "saludos", "que tal", "inicio"],
-    reply: "Hola, te doy la bienvenida a INMUTEC E.I.R.L. Soy tu asistente virtual. ¿En qué especialidad técnica te podemos orientar hoy? Puedes escribir en el teclado o pulsar una de las consultas rápidas."
-  },
-  {
-    keys: ["servicios", "cobertura", "que hacen", "especialidad", "catalogo"],
-    reply: "INMUTEC se especializa en 5 divisiones: 1. Internet Dedicado simétrico, 2. Redes de Fibra Óptica (planta externa/interna y OTDR), 3. Montaje de Torres y Puesta a Tierra STP, 4. Laboratorio Técnico de Radiotransmisión y 5. Domótica y Automatización Inteligente."
-  },
-  {
-    keys: ["norma", "stp", "tierra", "pozo a tierra", "ntp 2050", "telurometro", "pararrayo"],
-    reply: "Diseñamos e implementamos Sistemas de Protección a Tierra (STP) bajo la Norma Técnica Peruana NTP 2050 y el Código Nacional de Electricidad. Garantizamos valores de resistencia por debajo de 5 Ohmios certificados con telurómetro calibrado."
-  },
-  {
-    keys: ["domotica", "smart", "automatizacion", "casa inteligente", "edificio", "cerraduras"],
-    reply: "Nuestra división de Domótica e Inmótica implementa control inteligente de iluminación, cerraduras biométricas, cámaras con IA, sensores perimétricos y automatización de accesos para residencias, empresas e industrias."
-  },
-  {
-    keys: ["fibra", "otdr", "mufa", "fusion", "tendido", "wow", "dorsal"],
-    reply: "Contamos con fusionadoras Fujikura de alineación de núcleo y equipos OTDR calibrados. Hemos ejecutado más de 120 km de troncales ópticas para WOW Tel y mantenimiento correctivo en la Red Dorsal Nacional."
-  },
-  {
-    keys: ["laboratorio", "radio", "calibrar", "motorola", "kenwood", "falla"],
-    reply: "En nuestro laboratorio técnico de Huancayo (Jr. Salcantay 148, El Tambo) realizamos peritaje, calibración de frecuencia y potencia en banco RF, así como reparación electrónica de transceptores y repetidoras."
-  },
-  {
-    keys: ["ingeniero", "gerente", "marmanillo", "gustavo", "telefono", "whatsapp", "contacto"],
-    reply: "Puedes comunicarte directamente con el Gerente General, Ing. Gustavo Marmanillo Baldeón, al número celular / WhatsApp +51 954 928 201."
+// =============================================================================
+// MODULO 1: ENRUTADOR DINÁMICO (SPA) Y MOTOR SUPABASE CMS
+// =============================================================================
+export async function loadModule(moduleName) {
+  const container = document.getElementById("moduleContainer");
+  if (!container) return;
+
+  const modKey = modulesConfig[moduleName] ? moduleName : "inicio";
+  const config = modulesConfig[modKey];
+  const timestamp = Date.now();
+
+  // 1. Resaltar pestaña activa en el Header
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-md");
+    tab.classList.add("text-slate-200");
+  });
+  const activeTab = document.getElementById(`btn-${modKey}`);
+  if (activeTab) {
+    activeTab.classList.remove("text-slate-200");
+    activeTab.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-md");
   }
-];
 
-// Mapeo de Fichas Técnicas para el Módulo de Servicios
+  // 2. Cargar CSS dinámicamente
+  let cssLink = document.getElementById("module-dynamic-css");
+  if (!cssLink) {
+    cssLink = document.createElement("link");
+    cssLink.id = "module-dynamic-css";
+    cssLink.rel = "stylesheet";
+    document.head.appendChild(cssLink);
+  }
+  cssLink.href = `${config.css}?v=${timestamp}`;
+
+  // 3. Inyectar HTML del módulo
+  try {
+    const res = await fetch(`${config.html}?v=${timestamp}`);
+    if (!res.ok) throw new Error(`No se pudo cargar ${config.html}`);
+    container.innerHTML = await res.text();
+  } catch (err) {
+    console.error("Error al cargar módulo HTML:", err);
+    container.innerHTML = `<div class="p-8 text-center text-rose-500 font-bold">Error cargando ${modKey}. Revisa la conexión.</div>`;
+    return;
+  }
+
+  // 4. Sincronizar textos e imágenes desde Supabase
+  await applyCmsValuesToView();
+
+  // 5. Mantener bordes editables si el administrador está logueado
+  if (isAdminLoggedIn) {
+    enableAdminEditMode();
+  }
+
+  // 6. Inicializar lógica interna según la vista
+  if (modKey === "inicio") {
+    initInicioModule();
+  } else if (modKey === "cotizacion") {
+    await initCotizacionModule();
+  }
+}
+
+async function applyCmsValuesToView() {
+  try {
+    const { data, error } = await supabase.from("cms_content").select("*");
+    if (error || !data) return;
+
+    const cmsMap = {};
+    data.forEach(item => {
+      cmsMap[item.clave] = item.valor;
+    });
+
+    document.querySelectorAll("[data-cms-key]").forEach(el => {
+      const key = el.getAttribute("data-cms-key");
+      if (cmsMap[key]) {
+        if (el.tagName === "IMG") {
+          el.src = cmsMap[key];
+        } else {
+          el.innerHTML = cmsMap[key];
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Error cargando CMS desde Supabase:", err);
+  }
+}
+
+function enableAdminEditMode() {
+  document.querySelectorAll("[data-cms-key]").forEach(el => el.classList.add("admin-editable-active"));
+}
+
+function disableAdminEditMode() {
+  document.querySelectorAll("[data-cms-key]").forEach(el => el.classList.remove("admin-editable-active"));
+}
+
+async function uploadImageToSupabase(file, folder = "cms") {
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+
+  const { error } = await supabase.storage
+    .from("inmutec-media")
+    .upload(fileName, file, { cacheControl: "3600", upsert: true });
+
+  if (error) throw error;
+
+  const { data: publicUrlData } = supabase.storage
+    .from("inmutec-media")
+    .getPublicUrl(fileName);
+
+  return publicUrlData.publicUrl;
+}
+
+
+// =============================================================================
+// MODULO 2: VISTA INICIO (CARRUSEL INTERACTIVO)
+// =============================================================================
+function initInicioModule() {
+  const box = document.getElementById("inmutecCarouselBox") || document.getElementById("mainCarousel");
+  if (!box) return;
+
+  const slides = box.querySelectorAll(".inmutec-slide, .carousel-slide-item");
+  const dots = box.querySelectorAll(".inmutec-dot, .carousel-dot");
+  if (!slides.length) return;
+
+  currentSlideIndex = 0;
+
+  function renderSlide(idx) {
+    if (idx >= slides.length) currentSlideIndex = 0;
+    else if (idx < 0) currentSlideIndex = slides.length - 1;
+    else currentSlideIndex = idx;
+
+    slides.forEach((s, i) => {
+      if (i === currentSlideIndex) {
+        s.classList.remove("opacity-0", "pointer-events-none", "z-0");
+        s.classList.add("opacity-100", "z-10");
+      } else {
+        s.classList.remove("opacity-100", "z-10");
+        s.classList.add("opacity-0", "pointer-events-none", "z-0");
+      }
+    });
+
+    dots.forEach((d, i) => {
+      if (i === currentSlideIndex) {
+        d.classList.add("bg-[#00a8e8]", "w-6");
+        d.classList.remove("bg-white/40", "w-3");
+      } else {
+        d.classList.remove("bg-[#00a8e8]", "w-6");
+        d.classList.add("bg-white/40", "w-3");
+      }
+    });
+  }
+
+  window.inmutecNextSlide = () => renderSlide(currentSlideIndex + 1);
+  window.inmutecPrevSlide = () => renderSlide(currentSlideIndex - 1);
+  window.inmutecGoToSlide = (i) => renderSlide(i);
+
+  if (carouselTimer) clearInterval(carouselTimer);
+  carouselTimer = setInterval(() => renderSlide(currentSlideIndex + 1), 4500);
+
+  box.onmouseenter = () => clearInterval(carouselTimer);
+  box.onmouseleave = () => {
+    clearInterval(carouselTimer);
+    carouselTimer = setInterval(() => renderSlide(currentSlideIndex + 1), 4500);
+  };
+
+  renderSlide(0);
+}
+
+
+// =============================================================================
+// MODULO 3: VISTA SERVICIOS Y PORTAFOLIO (MODALES Y DATOS TÉCNICOS)
+// (Edita aquí las especificaciones técnicas y proyectos de referencia)
+// =============================================================================
 const serviceDataMap = {
   datos: {
     category: "Conectividad Empresarial",
@@ -144,7 +302,6 @@ const serviceDataMap = {
   }
 };
 
-// Mapeo de Expedientes de Obra para el Módulo de Portafolio
 const projectDataMap = {
   wow: {
     tag: "Gran Escala • Fibra Óptica Troncal",
@@ -196,183 +353,75 @@ const projectDataMap = {
   }
 };
 
-// ========================================================
-// 3. ENRUTADOR Y CARGA DINÁMICA CON SUPABASE CMS
-// ========================================================
-export async function loadModule(moduleName) {
-  const container = document.getElementById("moduleContainer");
-  if (!container) return;
+window.openServiceModal = function(key) {
+  const s = serviceDataMap[key];
+  if (!s) return;
+  document.getElementById("modalCategory").textContent = s.category;
+  document.getElementById("modalTitle").textContent = s.title;
+  document.getElementById("modalDesc").textContent = s.desc;
 
-  const modKey = modulesConfig[moduleName] ? moduleName : "inicio";
-  const config = modulesConfig[modKey];
-  const timestamp = Date.now();
-
-  // Actualizar botones de navegación
-  document.querySelectorAll(".nav-tab").forEach(tab => {
-    tab.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-md");
-    tab.classList.add("text-slate-200");
-  });
-  const activeTab = document.getElementById(`btn-${modKey}`);
-  if (activeTab) {
-    activeTab.classList.remove("text-slate-200");
-    activeTab.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-md");
+  const iconBox = document.getElementById("modalIconBox");
+  if (iconBox) {
+    iconBox.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${s.iconClass.split(' ').slice(0, 2).join(' ')}`;
+    iconBox.innerHTML = `<i class="${s.iconClass.split(' ').slice(2).join(' ')}"></i>`;
   }
 
-  // Cargar CSS
-  let cssLink = document.getElementById("module-dynamic-css");
-  if (!cssLink) {
-    cssLink = document.createElement("link");
-    cssLink.id = "module-dynamic-css";
-    cssLink.rel = "stylesheet";
-    document.head.appendChild(cssLink);
-  }
-  cssLink.href = `${config.css}?v=${timestamp}`;
-
-  // Inyectar HTML
-  try {
-    const res = await fetch(`${config.html}?v=${timestamp}`);
-    if (!res.ok) throw new Error(`No se pudo cargar ${config.html}`);
-    container.innerHTML = await res.text();
-  } catch (err) {
-    console.error("Error al cargar módulo HTML:", err);
-    return;
+  const delivUl = document.getElementById("modalDeliverables");
+  if (delivUl) {
+    delivUl.innerHTML = s.deliverables.map(d => `<li>${d}</li>`).join("");
   }
 
-  // Sincronizar textos e imágenes desde la base de datos de Supabase
-  await applyCmsValuesToView();
-
-  // Mantener bordes editables si el admin tiene sesión abierta
-  if (isAdminLoggedIn) {
-    enableAdminEditMode();
+  const actionBtn = document.getElementById("modalActionBtn");
+  if (actionBtn) {
+    actionBtn.onclick = () => {
+      window.closeServiceModal();
+      window.goToQuoteService(s.serviceName);
+    };
   }
 
-  // Inicializar funciones según módulo
-  if (modKey === "inicio") {
-    initInicioModule();
-  } else if (modKey === "cotizacion") {
-    await initCotizacionModule();
-  }
-}
+  document.getElementById("serviceDetailModal")?.classList.remove("hidden");
+};
 
-// Sincronización de campos marcados con [data-cms-key]
-async function applyCmsValuesToView() {
-  try {
-    const { data, error } = await supabase.from("cms_content").select("*");
-    if (error || !data) return;
+window.closeServiceModal = () => document.getElementById("serviceDetailModal")?.classList.add("hidden");
 
-    const cmsMap = {};
-    data.forEach(item => {
-      cmsMap[item.clave] = item.valor;
-    });
+window.goToQuoteService = function(serviceName) {
+  sessionStorage.setItem("inmutec_prefill_service", serviceName);
+  window.location.hash = "cotizacion";
+};
 
-    document.querySelectorAll("[data-cms-key]").forEach(el => {
-      const key = el.getAttribute("data-cms-key");
-      if (cmsMap[key]) {
-        if (el.tagName === "IMG") {
-          el.src = cmsMap[key];
-        } else {
-          el.innerHTML = cmsMap[key];
-        }
-      }
-    });
-  } catch (err) {
-    console.error("Error cargando CMS desde Supabase:", err);
-  }
-}
+window.openProjectModal = function(key) {
+  const p = projectDataMap[key];
+  if (!p) return;
+  document.getElementById("projModalTag").textContent = p.tag;
+  document.getElementById("projModalTitle").textContent = p.title;
+  document.getElementById("projModalClient").textContent = p.client;
+  document.getElementById("projModalDesc").textContent = p.desc;
 
-function enableAdminEditMode() {
-  document.querySelectorAll("[data-cms-key]").forEach(el => {
-    el.classList.add("admin-editable-active");
-  });
-}
+  const toolsUl = document.getElementById("projModalTools");
+  if (toolsUl) toolsUl.innerHTML = p.tools.map(t => `<li>${t}</li>`).join("");
 
-function disableAdminEditMode() {
-  document.querySelectorAll("[data-cms-key]").forEach(el => {
-    el.classList.remove("admin-editable-active");
-  });
-}
+  const stdsUl = document.getElementById("projModalStandards");
+  if (stdsUl) stdsUl.innerHTML = p.standards.map(s => `<li>${s}</li>`).join("");
 
-// Subida de imagen a Supabase Storage
-async function uploadImageToSupabase(file, folder = "cms") {
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+  document.getElementById("projectDetailModal")?.classList.remove("hidden");
+};
 
-  const { data, error } = await supabase.storage
-    .from("inmutec-media")
-    .upload(fileName, file, { cacheControl: "3600", upsert: true });
+window.closeProjectModal = () => document.getElementById("projectDetailModal")?.classList.add("hidden");
 
-  if (error) throw error;
+window.quoteSimilarProject = function() {
+  window.closeProjectModal();
+  window.location.hash = "cotizacion";
+};
 
-  const { data: publicUrlData } = supabase.storage
-    .from("inmutec-media")
-    .getPublicUrl(fileName);
 
-  return publicUrlData.publicUrl;
-}
-
-// ========================================================
-// 4. MÓDULO INICIO: CARRUSEL
-// ========================================================
-function initInicioModule() {
-  const box = document.getElementById("inmutecCarouselBox") || document.getElementById("mainCarousel");
-  if (!box) return;
-
-  const slides = box.querySelectorAll(".inmutec-slide, .carousel-slide-item");
-  const dots = box.querySelectorAll(".inmutec-dot, .carousel-dot");
-  if (!slides.length) return;
-
-  currentSlideIndex = 0;
-
-  function renderSlide(idx) {
-    if (idx >= slides.length) currentSlideIndex = 0;
-    else if (idx < 0) currentSlideIndex = slides.length - 1;
-    else currentSlideIndex = idx;
-
-    slides.forEach((s, i) => {
-      if (i === currentSlideIndex) {
-        s.classList.remove("opacity-0", "pointer-events-none", "z-0");
-        s.classList.add("opacity-100", "z-10");
-      } else {
-        s.classList.remove("opacity-100", "z-10");
-        s.classList.add("opacity-0", "pointer-events-none", "z-0");
-      }
-    });
-
-    dots.forEach((d, i) => {
-      if (i === currentSlideIndex) {
-        d.classList.add("bg-[#00a8e8]", "w-6");
-        d.classList.remove("bg-white/40", "w-3");
-      } else {
-        d.classList.remove("bg-[#00a8e8]", "w-6");
-        d.classList.add("bg-white/40", "w-3");
-      }
-    });
-  }
-
-  window.inmutecNextSlide = () => renderSlide(currentSlideIndex + 1);
-  window.inmutecPrevSlide = () => renderSlide(currentSlideIndex - 1);
-  window.inmutecGoToSlide = (i) => renderSlide(i);
-
-  if (carouselTimer) clearInterval(carouselTimer);
-  carouselTimer = setInterval(() => renderSlide(currentSlideIndex + 1), 4500);
-
-  box.onmouseenter = () => clearInterval(carouselTimer);
-  box.onmouseleave = () => {
-    clearInterval(carouselTimer);
-    carouselTimer = setInterval(() => renderSlide(currentSlideIndex + 1), 4500);
-  };
-
-  renderSlide(0);
-}
-
-// ========================================================
-// 5. MÓDULO COTIZACIÓN: FORMULARIO, CHATBOT Y PROFORMA
-// ========================================================
+// =============================================================================
+// MODULO 4: VISTA COTIZACIÓN (FORMULARIO DINÁMICO & ASISTENTE VIRTUAL)
+// =============================================================================
 async function initCotizacionModule() {
   const dynamicContainer = document.getElementById("dynamicServiceSection");
   const hiddenSvcInput = document.getElementById("selectedServiceInput");
 
-  // Inyectar el botón / mesa de proforma si el administrador está activo
+  // Si el administrador inició sesión, inyectar el módulo administrativo de proformas
   if (isAdminLoggedIn) {
     await verificarYMontarAdminProforma();
   }
@@ -411,7 +460,7 @@ async function initCotizacionModule() {
         </div>
         <div class="flex items-center space-x-2 text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200">
           <i class="fa-solid fa-location-dot text-[#00a8e8]"></i>
-          <span>Recepción oficial: <strong>Jr. Salcantay 148 - El Tambo, Huancayo</strong></span>
+          <span>Recepción oficial: <strong>${CONFIG_INMUTEC.direccionHuancayo}</strong></span>
         </div>
       `;
     } else if (serviceName === "Domótica") {
@@ -502,7 +551,7 @@ async function initCotizacionModule() {
   initChatbot();
 }
 
-// Inyección y Montaje del submódulo Admin Proforma
+// Inyección dinámica del módulo administrativo de proformas
 export async function verificarYMontarAdminProforma() {
   const container = document.getElementById("contenedor_modulo_admin_proforma");
   if (!container) return;
@@ -513,7 +562,7 @@ export async function verificarYMontarAdminProforma() {
       if (resp.ok) {
         container.innerHTML = await resp.text();
 
-        // Cargar html2pdf para PC si no existe
+        // Cargar html2pdf para generación de PDF en PC si aún no existe
         if (!document.getElementById("html2pdf-script")) {
           const script = document.createElement("script");
           script.id = "html2pdf-script";
@@ -521,7 +570,6 @@ export async function verificarYMontarAdminProforma() {
           document.head.appendChild(script);
         }
 
-        // Actualizar etiqueta del correlativo
         const badge = document.getElementById("admin_proforma_counter_badge");
         if (badge) {
           const num = await window.obtenerSiguienteNumeroProforma();
@@ -536,11 +584,13 @@ export async function verificarYMontarAdminProforma() {
   }
 }
 
-// ========================================================
-// 6. SISTEMA DE EMISIÓN DE PROFORMAS OFICIALES (ADMIN CMS)
-// ========================================================
 
-// 1. Contador Correlativo Dinámico (Solo lectura)
+// =============================================================================
+// MODULO 5: EMISOR OFICIAL DE PROFORMAS TÉCNICAS (ADMIN CMS)
+// (Lógica de PDF de imprenta, WhatsApp a 9 dígitos y Despacho por Correo)
+// =============================================================================
+
+// 1. Contador correlativo automático (Protegido - Solo Lectura)
 window.obtenerSiguienteNumeroProforma = async function() {
   let siguiente = 1070;
   try {
@@ -555,7 +605,7 @@ window.obtenerSiguienteNumeroProforma = async function() {
   return String(siguiente).padStart(6, "0");
 };
 
-// 2. Fecha y Hora Actual de Huancayo (Solo lectura)
+// 2. Fecha y hora automática de Huancayo (Protegido - Solo Lectura)
 window.generarFechaHoraHuancayo = function() {
   const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   const ahora = new Date();
@@ -572,7 +622,7 @@ window.generarFechaHoraHuancayo = function() {
   return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
 };
 
-// 3. Abrir / Cerrar Mesa de Proformas al presionar el Botón
+// 3. Abrir / Cerrar Mesa de Proformas
 window.toggleProformaWorkspace = async function() {
   const box = document.getElementById("proformaWorkspaceContainer");
   const txt = document.getElementById("btnToggleProformaText");
@@ -602,7 +652,7 @@ window.toggleProformaWorkspace = async function() {
   }
 };
 
-// 4. Plantillas Técnicas para los 5 Servicios
+// 4. Plantillas de conceptos técnicos por servicio
 window.aplicarPlantillaServicio = function(servicio) {
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
     b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
@@ -665,7 +715,7 @@ window.aplicarPlantillaServicio = function(servicio) {
   window.actualizarDocumentoEnVivo();
 };
 
-// 5. Renderizado Dinámico de Ítems
+// 5. Renderizado dinámico de filas con soporte para vista limpia de impresión
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -676,22 +726,28 @@ window.renderizarItemsAdmin = function() {
     const tr = document.createElement("tr");
     tr.className = "border-b border-slate-300";
     tr.innerHTML = `
-      <td class="border border-slate-400 px-2 py-2 text-center font-bold">${String(index + 1).padStart(2, '0')}</td>
+      <td class="border border-slate-400 px-2 py-2 text-center font-bold text-slate-800">${String(index + 1).padStart(2, '0')}</td>
       <td class="border border-slate-400 px-3 py-1.5">
-        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
+        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none proforma-input-edit" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
+        <div class="hidden proforma-print-view text-xs leading-relaxed text-slate-800 font-medium whitespace-pre-line">${item.descripcion}</div>
       </td>
       <td class="border border-slate-400 px-2 py-1.5 text-center">
-        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
+        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5 font-bold proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
+        <span class="hidden proforma-print-view font-bold text-xs">${item.cant}</span>
       </td>
       <td class="border border-slate-400 px-2 py-1.5 text-center font-semibold">
-        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
+        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5 proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
+        <span class="hidden proforma-print-view text-xs font-semibold">${item.unidad}</span>
       </td>
-      <td class="border border-slate-400 px-3 py-1.5 text-right">
-        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
+      <td class="border border-slate-400 px-3 py-1.5 text-right font-mono">
+        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5 proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
+        <span class="hidden proforma-print-view text-xs font-mono font-medium">${parseFloat(item.precio).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
       </td>
-      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-800 font-mono">S/ ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-      <td class="border border-slate-400 px-1 py-1 text-center print:hidden">
-        <button onclick="window.eliminarFilaItem(${index})" class="text-red-500 hover:text-red-700 text-xs px-1" title="Eliminar fila">&times;</button>
+      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-900 font-mono">
+        ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      </td>
+      <td class="border border-slate-400 px-1 py-1 text-center proforma-ui-tool">
+        <button onclick="window.eliminarFilaItem(${index})" class="text-rose-500 hover:text-rose-700 text-xs px-1 font-black" title="Eliminar fila">&times;</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -736,7 +792,7 @@ window.calcularTotalesProformaAdmin = function() {
   }
 };
 
-// Sincronización de campos de cabecera en vivo
+// Sincronización en vivo
 window.actualizarDocumentoEnVivo = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
@@ -745,7 +801,7 @@ window.actualizarDocumentoEnVivo = function() {
   if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
 };
 
-// Sincronización desde el formulario hacia la proforma
+// Sincronización formulario hacia la proforma
 window.sincronizarConProformaAdmin = function() {
   const cli = document.getElementById("qRazon")?.value.trim();
   const doc = document.getElementById("qDoc")?.value.trim();
@@ -764,7 +820,7 @@ window.sincronizarConProformaAdmin = function() {
   window.actualizarDocumentoEnVivo();
 };
 
-// Sincronización inversa: de la proforma editable hacia el formulario base
+// Sincronización inversa (de la proforma hacia el formulario base)
 window.sincronizarCamposInversos = function(tipo) {
   if (tipo === 'cliente') {
     const val = document.getElementById("prof_edit_cliente")?.value;
@@ -781,32 +837,76 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 6. Descarga y Generación de PDF (Retorna la instancia para reuso)
+// 6. Generador de PDF que oculta controles interactivos para generar acabado de imprenta
 window.descargarProformaPDF = function() {
   const element = document.getElementById("documento_proforma_imprimible");
   if (!element || typeof html2pdf === "undefined") {
-    alert("Cargando motor PDF. Intente nuevamente en 2 segundos.");
+    alert("Cargando motor de PDF. Intente nuevamente en 2 segundos.");
     return null;
   }
 
-  const cliente = (document.getElementById("prof_edit_cliente")?.value || "CLIENTE").trim().replace(/[^a-zA-Z0-9]/g, '_');
+  // 1. Pasar valores de inputs a texto plano para el PDF
+  const valCliente = document.getElementById("prof_edit_cliente")?.value || "CLIENTE REGISTRADO";
+  const valDoc = document.getElementById("prof_edit_doc")?.value || "-";
+  const valLugar = document.getElementById("prof_edit_lugar")?.value || "Huancayo";
+  const valDcto = document.getElementById("input_descuento_admin")?.value || "0.00";
+
+  const printCli = document.getElementById("prof_print_cliente");
+  const printDoc = document.getElementById("prof_print_doc");
+  const printLug = document.getElementById("prof_print_lugar");
+  const printDcto = document.getElementById("print_descuento_admin");
+
+  if (printCli) printCli.textContent = valCliente;
+  if (printDoc) printDoc.textContent = valDoc;
+  if (printLug) printLug.textContent = valLugar;
+  if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
+
+  // 2. Ocultar botones y controles interactivos en el PDF
+  document.querySelectorAll(".proforma-ui-tool").forEach(el => el.classList.add("hidden"));
+  document.querySelectorAll(".proforma-input-edit").forEach(el => el.classList.add("hidden"));
+  document.getElementById("prof_edit_cliente")?.classList.add("hidden");
+  document.getElementById("prof_edit_doc")?.classList.add("hidden");
+  document.getElementById("prof_edit_lugar")?.classList.add("hidden");
+
+  // 3. Mostrar vistas limpias de texto
+  printCli?.classList.remove("hidden");
+  printDoc?.classList.remove("hidden");
+  printLug?.classList.remove("hidden");
+  printDcto?.classList.remove("hidden");
+  document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.remove("hidden"));
+
+  const clienteLimpio = valCliente.trim().replace(/[^a-zA-Z0-9]/g, '_');
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
-  const nombreArchivo = `PROFORMA_${num}_INMUTEC_${cliente}.pdf`;
+  const nombreArchivo = `PROFORMA_${num}_INMUTEC_${clienteLimpio}.pdf`;
 
   const opt = {
-    margin: [8, 8, 8, 8],
+    margin: [6, 6, 6, 6],
     filename: nombreArchivo,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(element).save();
+  html2pdf().set(opt).from(element).save().then(() => {
+    // Restaurar los inputs de la vista web tras la descarga
+    document.querySelectorAll(".proforma-ui-tool").forEach(el => el.classList.remove("hidden"));
+    document.querySelectorAll(".proforma-input-edit").forEach(el => el.classList.remove("hidden"));
+    document.getElementById("prof_edit_cliente")?.classList.remove("hidden");
+    document.getElementById("prof_edit_doc")?.classList.remove("hidden");
+    document.getElementById("prof_edit_lugar")?.classList.remove("hidden");
+
+    printCli?.classList.add("hidden");
+    printDoc?.classList.add("hidden");
+    printLug?.classList.add("hidden");
+    printDcto?.classList.add("hidden");
+    document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.add("hidden"));
+  });
+
   localStorage.setItem("inmutec_ultimo_correlativo", num);
   return nombreArchivo;
 };
 
-// 7. Despacho por WhatsApp a Teléfono Destinatario con PDF generado
+// 7. Despacho por WhatsApp (Valida número de 9 dígitos y adjunta el PDF generado)
 window.enviarProformaWhatsApp = function() {
   const inputPhone = document.getElementById("qPhone")?.value.trim() || "";
   let destinatario = prompt("Ingresa el número celular de WhatsApp del destinatario (9 dígitos):", inputPhone);
@@ -819,7 +919,7 @@ window.enviarProformaWhatsApp = function() {
     return;
   }
 
-  // Descarga inmediata del PDF oficial en el dispositivo
+  // Genera y descarga el PDF inmediatamente en el dispositivo
   const nombrePDF = window.descargarProformaPDF();
 
   const cli = document.getElementById("prof_edit_cliente")?.value || "Cliente";
@@ -828,7 +928,7 @@ window.enviarProformaWhatsApp = function() {
   const fec = document.getElementById("prof_vista_fecha")?.textContent || "";
   const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Integrales";
 
-  let txt = `*MULTISERVICIOS GENERALES INMUTEC E.I.R.L.*\n`;
+  let txt = `*${CONFIG_INMUTEC.empresaNombre}*\n`;
   txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n`;
   txt += `📅 ${fec}\n\n`;
   txt += `👤 *Cliente / Empresa:* ${cli}\n`;
@@ -839,16 +939,17 @@ window.enviarProformaWhatsApp = function() {
     txt += `${i + 1}. ${it.descripcion.replace(/\n/g, ' ')} (${it.cant} ${it.unidad}) -> S/ ${(it.cant * it.precio).toFixed(2)}\n`;
   });
 
-  txt += `\n*TOTAL GENERAL FACTURADO (Inc. IGV):* ${tot}\n`;
-  txt += `\n💳 *Cuentas Bancarias Corporativas:*\n`;
+  txt += `\n*TOTAL FACTURADO (Inc. IGV):* ${tot}\n`;
+  txt += `\n💳 *Cuentas Bancarias Autorizadas:*\n`;
   txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
-  txt += `• BANCO BBVA: 00110235930201930055 (CCI: 01123500020193005593)\n\n`;
-  txt += `📎 *Documento oficial:* Acabamos de generar el documento PDF *${nombrePDF}*. Se adjunta para su revisión formal.`;
+  txt += `• BANCO BBVA: 0011-0235-9302019300-55 (CCI: 011-235-000201930055-93)\n\n`;
+  txt += `📧 Correo Oficial: ${CONFIG_INMUTEC.correoPrincipal}\n`;
+  txt += `📎 Acabamos de generar el documento formal *${nombrePDF}*. Se adjunta en este chat para su revisión técnica.`;
 
   window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
-// 8. Despacho por Email con Destinatario y PDF
+// 8. Despacho por Correo Electrónico
 window.enviarProformaCorreo = function() {
   const inputEmail = document.getElementById("qEmail")?.value.trim() || "";
   let emailDestino = prompt("Ingresa el correo electrónico del cliente para el envío:", inputEmail);
@@ -872,88 +973,51 @@ window.enviarProformaCorreo = function() {
     `Importe Total Facturado (Inc. IGV): ${tot}\n\n` +
     `El archivo en formato PDF (${nombrePDF}) ha sido generado y descargado en su dispositivo para adjuntarlo en este mensaje.\n\n` +
     `Atentamente,\n` +
-    `Ing. Gustavo Marmanillo Baldeón\n` +
-    `Gerencia General - INMUTEC E.I.R.L.\n` +
-    `Central: 954928201 / (064) 390077\n` +
+    `${CONFIG_INMUTEC.gerenteGeneral}\n` +
+    `Gerencia General - ${CONFIG_INMUTEC.empresaNombre}\n` +
+    `Central: ${CONFIG_INMUTEC.centralMovil} / ${CONFIG_INMUTEC.telefonoFijo}\n` +
+    `Correo: ${CONFIG_INMUTEC.correoPrincipal}\n` +
     `Huancayo - Perú`;
 
   window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
 
-// ========================================================
-// 7. FUNCIONES GLOBALES PARA MODALES (SERVICIOS Y PORTAFOLIO)
-// ========================================================
-window.openServiceModal = function(key) {
-  const s = serviceDataMap[key];
-  if (!s) return;
-  document.getElementById("modalCategory").textContent = s.category;
-  document.getElementById("modalTitle").textContent = s.title;
-  document.getElementById("modalDesc").textContent = s.desc;
 
-  const iconBox = document.getElementById("modalIconBox");
-  if (iconBox) {
-    iconBox.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${s.iconClass.split(' ').slice(0, 2).join(' ')}`;
-    iconBox.innerHTML = `<i class="${s.iconClass.split(' ').slice(2).join(' ')}"></i>`;
+// =============================================================================
+// MODULO 6: CHATBOT ASISTENTE TÉCNICO (BASE DE CONOCIMIENTO EDITABLE)
+// (Agrega o modifica preguntas y respuestas frecuentes aquí)
+// =============================================================================
+const BOT_KNOWLEDGE = [
+  {
+    keys: ["hola", "buen dia", "buenas", "saludos", "que tal", "inicio"],
+    reply: `Hola, te doy la bienvenida a ${CONFIG_INMUTEC.empresaNombre}. Soy tu asistente virtual. ¿En qué especialidad técnica te podemos orientar hoy? Puedes escribir en el teclado o pulsar una de las consultas rápidas.`
+  },
+  {
+    keys: ["servicios", "cobertura", "que hacen", "especialidad", "catalogo"],
+    reply: "INMUTEC se especializa en 5 divisiones: 1. Internet Dedicado simétrico, 2. Redes de Fibra Óptica (planta externa/interna y OTDR), 3. Montaje de Torres y Puesta a Tierra STP, 4. Laboratorio Técnico de Radiotransmisión y 5. Domótica y Automatización Inteligente."
+  },
+  {
+    keys: ["norma", "stp", "tierra", "pozo a tierra", "ntp 2050", "telurometro", "pararrayo"],
+    reply: "Diseñamos e implementamos Sistemas de Protección a Tierra (STP) bajo la Norma Técnica Peruana NTP 2050 y el Código Nacional de Electricidad. Garantizamos valores de resistencia por debajo de 5 Ohmios certificados con telurómetro calibrado."
+  },
+  {
+    keys: ["domotica", "smart", "automatizacion", "casa inteligente", "edificio", "cerraduras"],
+    reply: "Nuestra división de Domótica e Inmótica implementa control inteligente de iluminación, cerraduras biométricas, cámaras con IA, sensores perimétricos y automatización de accesos para residencias, empresas e industrias."
+  },
+  {
+    keys: ["fibra", "otdr", "mufa", "fusion", "tendido", "wow", "dorsal"],
+    reply: "Contamos con fusionadoras Fujikura de alineación de núcleo y equipos OTDR calibrados. Hemos ejecutado más de 120 km de troncales ópticas para WOW Tel y mantenimiento correctivo en la Red Dorsal Nacional."
+  },
+  {
+    keys: ["laboratorio", "radio", "calibrar", "motorola", "kenwood", "falla"],
+    reply: `En nuestro laboratorio técnico de Huancayo (${CONFIG_INMUTEC.direccionHuancayo}) realizamos peritaje, calibración de frecuencia y potencia en banco RF, así como reparación electrónica de transceptores y repetidoras.`
+  },
+  {
+    keys: ["ingeniero", "gerente", "marmanillo", "gustavo", "telefono", "whatsapp", "contacto"],
+    reply: `Puedes comunicarte directamente con el Gerente General, ${CONFIG_INMUTEC.gerenteGeneral}, al número celular / WhatsApp ${CONFIG_INMUTEC.centralMovil}.`
   }
+];
 
-  const delivUl = document.getElementById("modalDeliverables");
-  if (delivUl) {
-    delivUl.innerHTML = s.deliverables.map(d => `<li>${d}</li>`).join("");
-  }
-
-  const actionBtn = document.getElementById("modalActionBtn");
-  if (actionBtn) {
-    actionBtn.onclick = () => {
-      window.closeServiceModal();
-      window.goToQuoteService(s.serviceName);
-    };
-  }
-
-  document.getElementById("serviceDetailModal")?.classList.remove("hidden");
-};
-
-window.closeServiceModal = function() {
-  document.getElementById("serviceDetailModal")?.classList.add("hidden");
-};
-
-window.goToQuoteService = function(serviceName) {
-  sessionStorage.setItem("inmutec_prefill_service", serviceName);
-  window.location.hash = "cotizacion";
-};
-
-window.openProjectModal = function(key) {
-  const p = projectDataMap[key];
-  if (!p) return;
-  document.getElementById("projModalTag").textContent = p.tag;
-  document.getElementById("projModalTitle").textContent = p.title;
-  document.getElementById("projModalClient").textContent = p.client;
-  document.getElementById("projModalDesc").textContent = p.desc;
-
-  const toolsUl = document.getElementById("projModalTools");
-  if (toolsUl) {
-    toolsUl.innerHTML = p.tools.map(t => `<li>${t}</li>`).join("");
-  }
-
-  const stdsUl = document.getElementById("projModalStandards");
-  if (stdsUl) {
-    stdsUl.innerHTML = p.standards.map(s => `<li>${s}</li>`).join("");
-  }
-
-  document.getElementById("projectDetailModal")?.classList.remove("hidden");
-};
-
-window.closeProjectModal = function() {
-  document.getElementById("projectDetailModal")?.classList.add("hidden");
-};
-
-window.quoteSimilarProject = function() {
-  window.closeProjectModal();
-  window.location.hash = "cotizacion";
-};
-
-// ========================================================
-// 8. CHATBOT Y MENSAJERÍA
-// ========================================================
 function initChatbot() {
   const chatMessages = document.getElementById("chatMessages");
   if (!chatMessages) return;
@@ -988,7 +1052,7 @@ function appendBotMessage(text, sender, isButton = false) {
     if (isButton) {
       btnHtml = `
         <div class="mt-2.5 pt-2 border-t border-slate-100">
-          <a href="https://wa.me/${WHATSAPP_PHONE}?text=Hola%20Ing.%20Marmanillo,%20solicito%20asistencia%20t%C3%A9cnica%20especializada" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#10b981] hover:bg-[#059669] text-white px-3 py-1.5 rounded-xl font-bold text-[10px] transition shadow">
+          <a href="https://wa.me/${CONFIG_INMUTEC.whatsappGeneral}?text=Hola%20Ing.%20Marmanillo,%20solicito%20asistencia%20t%C3%A9cnica%20especializada" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#10b981] hover:bg-[#059669] text-white px-3 py-1.5 rounded-xl font-bold text-[10px] transition shadow">
             <i class="fa-brands fa-whatsapp"></i>
             <span>Consultar con un Ingeniero por WhatsApp</span>
           </a>
@@ -1034,25 +1098,26 @@ function processBotQuery(userText) {
   }, 250);
 }
 
-// ========================================================
-// 9. INICIALIZACIÓN GLOBAL DE EVENTOS (ROUTER, AUTH Y CMS)
-// ========================================================
-document.addEventListener("DOMContentLoaded", async () => {
-  // Manejo de Rutas por Hash
+
+// =============================================================================
+// MODULO 7: INICIALIZACIÓN GLOBAL DE EVENTOS (ROUTER, AUTENTICACIÓN Y CMS)
+// =============================================================================
+async function inicializarSistemaCompleto() {
+  // 1. Manejo de Rutas por Hash
   window.addEventListener("hashchange", () => {
     const mod = window.location.hash.replace("#", "") || "inicio";
     loadModule(mod);
   });
 
-  // Navegación por botones del Header
+  // 2. Navegación por botones del Header
   document.querySelectorAll(".nav-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       const target = tab.getAttribute("data-module");
-      window.location.hash = target;
+      if (target) window.location.hash = target;
     });
   });
 
-  // Gestión de Sesión Supabase CMS
+  // 3. Verificación de Sesión Supabase CMS
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -1065,11 +1130,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn("Verificación de sesión omitida:", err);
   }
 
-  // Cargar módulo inicial según hash
+  // 4. Cargar el módulo inicial
   const initialHash = window.location.hash.replace("#", "") || "inicio";
   await loadModule(initialHash);
 
-  // Modal Login Admin
+  // 5. Manejo de Login del Administrador
   const btnOpenLogin = document.getElementById("btnOpenLoginModal");
   const loginModal = document.getElementById("loginModal");
   const btnCloseLogin = document.getElementById("btnCloseLoginModal");
@@ -1119,7 +1184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Cerrar Sesión Admin
+  // 6. Cerrar Sesión del Administrador
   const btnCerrarSesion = document.getElementById("btnAdminCerrarSesion");
   if (btnCerrarSesion) {
     btnCerrarSesion.addEventListener("click", async () => {
@@ -1133,7 +1198,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Eventos de Chatbot
+  // 7. Eventos del Chatbot
   document.addEventListener("submit", (e) => {
     if (e.target && e.target.id === "chatForm") {
       e.preventDefault();
@@ -1157,7 +1222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Editor Modal CMS para textos e imágenes en vivo
+  // 8. Editor Modal CMS en vivo para textos e imágenes
   document.addEventListener("click", (e) => {
     if (!isAdminLoggedIn) return;
     const editableTarget = e.target.closest("[data-cms-key]");
@@ -1193,7 +1258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Guardar Cambios CMS en Supabase
+  // 9. Guardar cambios en Supabase CMS
   const btnSaveCms = document.getElementById("btnSaveCms");
   const btnCancelCms = document.getElementById("btnCancelCms");
   const btnCloseCmsModal = document.getElementById("btnCloseCmsModal");
@@ -1244,4 +1309,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     };
   }
-});
+}
+
+// Inicialización segura contra estados de carga asíncrona
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", inicializarSistemaCompleto);
+} else {
+  inicializarSistemaCompleto();
+}
