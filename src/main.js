@@ -18,6 +18,16 @@ let currentEditingElement = null;
 let currentEditingKey = null;
 let isEditingImage = false;
 
+// Estado reactivo de ítems de la Proforma Admin
+window.itemsProformaAdmin = [
+  {
+    descripcion: "Trabajos de fusión y acondicionamiento en varias MUFAS 122 FUSIONES\nInstalación y acondicionamiento de ODF en site 28 FUSIONES\nMEDCIONES CON OTDR EXFO 28 HILOS",
+    cant: 1,
+    unidad: "UND",
+    precio: 3500.00
+  }
+];
+
 // 2. Configuración de Rutas de Plantillas
 const modulesConfig = {
   inicio: {
@@ -247,7 +257,7 @@ export async function loadModule(moduleName) {
   if (modKey === "inicio") {
     initInicioModule();
   } else if (modKey === "cotizacion") {
-    initCotizacionModule();
+    await initCotizacionModule();
   }
 }
 
@@ -363,11 +373,14 @@ function initInicioModule() {
 }
 
 // ========================================================
-// 5. MÓDULO COTIZACIÓN: FORMULARIO Y ASISTENTE
+// 5. MÓDULO COTIZACIÓN: FORMULARIO, CHATBOT Y PROFORMA ADMIN
 // ========================================================
-function initCotizacionModule() {
+async function initCotizacionModule() {
   const dynamicContainer = document.getElementById("dynamicServiceSection");
   const hiddenSvcInput = document.getElementById("selectedServiceInput");
+
+  // Inyección de la proforma modular si el administrador está activo
+  await verificarYMontarAdminProforma();
 
   window.renderCotizacionCampos = function(serviceName) {
     if (!dynamicContainer) return;
@@ -408,14 +421,40 @@ function initCotizacionModule() {
       `;
     } else if (serviceName === "Domótica") {
       dynamicContainer.innerHTML = `
-        <div class="border-b border-slate-200 pb-2">
-          <span class="text-[10px] font-black uppercase text-purple-600 tracking-wider block">Automatización & Domótica Inteligente</span>
-          <p class="text-[11px] text-slate-500">Sistemas inteligentes para viviendas, oficinas o plantas corporativas.</p>
+        <div class="border-b border-amber-200 pb-2 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-black uppercase text-amber-700 tracking-wider block flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              NUEVO: Automatización & Domótica Inteligente (IoT)
+            </span>
+            <p class="text-[11px] text-slate-500">Marca las soluciones inteligentes requeridas para la implementación.</p>
+          </div>
+          <span class="text-[9px] bg-amber-500 text-white font-black px-2 py-0.5 rounded-full uppercase">Inmótica / IoT</span>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Iluminación Smart & Escenas Arquitectónicas" checked>
+            <span>💡 Iluminación & Dimerización Smart</span>
+          </label>
+          <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Control de Acceso Biométrico y Cerraduras Digitales" checked>
+            <span>🔐 Accesos Digitales & Motores</span>
+          </label>
+          <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="CCTV con Detección IA & Audio Bidireccional">
+            <span>📷 Seguridad Perimetral con IA</span>
+          </label>
+          <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Monitoreo Energético y Automatización de Tableros">
+            <span>⚡ Telemetría Eléctrica & Ahorro</span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <div>
             <label class="font-bold text-slate-700 block mb-1">Tipo de Espacio *</label>
-            <select id="qDomTipo" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white">
+            <select id="qDomTipo" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs">
               <option value="Hogar / Residencia Inteligente">Hogar / Residencia Inteligente</option>
               <option value="Oficinas Corporativas">Oficinas Corporativas</option>
               <option value="Planta Industrial / Accesos">Planta Industrial / Accesos</option>
@@ -423,12 +462,12 @@ function initCotizacionModule() {
           </div>
           <div>
             <label class="font-bold text-slate-700 block mb-1">Lugar de Implementación *</label>
-            <input id="qLugar" type="text" placeholder="Ej. Huancayo, El Tambo, Jauja..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white">
+            <input id="qLugar" type="text" placeholder="Ej. El Tambo, Huancayo, Satipo..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs" oninput="window.sincronizarConProformaAdmin()">
           </div>
         </div>
         <div>
-          <label class="font-bold text-slate-700 block mb-1">Sistemas Requeridos *</label>
-          <textarea id="qDetalles" rows="3" placeholder="Ej. Control de iluminación, cerraduras biométricas, cámaras con IA, sensores perimétricos..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white"></textarea>
+          <label class="font-bold text-slate-700 block mb-1">Detalle Específico del Proyecto *</label>
+          <textarea id="qDetalles" rows="2" placeholder="Especificar cantidad de ambientes, control por voz o integración con tableros..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs" oninput="window.sincronizarConProformaAdmin()"></textarea>
         </div>
       `;
     } else {
@@ -443,19 +482,19 @@ function initCotizacionModule() {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="font-bold text-slate-700 block mb-1">Sede Responsable</label>
-            <select id="qSede" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white">
+            <select id="qSede" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs">
               <option value="Sede Huancayo - Jr. Salcantay 148, El Tambo">Sede Huancayo - Jr. Salcantay 148, El Tambo</option>
               <option value="Sede Huancavelica - Av. Andrés A. Cáceres #698">Sede Huancavelica - Av. Andrés A. Cáceres #698</option>
             </select>
           </div>
           <div>
             <label class="font-bold text-slate-700 block mb-1">Lugar de la Obra *</label>
-            <input id="qLugar" type="text" placeholder="Ej. Chilca, La Oroya, Pampas, Satipo..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white">
+            <input id="qLugar" type="text" placeholder="Ej. Chilca, La Oroya, Pampas, Satipo..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs" oninput="window.sincronizarConProformaAdmin()">
           </div>
         </div>
         <div>
           <label class="font-bold text-slate-700 block mb-1">Descripción de la Necesidad Técnica *</label>
-          <textarea id="qDetalles" rows="3" placeholder="Indicar metraje estimado de fibra, ancho de banda simétrico, altura de torre o sistema de puesta a tierra..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white"></textarea>
+          <textarea id="qDetalles" rows="3" placeholder="Indicar metraje estimado de fibra, ancho de banda simétrico, altura de torre o sistema de puesta a tierra..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs" oninput="window.sincronizarConProformaAdmin()"></textarea>
         </div>
       `;
     }
@@ -467,6 +506,197 @@ function initCotizacionModule() {
 
   initChatbot();
 }
+
+// Inyección y Montaje del submódulo Admin Proforma
+export async function verificarYMontarAdminProforma() {
+  const container = document.getElementById("contenedor_modulo_admin_proforma");
+  if (!container) return;
+
+  if (isAdminLoggedIn) {
+    try {
+      const resp = await fetch("./modules/cotizacion/admin-proforma.html");
+      if (resp.ok) {
+        container.innerHTML = await resp.text();
+        
+        // Cargar html2pdf para PC si no existe
+        if (!document.getElementById("html2pdf-script")) {
+          const script = document.createElement("script");
+          script.id = "html2pdf-script";
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+          document.head.appendChild(script);
+        }
+
+        window.renderizarItemsAdmin();
+        window.sincronizarConProformaAdmin();
+      }
+    } catch (e) {
+      console.error("Error al cargar admin-proforma.html:", e);
+    }
+  } else {
+    container.innerHTML = "";
+  }
+}
+
+// Funciones globales de la Proforma Admin
+window.renderizarItemsAdmin = function() {
+  const tbody = document.getElementById("tabla_items_body_admin");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  window.itemsProformaAdmin.forEach((item, index) => {
+    const total = (item.cant * item.precio).toFixed(2);
+    const tr = document.createElement("tr");
+    tr.className = "border-b border-slate-300";
+    tr.innerHTML = `
+      <td class="border border-slate-400 px-2 py-1.5 text-center font-bold">${String(index + 1).padStart(2, '0')}</td>
+      <td class="border border-slate-400 px-3 py-1.5">
+        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
+      </td>
+      <td class="border border-slate-400 px-2 py-1.5 text-center">
+        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
+      </td>
+      <td class="border border-slate-400 px-2 py-1.5 text-center font-semibold">
+        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
+      </td>
+      <td class="border border-slate-400 px-3 py-1.5 text-right">
+        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
+      </td>
+      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-800">S/ ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+      <td class="border border-slate-400 px-1 py-1 text-center print:hidden">
+        <button onclick="window.eliminarFilaItem(${index})" class="text-red-500 hover:text-red-700 text-xs px-1" title="Eliminar fila">&times;</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  window.calcularTotalesProformaAdmin();
+};
+
+window.eliminarFilaItem = function(idx) {
+  if (window.itemsProformaAdmin.length > 1) {
+    window.itemsProformaAdmin.splice(idx, 1);
+    window.renderizarItemsAdmin();
+  } else {
+    alert("La cotización debe tener al menos 1 ítem.");
+  }
+};
+
+window.agregarFilaItem = function() {
+  window.itemsProformaAdmin.push({
+    descripcion: "Suministro e instalación complementaria para infraestructura técnica.",
+    cant: 1,
+    unidad: "UND",
+    precio: 500.00
+  });
+  window.renderizarItemsAdmin();
+};
+
+window.calcularTotalesProformaAdmin = function() {
+  const neto = window.itemsProformaAdmin.reduce((acc, it) => acc + (it.cant * it.precio), 0);
+  const inputDcto = document.getElementById("input_descuento_admin");
+  const descuento = inputDcto ? (parseFloat(inputDcto.value) || 0) : 0;
+  const subtotal = Math.max(0, neto - descuento);
+  const igv = subtotal * 0.18;
+  const total = subtotal + igv;
+
+  const f = n => `S/ ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (document.getElementById("calc_neto_admin")) {
+    document.getElementById("calc_neto_admin").textContent = f(neto);
+    document.getElementById("calc_subtotal_admin").textContent = f(subtotal);
+    document.getElementById("calc_igv_admin").textContent = f(igv);
+    document.getElementById("calc_total_admin").textContent = f(total);
+  }
+};
+
+window.sincronizarConProformaAdmin = function() {
+  const cli = document.getElementById("qRazon")?.value.trim() || "JORGE QUISPE";
+  const doc = document.getElementById("qDoc")?.value.trim() || "-";
+  const lug = document.getElementById("qLugar")?.value.trim() || "Huancayo";
+  const checkedRadio = document.querySelector("input[name='docType']:checked");
+  const tipoDoc = checkedRadio ? checkedRadio.value : "RUC";
+
+  if (document.getElementById("prof_vista_cliente")) {
+    document.getElementById("prof_vista_cliente").textContent = cli;
+    document.getElementById("prof_vista_doc").textContent = `${tipoDoc}: ${doc}`;
+    document.getElementById("prof_vista_lugar").textContent = `Lugar de Obra: ${lug}`;
+  }
+};
+
+window.actualizarCabeceraProforma = function() {
+  const num = document.getElementById("admin_prof_numero")?.value || "# 001070";
+  const fec = document.getElementById("admin_prof_fecha")?.value || "HUANCAYO, 24 DE AGOSTO 2026";
+  if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num.replace("#", "").trim();
+  if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
+};
+
+window.cargarPlantillaJorge = function() {
+  const inputRazon = document.getElementById("qRazon");
+  const inputDoc = document.getElementById("qDoc");
+  if (inputRazon) inputRazon.value = "JORGE QUISPE";
+  if (inputDoc) inputDoc.value = "10458923145";
+
+  window.itemsProformaAdmin = [{
+    descripcion: "Trabajos de fusión y acondicionamiento en varias MUFAS 122 FUSIONES\nInstalación y acondicionamiento de ODF en site 28 FUSIONES\nMEDCIONES CON OTDR EXFO 28 HILOS",
+    cant: 1,
+    unidad: "UND",
+    precio: 3500.00
+  }];
+  window.renderizarItemsAdmin();
+  window.sincronizarConProformaAdmin();
+};
+
+window.descargarProformaPDF = function() {
+  const element = document.getElementById("documento_proforma_imprimible");
+  if (!element || typeof html2pdf === "undefined") {
+    alert("Generando motor PDF, intente en 2 segundos...");
+    return;
+  }
+  const cliente = (document.getElementById("prof_vista_cliente")?.textContent || "CLIENTE").replace(/\s+/g, '_');
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: `COTIZACION_INMUTEC_${cliente}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save();
+};
+
+window.enviarProformaWhatsApp = function() {
+  const cli = document.getElementById("prof_vista_cliente")?.textContent || "Cliente";
+  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+  const num = document.getElementById("prof_vista_numero")?.textContent || "001070";
+  const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Generales";
+
+  let txt = `*MULTISERVICIOS GENERALES INMUTEC E.I.R.L.*\n`;
+  txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n\n`;
+  txt += `👤 *Cliente:* ${cli}\n`;
+  txt += `🛠 *Servicio:* ${svc}\n\n`;
+  txt += `*DETALLE DE PROPUESTA:*\n`;
+
+  window.itemsProformaAdmin.forEach((it, i) => {
+    txt += `${i + 1}. ${it.descripcion} (${it.cant} ${it.unidad}) -> S/ ${(it.cant * it.precio).toFixed(2)}\n`;
+  });
+
+  txt += `\n*TOTAL FACTURADO (Inc. IGV):* ${tot}\n`;
+  txt += `💳 *Cuentas Bancarias:*\n`;
+  txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
+  txt += `• BANCO BBVA: 00110235930201930055 (CCI: 01123500020193005593)\n`;
+  txt += `📅 *Validez:* 05 días calendario.`;
+
+  window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(txt)}`, "_blank");
+};
+
+window.enviarProformaCorreo = function() {
+  const cli = document.getElementById("prof_vista_cliente")?.textContent || "Cliente";
+  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+  const emailDestino = document.getElementById("qEmail")?.value || "inmuteceirl@gmail.com";
+
+  const subject = `Propuesta Técnica Económica INMUTEC - ${cli}`;
+  const body = `Estimados Señores:\n\nAdjuntamos la propuesta técnica comercial por el importe total de ${tot} (100% Facturado).\n\nQuedamos a su atenta respuesta.\n\nCentral Telefónica: 954928201 / 064595829\nEmail: inmuteceirl@gmail.com`;
+
+  window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
 
 function initChatbot() {
   const chatMessages = document.getElementById("chatMessages");
@@ -732,6 +962,8 @@ document.addEventListener("click", async (e) => {
     const txtBtn = document.getElementById("txtLoginBtn");
     if (txtBtn) txtBtn.textContent = "Login";
     disableAdminEditMode();
+    const proformaContainer = document.getElementById("contenedor_modulo_admin_proforma");
+    if (proformaContainer) proformaContainer.innerHTML = "";
     return;
   }
 
@@ -902,6 +1134,7 @@ document.addEventListener("input", (e) => {
     } else {
       clearError(target, err);
     }
+    window.sincronizarConProformaAdmin();
   }
 
   if (target.id === "qDoc") {
@@ -923,6 +1156,7 @@ document.addEventListener("input", (e) => {
     } else {
       clearError(target, err);
     }
+    window.sincronizarConProformaAdmin();
   }
 
   if (target.id === "qEmail") {
@@ -972,6 +1206,7 @@ document.addEventListener("change", (e) => {
     if (inputDoc.value) {
       inputDoc.dispatchEvent(new Event("input"));
     }
+    window.sincronizarConProformaAdmin();
   }
 });
 
@@ -1006,6 +1241,7 @@ document.addEventListener("submit", async (e) => {
       if (txtBtn) txtBtn.textContent = "Admin Activo";
 
       enableAdminEditMode();
+      await verificarYMontarAdminProforma();
     } catch (err) {
       if (errorEl) {
         errorEl.textContent = "Credenciales incorrectas: " + err.message;
@@ -1050,12 +1286,13 @@ document.addEventListener("submit", async (e) => {
       const eq = document.getElementById("qLabEquipo") ? document.getElementById("qLabEquipo").value.trim() : "No indicado";
       const cant = document.getElementById("qLabCantidad") ? document.getElementById("qLabCantidad").value.trim() : "1";
       const falla = document.getElementById("qLabFalla") ? document.getElementById("qLabFalla").value.trim() : "Mantenimiento general";
-      extra = `• Equipo/Marca: ${eq}\n• Cantidad: ${cant}\n• Falla o Trabajo: ${falla}\n• Sede: Huancayo (Jr. Salcantay 148)`;
+      extra = `• Equipo/Marca: ${eq}\n• Cantidad: ${cant}\n• Falla: ${falla}\n• Sede: Huancayo (Jr. Salcantay 148)`;
     } else if (svc === "Domótica") {
       const tipo = document.getElementById("qDomTipo") ? document.getElementById("qDomTipo").value : "Residencial";
       const lugar = document.getElementById("qLugar") ? document.getElementById("qLugar").value.trim() : "Huancayo";
+      const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => c.value).join(", ");
       const sis = document.getElementById("qDetalles") ? document.getElementById("qDetalles").value.trim() : "Automatización";
-      extra = `• Tipo de Proyecto: ${tipo}\n• Ubicación: ${lugar}\n• Sistemas requeridos: ${sis}`;
+      extra = `• Tipo de Proyecto: ${tipo}\n• Ubicación: ${lugar}\n• Módulos IoT: ${checks}\n• Requerimiento: ${sis}`;
     } else {
       const sede = document.getElementById("qSede") ? document.getElementById("qSede").value : "Huancayo";
       const lugar = document.getElementById("qLugar") ? document.getElementById("qLugar").value.trim() : "No indicado";
@@ -1063,7 +1300,6 @@ document.addEventListener("submit", async (e) => {
       extra = `• Sede Asignada: ${sede}\n• Lugar de la Obra: ${lugar}\n• Requerimiento: ${desc}`;
     }
 
-    // A. Guardar cotización en la tabla de Supabase (Respaldo en base de datos)
     try {
       await supabase.from("cotizaciones").insert([
         {
@@ -1081,7 +1317,6 @@ document.addEventListener("submit", async (e) => {
       console.warn("No se pudo registrar la cotización en Supabase:", dbErr);
     }
 
-    // B. Despacho a WhatsApp al Ing. Gustavo Marmanillo Baldeón
     const mensaje = 
       `*SOLICITUD DE COTIZACIÓN TÉCNICA - INMUTEC E.I.R.L.*\n\n` +
       `*Cliente / Razón Social:* ${razon}\n` +
@@ -1128,13 +1363,26 @@ function clearError(input, errorEl) {
   }
 }
 
-// Inicialización de la SPA
-window.addEventListener("DOMContentLoaded", () => {
+// Inicialización de la SPA y comprobación de sesión Supabase
+window.addEventListener("DOMContentLoaded", async () => {
+  // Comprobar si hay una sesión guardada en Supabase
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      isAdminLoggedIn = true;
+      document.getElementById("adminTopBar")?.classList.remove("hidden");
+      const txtBtn = document.getElementById("txtLoginBtn");
+      if (txtBtn) txtBtn.textContent = "Admin Activo";
+    }
+  } catch (err) {
+    console.warn("No se pudo recuperar la sesión:", err);
+  }
+
   window.addEventListener("hashchange", () => {
     const hash = window.location.hash.replace("#", "") || "inicio";
     loadModule(hash);
   });
 
   const initialHash = window.location.hash.replace("#", "") || "inicio";
-  loadModule(initialHash);
+  await loadModule(initialHash);
 });
