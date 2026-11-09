@@ -972,538 +972,344 @@ window.quoteSimilarProject = function() {
 };
 
 // ========================================================
-// 7. DELEGACIÓN GLOBAL DE EVENTOS (INTERACCIÓN & CMS)
+// SISTEMA DE EMISIÓN DE PROFORMAS OFICIALES (ADMIN CMS)
 // ========================================================
-document.addEventListener("click", async (e) => {
-  // A. Clic en Elemento Editable (Solo si el Admin inició sesión)
-  const editableTarget = e.target.closest("[data-cms-key]");
-  if (editableTarget && isAdminLoggedIn) {
-    e.preventDefault();
-    currentEditingElement = editableTarget;
-    currentEditingKey = editableTarget.getAttribute("data-cms-key");
-    isEditingImage = editableTarget.tagName === "IMG";
 
-    const modal = document.getElementById("cmsEditorModal");
-    const textBlock = document.getElementById("cmsTextEditorBlock");
-    const imgBlock = document.getElementById("cmsImageEditorBlock");
-    const title = document.getElementById("cmsModalFieldTitle");
-
-    if (modal && textBlock && imgBlock && title) {
-      title.textContent = `Modificar campo: ${currentEditingKey}`;
-
-      if (isEditingImage) {
-        textBlock.classList.add("hidden");
-        imgBlock.classList.remove("hidden");
-        const preview = document.getElementById("cmsImagePreview");
-        const placeholder = document.getElementById("cmsImagePlaceholder");
-        if (preview && placeholder) {
-          preview.src = editableTarget.src;
-          preview.classList.remove("hidden");
-          placeholder.classList.add("hidden");
-        }
-      } else {
-        imgBlock.classList.add("hidden");
-        textBlock.classList.remove("hidden");
-        const txtInput = document.getElementById("cmsTextInput");
-        if (txtInput) txtInput.value = editableTarget.innerText.trim();
-      }
-
-      modal.classList.remove("hidden");
-    }
-    return;
-  }
-
-  // B. Botones de Login y Cierre
-  if (e.target.closest("#btnOpenLoginModal")) {
-    document.getElementById("loginModal")?.classList.remove("hidden");
-    return;
-  }
-  if (e.target.closest("#btnCloseLoginModal")) {
-    document.getElementById("loginModal")?.classList.add("hidden");
-    return;
-  }
-  if (e.target.closest("#btnCloseCmsModal, #btnCancelCms")) {
-    document.getElementById("cmsEditorModal")?.classList.add("hidden");
-    return;
-  }
-
-  // C. Guardar Cambios en Supabase (Texto o Imagen)
-  if (e.target.closest("#btnSaveCms")) {
-    const saveBtn = document.getElementById("btnSaveCms");
-    if (!saveBtn) return;
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Guardando en Supabase...";
-
-    try {
-      if (isEditingImage) {
-        const fileInput = document.getElementById("cmsFileInput");
-        if (fileInput && fileInput.files.length > 0) {
-          const file = fileInput.files[0];
-          const newUrl = await uploadImageToSupabase(file, "cms");
-
-          await supabase.from("cms_content").upsert({
-            clave: currentEditingKey,
-            modulo: "general",
-            etiqueta: currentEditingKey,
-            valor: newUrl,
-            updated_at: new Date().toISOString()
-          });
-
-          if (currentEditingElement) currentEditingElement.src = newUrl;
-        }
-      } else {
-        const nuevoTexto = document.getElementById("cmsTextInput")?.value.trim();
-        if (nuevoTexto !== undefined) {
-          await supabase.from("cms_content").upsert({
-            clave: currentEditingKey,
-            modulo: "general",
-            etiqueta: currentEditingKey,
-            valor: nuevoTexto,
-            updated_at: new Date().toISOString()
-          });
-
-          if (currentEditingElement) currentEditingElement.innerHTML = nuevoTexto;
-        }
-      }
-      document.getElementById("cmsEditorModal")?.classList.add("hidden");
-    } catch (err) {
-      alert("Error al guardar en base de datos: " + err.message);
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.textContent = "Guardar Cambios en Base de Datos";
-    }
-    return;
-  }
-
-  // D. Cerrar Sesión del Administrador
-  if (e.target.closest("#btnAdminCerrarSesion")) {
-    await supabase.auth.signOut();
-    isAdminLoggedIn = false;
-    document.getElementById("adminTopBar")?.classList.add("hidden");
-    const txtBtn = document.getElementById("txtLoginBtn");
-    if (txtBtn) txtBtn.textContent = "Login";
-    disableAdminEditMode();
-    const proformaContainer = document.getElementById("contenedor_modulo_admin_proforma");
-    if (proformaContainer) proformaContainer.innerHTML = "";
-    return;
-  }
-
-  // E. Pestañas de Navegación del Header
-  const navTab = e.target.closest(".nav-tab");
-  if (navTab) {
-    const targetModule = navTab.getAttribute("data-module");
-    if (targetModule) window.location.hash = targetModule;
-    return;
-  }
-
-  // F. Flechas del Carrusel en Inicio
-  if (e.target.closest("#inmutecBtnNext, #carouselNextBtn, #btnNextSlide")) {
-    e.preventDefault();
-    if (window.inmutecNextSlide) window.inmutecNextSlide();
-    return;
-  }
-  if (e.target.closest("#inmutecBtnPrev, #carouselPrevBtn, #btnPrevSlide")) {
-    e.preventDefault();
-    if (window.inmutecPrevSlide) window.inmutecPrevSlide();
-    return;
-  }
-
-  // Carrusel de Integrantes del Equipo (Quiénes Somos)
-  if (e.target.closest("#teamNextBtn")) {
-    e.preventDefault();
-    const track = document.getElementById("teamCarouselTrack");
-    if (track && track.firstElementChild) {
-      track.appendChild(track.firstElementChild);
-    }
-    return;
-  }
-  if (e.target.closest("#teamPrevBtn")) {
-    e.preventDefault();
-    const track = document.getElementById("teamCarouselTrack");
-    if (track && track.lastElementChild) {
-      track.insertBefore(track.lastElementChild, track.firstElementChild);
-    }
-    return;
-  }
-
-  // G. Puntos del Carrusel
-  const dotBtn = e.target.closest(".inmutec-dot, .carousel-dot");
-  if (dotBtn) {
-    e.preventDefault();
-    const idx = parseInt(dotBtn.getAttribute("data-idx") || dotBtn.getAttribute("data-slide") || "0", 10);
-    if (window.inmutecGoToSlide) window.inmutecGoToSlide(idx);
-    return;
-  }
-
-  // H. Filtros en Servicios
-  const svcFilterBtn = e.target.closest(".svc-tab-btn");
-  if (svcFilterBtn) {
-    e.preventDefault();
-    const category = svcFilterBtn.getAttribute("data-category");
-    document.querySelectorAll(".svc-tab-btn").forEach(b => {
-      b.classList.remove("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
-      b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
-    });
-    svcFilterBtn.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
-    svcFilterBtn.classList.add("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
-
-    const cards = document.querySelectorAll(".svc-card");
-    let count = 0;
-    cards.forEach(card => {
-      const cat = card.getAttribute("data-cat");
-      if (category === "all" || cat === category) {
-        card.classList.remove("hidden");
-        count++;
-      } else {
-        card.classList.add("hidden");
-      }
-    });
-
-    const counter = document.getElementById("svcCounterText");
-    if (counter) counter.textContent = `Mostrando ${count} especialidades`;
-    return;
-  }
-
-  // I. Filtros en Portafolio
-  const portFilterBtn = e.target.closest(".port-tab-btn");
-  if (portFilterBtn) {
-    e.preventDefault();
-    const filter = portFilterBtn.getAttribute("data-filter");
-    document.querySelectorAll(".port-tab-btn").forEach(b => {
-      b.classList.remove("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
-      b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
-    });
-    portFilterBtn.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
-    portFilterBtn.classList.add("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
-
-    const cards = document.querySelectorAll(".project-card");
-    let count = 0;
-    cards.forEach(card => {
-      const cat = card.getAttribute("data-cat");
-      if (filter === "all" || cat === filter) {
-        card.classList.remove("hidden");
-        count++;
-      } else {
-        card.classList.add("hidden");
-      }
-    });
-
-    const counter = document.getElementById("portCounterText");
-    if (counter) counter.textContent = `Mostrando ${count} obras principales`;
-    return;
-  }
-
-  // J. Selector de Servicios en Cotización
-  const svcBtn = e.target.closest(".svc-selector-btn");
-  if (svcBtn) {
-    e.preventDefault();
-    const svcName = svcBtn.getAttribute("data-svc");
-    if (window.renderCotizacionCampos) window.renderCotizacionCampos(svcName);
-    return;
-  }
-
-  // K. Chatbot Opciones
-  const quickBtn = e.target.closest(".quick-btn");
-  if (quickBtn) {
-    e.preventDefault();
-    const q = quickBtn.textContent.trim();
-    appendBotMessage(q, "user");
-    processBotQuery(q);
-    return;
-  }
-
-  // L. Chatbot Reset
-  if (e.target.closest("#btnResetChat")) {
-    e.preventDefault();
-    initChatbot();
-    return;
-  }
-});
-
-// Previsualización de Imagen en Modal CMS
-document.addEventListener("change", (e) => {
-  if (e.target.id === "cmsFileInput" && e.target.files.length > 0) {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const preview = document.getElementById("cmsImagePreview");
-      const placeholder = document.getElementById("cmsImagePlaceholder");
-      if (preview && placeholder) {
-        preview.src = ev.target.result;
-        preview.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-      }
-    };
-    reader.readAsDataURL(e.target.files[0]);
-  }
-});
-
-// Validaciones en Tiempo Real de Formularios
-document.addEventListener("input", (e) => {
-  const target = e.target;
-
-  if (target.id === "qRazon") {
-    const err = document.getElementById("errRazon");
-    const val = target.value.trim();
-    if (!val) {
-      showError(target, err, "Este campo es obligatorio.");
-    } else if (val.length < 3) {
-      showError(target, err, "Debe ingresar al menos 3 caracteres.");
-    } else if (/(.)\1{3,}/i.test(val)) {
-      showError(target, err, "Nombre no válido. Evite caracteres repetidos.");
-    } else if (!/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(val)) {
-      showError(target, err, "Debe contener letras válidas.");
-    } else {
-      clearError(target, err);
-    }
-    window.sincronizarConProformaAdmin();
-  }
-
-  if (target.id === "qDoc") {
-    const err = document.getElementById("errDoc");
-    const checked = document.querySelector("input[name='docType']:checked");
-    const type = checked ? checked.value : "RUC";
-
-    target.value = target.value.replace(/\D/g, "");
-    const val = target.value;
-
-    if (!val) {
-      showError(target, err, `El número de ${type} es obligatorio.`);
-    } else if (type === "DNI" && val.length !== 8) {
-      showError(target, err, `El DNI debe tener exactamente 8 dígitos (ingresó ${val.length}).`);
-    } else if (type === "RUC" && val.length !== 11) {
-      showError(target, err, `El RUC debe tener exactamente 11 dígitos (ingresó ${val.length}).`);
-    } else if (type === "RUC" && !val.startsWith("10") && !val.startsWith("20") && !val.startsWith("15") && !val.startsWith("17")) {
-      showError(target, err, "RUC no válido. En Perú debe iniciar con 10 o 20.");
-    } else {
-      clearError(target, err);
-    }
-    window.sincronizarConProformaAdmin();
-  }
-
-  if (target.id === "qEmail") {
-    const err = document.getElementById("errEmail");
-    const val = target.value.trim();
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!val) {
-      showError(target, err, "El correo electrónico es obligatorio.");
-    } else if (!regex.test(val)) {
-      showError(target, err, "Formato inválido. Debe contener '@' y dominio (ej. contacto@empresa.com).");
-    } else {
-      clearError(target, err);
-    }
-  }
-
-  if (target.id === "qPhone") {
-    const err = document.getElementById("errPhone");
-    target.value = target.value.replace(/\D/g, "");
-    const val = target.value;
-
-    if (!val) {
-      showError(target, err, "El número de celular es obligatorio.");
-    } else if (val.length !== 9) {
-      showError(target, err, `Debe tener 9 dígitos (ingresó ${val.length}).`);
-    } else if (!val.startsWith("9")) {
-      showError(target, err, "En Perú los números celulares inician con 9.");
-    } else {
-      clearError(target, err);
-    }
-  }
-});
-
-document.addEventListener("change", (e) => {
-  if (e.target.name === "docType") {
-    const inputDoc = document.getElementById("qDoc");
-    if (!inputDoc) return;
-
-    if (e.target.value === "DNI") {
-      inputDoc.maxLength = 8;
-      inputDoc.placeholder = "Ingrese los 8 dígitos de su DNI";
-      if (inputDoc.value.length > 8) inputDoc.value = inputDoc.value.substring(0, 8);
-    } else {
-      inputDoc.maxLength = 11;
-      inputDoc.placeholder = "Ingrese los 11 dígitos de su RUC";
-    }
-
-    if (inputDoc.value) {
-      inputDoc.dispatchEvent(new Event("input"));
-    }
-    window.sincronizarConProformaAdmin();
-  }
-});
-
-// Envíos de Formulario (Login, Cotización WhatsApp + BD, Chatbot)
-document.addEventListener("submit", async (e) => {
-  // 1. Login del Administrador
-  if (e.target.id === "adminLoginForm") {
-    e.preventDefault();
-    const email = document.getElementById("loginEmail")?.value.trim();
-    const pass = document.getElementById("loginPass")?.value.trim();
-    const errorEl = document.getElementById("loginErrorMsg");
-    const btnSubmit = document.getElementById("btnSubmitLogin");
-
-    if (btnSubmit) {
-      btnSubmit.disabled = true;
-      btnSubmit.textContent = "Verificando acceso...";
-    }
-    if (errorEl) errorEl.classList.add("hidden");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: pass
-      });
-
-      if (error) throw error;
-
-      isAdminLoggedIn = true;
-      document.getElementById("loginModal")?.classList.add("hidden");
-      document.getElementById("adminTopBar")?.classList.remove("hidden");
-      const txtBtn = document.getElementById("txtLoginBtn");
-      if (txtBtn) txtBtn.textContent = "Admin Activo";
-
-      enableAdminEditMode();
-      await verificarYMontarAdminProforma();
-    } catch (err) {
-      if (errorEl) {
-        errorEl.textContent = "Credenciales incorrectas: " + err.message;
-        errorEl.classList.remove("hidden");
-      }
-    } finally {
-      if (btnSubmit) {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = "INGRESAR AL PANEL";
-      }
-    }
-    return;
-  }
-
-  // 2. Mesa de Cotización
-  if (e.target.id === "quoteForm") {
-    e.preventDefault();
-
-    const inputRazon = document.getElementById("qRazon");
-    const inputDoc = document.getElementById("qDoc");
-    const inputEmail = document.getElementById("qEmail");
-    const inputPhone = document.getElementById("qPhone");
-
-    if (inputRazon) inputRazon.dispatchEvent(new Event("input"));
-    if (inputDoc) inputDoc.dispatchEvent(new Event("input"));
-    if (inputEmail) inputEmail.dispatchEvent(new Event("input"));
-    if (inputPhone) inputPhone.dispatchEvent(new Event("input"));
-
-    const hasErrors = document.querySelectorAll("#quoteForm .text-rose-500:not(.hidden)");
-    if (hasErrors.length > 0) return;
-
-    const razon = inputRazon.value.trim();
-    const checked = document.querySelector("input[name='docType']:checked");
-    const docType = checked ? checked.value : "RUC";
-    const doc = inputDoc.value.trim();
-    const email = inputEmail.value.trim();
-    const phone = inputPhone.value.trim();
-    const svc = document.getElementById("selectedServiceInput") ? document.getElementById("selectedServiceInput").value : "Internet Dedicado";
-
-    let extra = "";
-    if (svc === "Laboratorio") {
-      const eq = document.getElementById("qLabEquipo") ? document.getElementById("qLabEquipo").value.trim() : "No indicado";
-      const cant = document.getElementById("qLabCantidad") ? document.getElementById("qLabCantidad").value.trim() : "1";
-      const falla = document.getElementById("qLabFalla") ? document.getElementById("qLabFalla").value.trim() : "Mantenimiento general";
-      extra = `• Equipo/Marca: ${eq}\n• Cantidad: ${cant}\n• Falla: ${falla}\n• Sede: Huancayo (Jr. Salcantay 148)`;
-    } else if (svc === "Domótica") {
-      const tipo = document.getElementById("qDomTipo") ? document.getElementById("qDomTipo").value : "Residencial";
-      const lugar = document.getElementById("qLugar") ? document.getElementById("qLugar").value.trim() : "Huancayo";
-      const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => c.value).join(", ");
-      const sis = document.getElementById("qDetalles") ? document.getElementById("qDetalles").value.trim() : "Automatización";
-      extra = `• Tipo de Proyecto: ${tipo}\n• Ubicación: ${lugar}\n• Módulos IoT: ${checks}\n• Requerimiento: ${sis}`;
-    } else {
-      const sede = document.getElementById("qSede") ? document.getElementById("qSede").value : "Huancayo";
-      const lugar = document.getElementById("qLugar") ? document.getElementById("qLugar").value.trim() : "No indicado";
-      const desc = document.getElementById("qDetalles") ? document.getElementById("qDetalles").value.trim() : "General";
-      extra = `• Sede Asignada: ${sede}\n• Lugar de la Obra: ${lugar}\n• Requerimiento: ${desc}`;
-    }
-
-    try {
-      await supabase.from("cotizaciones").insert([
-        {
-          razon_social: razon,
-          tipo_documento: docType,
-          numero_documento: doc,
-          correo: email,
-          celular: phone,
-          servicio_solicitado: svc,
-          detalles: extra,
-          estado: "Pendiente"
-        }
-      ]);
-    } catch (dbErr) {
-      console.warn("No se pudo registrar la cotización en Supabase:", dbErr);
-    }
-
-    const mensaje = 
-      `*SOLICITUD DE COTIZACIÓN TÉCNICA - INMUTEC E.I.R.L.*\n\n` +
-      `*Cliente / Razón Social:* ${razon}\n` +
-      `*${docType}:* ${doc}\n` +
-      `*Correo:* ${email}\n` +
-      `*Celular:* +51 ${phone}\n` +
-      `*Servicio Solicitado:* ${svc}\n\n` +
-      `*ESPECIFICACIONES DEL REQUERIMIENTO:*\n${extra}\n\n` +
-      `_Mensaje enviado desde la Mesa de Cotización www.inmutec.com.pe_`;
-
-    window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(mensaje)}`, "_blank");
-    return;
-  }
-
-  // 3. Formulario del Chatbot
-  if (e.target.id === "chatForm") {
-    e.preventDefault();
-    const chatInput = document.getElementById("chatInput");
-    if (!chatInput) return;
-    const txt = chatInput.value.trim();
-    if (!txt) return;
-
-    appendBotMessage(txt, "user");
-    chatInput.value = "";
-    processBotQuery(txt);
-  }
-});
-
-function showError(input, errorEl, msg) {
-  input.classList.add("border-rose-500", "focus:ring-rose-400");
-  input.classList.remove("border-slate-300", "focus:ring-[#00a8e8]");
-  if (errorEl) {
-    errorEl.textContent = msg;
-    errorEl.classList.remove("hidden");
-  }
-}
-
-function clearError(input, errorEl) {
-  input.classList.remove("border-rose-500", "focus:ring-rose-400");
-  input.classList.add("border-slate-300", "focus:ring-[#00a8e8]");
-  if (errorEl) {
-    errorEl.textContent = "";
-    errorEl.classList.add("hidden");
-  }
-}
-
-// Inicialización de la SPA y comprobación de sesión Supabase
-window.addEventListener("DOMContentLoaded", async () => {
+// 1. Contador Correlativo Dinámico (Solo lectura)
+window.obtenerSiguienteNumeroProforma = async function() {
+  let siguiente = 1070;
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      isAdminLoggedIn = true;
-      document.getElementById("adminTopBar")?.classList.remove("hidden");
-      const txtBtn = document.getElementById("txtLoginBtn");
-      if (txtBtn) txtBtn.textContent = "Admin Activo";
+    const { count, error } = await supabase.from("cotizaciones").select("*", { count: "exact", head: true });
+    if (!error && typeof count === "number") {
+      siguiente = 1070 + count;
     }
-  } catch (err) {
-    console.warn("No se pudo recuperar la sesión:", err);
+  } catch (e) {
+    const guardado = localStorage.getItem("inmutec_ultimo_correlativo");
+    if (guardado) siguiente = parseInt(guardado, 10) + 1;
   }
+  return String(siguiente).padStart(6, "0");
+};
 
-  window.addEventListener("hashchange", () => {
-    const hash = window.location.hash.replace("#", "") || "inicio";
-    loadModule(hash);
+// 2. Fecha y Hora Actual de Huancayo (Solo lectura)
+window.generarFechaHoraHuancayo = function() {
+  const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+  const ahora = new Date();
+  const dia = ahora.getDate();
+  const mes = meses[ahora.getMonth()];
+  const anio = ahora.getFullYear();
+
+  let horas = ahora.getHours();
+  const minutos = String(ahora.getMinutes()).padStart(2, "0");
+  const ampm = horas >= 12 ? "PM" : "AM";
+  horas = horas % 12;
+  horas = horas ? horas : 12;
+
+  return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
+};
+
+// 3. Abrir / Cerrar Mesa de Proformas al presionar el Botón
+window.toggleProformaWorkspace = async function() {
+  const box = document.getElementById("proformaWorkspaceContainer");
+  const txt = document.getElementById("btnToggleProformaText");
+  const icon = document.getElementById("btnToggleIcon");
+  if (!box) return;
+
+  if (box.classList.contains("hidden")) {
+    box.classList.remove("hidden");
+    if (txt) txt.textContent = "Ocultar Mesa de Proforma";
+    if (icon) icon.classList.add("rotate-180");
+
+    const num = await window.obtenerSiguienteNumeroProforma();
+    const fechaHora = window.generarFechaHoraHuancayo();
+
+    const inputNum = document.getElementById("admin_prof_numero");
+    const inputFecha = document.getElementById("admin_prof_fecha");
+    if (inputNum) inputNum.value = num;
+    if (inputFecha) inputFecha.value = fechaHora;
+
+    const servicioActual = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
+    window.aplicarPlantillaServicio(servicioActual);
+    window.sincronizarConProformaAdmin();
+  } else {
+    box.classList.add("hidden");
+    if (txt) txt.textContent = "Realizar Nueva Proforma";
+    if (icon) icon.classList.remove("rotate-180");
+  }
+};
+
+// 4. Plantillas Técnicas para los 5 Servicios
+window.aplicarPlantillaServicio = function(servicio) {
+  document.querySelectorAll(".srv-admin-filter").forEach(b => {
+    b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+    if (b.dataset.filter === servicio) b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
   });
 
-  const initialHash = window.location.hash.replace("#", "") || "inicio";
-  await loadModule(initialHash);
-});
+  if (servicio === "Fibra Óptica") {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Tendido de fibra óptica monomodo ADSS, sangrado de mufas troncales FOSC y pruebas reflectométricas OTDR por hilo.",
+        cant: 1,
+        unidad: "GLB",
+        precio: 3500.00
+      }
+    ];
+  } else if (servicio === "Torres & STP") {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Mantenimiento preventivo de torre ventada, cambio de retenidas y protocolo de resistividad STP NTP 2050 (< 5 Ohmios).",
+        cant: 1,
+        unidad: "SERV",
+        precio: 2800.00
+      }
+    ];
+  } else if (servicio === "Laboratorio RF" || servicio === "Laboratorio") {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Diagnóstico en banco RF, calibración de potencias, alineamiento de frecuencia y mantenimiento electrónico.",
+        cant: 1,
+        unidad: "UND",
+        precio: 1400.00
+      }
+    ];
+  } else if (servicio === "Domótica & Smart" || servicio === "Domótica") {
+    const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => "• " + c.value);
+    const detalleDomo = checks.length > 0 
+      ? `Implementación Smart de Domótica & Seguridad Corporativa:\n${checks.join("\n")}`
+      : "Implementación integral de sistema smart residencial/corporativo (Iluminación, Accesos y Cámaras IP IA).";
+
+    window.itemsProformaAdmin = [
+      {
+        descripcion: detalleDomo,
+        cant: 1,
+        unidad: "GLB",
+        precio: 4200.00
+      }
+    ];
+  } else {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Suministro e instalación de enlace de Internet Dedicado corporativo simétrico 1:1 con SLA 99.8% y monitoreo NOC 24/7.",
+        cant: 1,
+        unidad: "MES",
+        precio: 1800.00
+      }
+    ];
+  }
+
+  window.renderizarItemsAdmin();
+  window.actualizarDocumentoEnVivo();
+};
+
+// 5. Renderizado Dinámico de Ítems
+window.renderizarItemsAdmin = function() {
+  const tbody = document.getElementById("tabla_items_body_admin");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  window.itemsProformaAdmin.forEach((item, index) => {
+    const total = (item.cant * item.precio).toFixed(2);
+    const tr = document.createElement("tr");
+    tr.className = "border-b border-slate-300";
+    tr.innerHTML = `
+      <td class="border border-slate-400 px-2 py-2 text-center font-bold">${String(index + 1).padStart(2, '0')}</td>
+      <td class="border border-slate-400 px-3 py-1.5">
+        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
+      </td>
+      <td class="border border-slate-400 px-2 py-1.5 text-center">
+        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
+      </td>
+      <td class="border border-slate-400 px-2 py-1.5 text-center font-semibold">
+        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
+      </td>
+      <td class="border border-slate-400 px-3 py-1.5 text-right">
+        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
+      </td>
+      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-800 font-mono">S/ ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+      <td class="border border-slate-400 px-1 py-1 text-center print:hidden">
+        <button onclick="window.eliminarFilaItem(${index})" class="text-red-500 hover:text-red-700 text-xs px-1" title="Eliminar fila">&times;</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  window.calcularTotalesProformaAdmin();
+};
+
+window.eliminarFilaItem = function(idx) {
+  if (window.itemsProformaAdmin.length > 1) {
+    window.itemsProformaAdmin.splice(idx, 1);
+    window.renderizarItemsAdmin();
+  } else {
+    alert("La proforma debe contener al menos un ítem cotizado.");
+  }
+};
+
+window.agregarFilaItem = function() {
+  window.itemsProformaAdmin.push({
+    descripcion: "Trabajos o suministros complementarios para infraestructura técnica.",
+    cant: 1,
+    unidad: "UND",
+    precio: 350.00
+  });
+  window.renderizarItemsAdmin();
+};
+
+window.calcularTotalesProformaAdmin = function() {
+  const neto = window.itemsProformaAdmin.reduce((acc, it) => acc + (it.cant * it.precio), 0);
+  const inputDcto = document.getElementById("input_descuento_admin");
+  const descuento = inputDcto ? (parseFloat(inputDcto.value) || 0) : 0;
+  const subtotal = Math.max(0, neto - descuento);
+  const igv = subtotal * 0.18;
+  const total = subtotal + igv;
+
+  const f = n => `S/ ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (document.getElementById("calc_neto_admin")) {
+    document.getElementById("calc_neto_admin").textContent = f(neto);
+    document.getElementById("calc_subtotal_admin").textContent = f(subtotal);
+    document.getElementById("calc_igv_admin").textContent = f(igv);
+    document.getElementById("calc_total_admin").textContent = f(total);
+  }
+};
+
+// Sincronización formulario hacia la proforma
+window.actualizarDocumentoEnVivo = function() {
+  const num = document.getElementById("admin_prof_numero")?.value || "001072";
+  const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
+
+  if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num;
+  if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
+};
+
+window.sincronizarConProformaAdmin = function() {
+  const cli = document.getElementById("qRazon")?.value.trim();
+  const doc = document.getElementById("qDoc")?.value.trim();
+  const lug = document.getElementById("qLugar")?.value.trim();
+  const checkedRadio = document.querySelector("input[name='docType']:checked");
+  const tipoDoc = checkedRadio ? checkedRadio.value : "RUC";
+
+  const editCli = document.getElementById("prof_edit_cliente");
+  const editDoc = document.getElementById("prof_edit_doc");
+  const editLug = document.getElementById("prof_edit_lugar");
+
+  if (editCli && cli) editCli.value = cli;
+  if (editDoc && doc) editDoc.value = `${tipoDoc}: ${doc}`;
+  if (editLug && lug) editLug.value = lug;
+
+  window.actualizarDocumentoEnVivo();
+};
+
+// Sincronización inversa: de la proforma editable hacia el formulario base
+window.sincronizarCamposInversos = function(tipo) {
+  if (tipo === 'cliente') {
+    const val = document.getElementById("prof_edit_cliente")?.value;
+    const inputRazon = document.getElementById("qRazon");
+    if (inputRazon) inputRazon.value = val;
+  } else if (tipo === 'doc') {
+    const val = document.getElementById("prof_edit_doc")?.value.replace(/\D/g, "");
+    const inputDoc = document.getElementById("qDoc");
+    if (inputDoc && val) inputDoc.value = val;
+  } else if (tipo === 'lugar') {
+    const val = document.getElementById("prof_edit_lugar")?.value;
+    const inputLug = document.getElementById("qLugar");
+    if (inputLug) inputLug.value = val;
+  }
+};
+
+// 6. Descarga y Generación de PDF (Retorna la instancia para reuso)
+window.descargarProformaPDF = function() {
+  const element = document.getElementById("documento_proforma_imprimible");
+  if (!element || typeof html2pdf === "undefined") {
+    alert("Cargando motor PDF. Intente nuevamente en 2 segundos.");
+    return null;
+  }
+
+  const cliente = (document.getElementById("prof_edit_cliente")?.value || "CLIENTE").trim().replace(/[^a-zA-Z0-9]/g, '_');
+  const num = document.getElementById("admin_prof_numero")?.value || "001072";
+  const nombreArchivo = `PROFORMA_${num}_INMUTEC_${cliente}.pdf`;
+
+  const opt = {
+    margin: [8, 8, 8, 8],
+    filename: nombreArchivo,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+  localStorage.setItem("inmutec_ultimo_correlativo", num);
+  return nombreArchivo;
+};
+
+// 7. Despacho por WhatsApp a Teléfono Destinatario con PDF generado
+window.enviarProformaWhatsApp = function() {
+  const inputPhone = document.getElementById("qPhone")?.value.trim() || "";
+  let destinatario = prompt("Ingresa el número celular de WhatsApp del destinatario (9 dígitos):", inputPhone);
+
+  if (!destinatario) return;
+  destinatario = destinatario.replace(/\D/g, "");
+
+  if (destinatario.length !== 9 || !destinatario.startsWith("9")) {
+    alert("Número celular no válido. En Perú debe tener 9 dígitos e iniciar con 9.");
+    return;
+  }
+
+  // Descarga inmediata del PDF oficial en el dispositivo
+  const nombrePDF = window.descargarProformaPDF();
+
+  const cli = document.getElementById("prof_edit_cliente")?.value || "Cliente";
+  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+  const num = document.getElementById("admin_prof_numero")?.value || "001072";
+  const fec = document.getElementById("prof_vista_fecha")?.textContent || "";
+  const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Integrales";
+
+  let txt = `*MULTISERVICIOS GENERALES INMUTEC E.I.R.L.*\n`;
+  txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n`;
+  txt += `📅 ${fec}\n\n`;
+  txt += `👤 *Cliente / Empresa:* ${cli}\n`;
+  txt += `🛠 *Especialidad:* ${svc}\n\n`;
+  txt += `*DETALLE DE PARTIDAS:*\n`;
+
+  window.itemsProformaAdmin.forEach((it, i) => {
+    txt += `${i + 1}. ${it.descripcion.replace(/\n/g, ' ')} (${it.cant} ${it.unidad}) -> S/ ${(it.cant * it.precio).toFixed(2)}\n`;
+  });
+
+  txt += `\n*TOTAL GENERAL FACTURADO (Inc. IGV):* ${tot}\n`;
+  txt += `\n💳 *Cuentas Bancarias Corporativas:*\n`;
+  txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
+  txt += `• BANCO BBVA: 00110235930201930055 (CCI: 01123500020193005593)\n\n`;
+  txt += `📎 *Documento oficial:* Acabamos de generar el documento PDF *${nombrePDF}*. Se adjunta para su revisión formal.`;
+
+  window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
+};
+
+// 8. Despacho por Email con Destinatario y PDF
+window.enviarProformaCorreo = function() {
+  const inputEmail = document.getElementById("qEmail")?.value.trim() || "";
+  let emailDestino = prompt("Ingresa el correo electrónico del cliente para el envío:", inputEmail);
+
+  if (!emailDestino) return;
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!regex.test(emailDestino)) {
+    alert("Formato de correo no válido.");
+    return;
+  }
+
+  const nombrePDF = window.descargarProformaPDF();
+
+  const cli = document.getElementById("prof_edit_cliente")?.value || "Estimados Señores";
+  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+  const num = document.getElementById("admin_prof_numero")?.value || "001072";
+
+  const subject = `Propuesta Técnica Económica Proforma Nº ${num} - INMUTEC E.I.R.L. (${cli})`;
+  const body = `Estimados Señores (${cli}):\n\n` +
+    `Por medio de la presente, remitimos la propuesta técnica económica formal correspondiente a la Proforma Nº ${num}.\n\n` +
+    `Importe Total Facturado (Inc. IGV): ${tot}\n\n` +
+    `El archivo en formato PDF (${nombrePDF}) ha sido generado y descargado en su dispositivo para adjuntarlo en este mensaje.\n\n` +
+    `Atentamente,\n` +
+    `Ing. Gustavo Marmanillo Baldeón\n` +
+    `Gerencia General - INMUTEC E.I.R.L.\n` +
+    `Central: 954928201 / (064) 390077\n` +
+    `Huancayo - Perú`;
+
+  window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
