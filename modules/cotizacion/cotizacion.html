@@ -1,19 +1,20 @@
-<div class="space-y-10 animate-fadeIn">
+<div class="space-y-6 sm:space-y-10 animate-fadeIn w-full max-w-full overflow-hidden">
 
   <!-- ============================================================== -->
   <!-- CONTENEDOR EXCLUSIVO: Solo se inyecta cuando hay sesión Admin  -->
   <!-- ============================================================== -->
-  <div id="contenedor_modulo_admin_proforma"></div>
+  <div id="contenedor_modulo_admin_proforma" class="w-full max-w-full"></div>
 
   <!-- CABECERA -->
-  <section class="relative bg-gradient-to-br from-[#001d32] via-[#002b49] to-[#081b2a] rounded-3xl p-8 lg:p-12 text-white shadow-2xl overflow-hidden border border-[#00a8e8]/30">
+  <section class="relative bg-gradient-to-br from-[#001d32] via-[#002b49] to-[#081b2a] rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-12 text-white shadow-2xl overflow-hidden border border-[#00a8e8]/30 w-full">
     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div class="space-y-3 max-w-2xl">
-        <div class="inline-flex items-center space-x-2 bg-[#00a8e8]/15 border border-[#00a8e8]/40 px-3.5 py-1 rounded-full text-xs font-semibold text-cyan-200">
+      
+      <div class="space-y-2.5 sm:space-y-3 max-w-2xl">
+        <div class="inline-flex items-center space-x-2 bg-[#00a8e8]/15 border border-[#00a8e8]/40 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-cyan-200">
           <i class="fa-solid fa-headset text-[#00a8e8]"></i>
           <span>Canal de Atención Corporativa & Proyectos B2B</span>
         </div>
-        <h1 data-cms-key="cotiz_hero_titulo" class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+        <h1 data-cms-key="cotiz_hero_titulo" class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-snug sm:leading-tight break-words">
           Centro de Cotizaciones & <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00a8e8] via-sky-300 to-emerald-400">Soporte Técnico</span>
         </h1>
         <p data-cms-key="cotiz_hero_desc" class="text-slate-300 text-xs sm:text-sm lg:text-base leading-relaxed font-normal">
@@ -21,54 +22,55 @@
         </p>
       </div>
 
-      <div class="bg-white/5 backdrop-blur-xl border border-white/15 p-5 rounded-3xl min-w-[270px] space-y-2 shadow-xl">
+      <div class="bg-white/5 backdrop-blur-xl border border-white/15 p-4 sm:p-5 rounded-2xl sm:rounded-3xl w-full md:w-auto md:min-w-[270px] space-y-2 shadow-xl">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-[#10b981]/20 text-[#10b981] flex items-center justify-center text-xl font-black">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#10b981]/20 text-[#10b981] flex items-center justify-center text-lg sm:text-xl font-black shrink-0">
             <i class="fa-solid fa-bolt"></i>
           </div>
           <div>
-            <span class="text-xs font-black uppercase text-white tracking-wider block">Atención Rápida</span>
-            <span data-cms-key="cotiz_horario_atencion" class="text-[11px] text-cyan-200">Lunes a Sábado: 8:00 AM - 6:00 PM</span>
+            <span class="text-[10px] sm:text-xs font-black uppercase text-white tracking-wider block">Atención Rápida</span>
+            <span data-cms-key="cotiz_horario_atencion" class="text-[10px] sm:text-[11px] text-cyan-200">Lunes a Sábado: 8:00 AM - 6:00 PM</span>
           </div>
         </div>
         <div class="pt-2 border-t border-white/10 text-xs">
-          <span class="text-slate-300 block">Gerencia General (Ing. Gustavo Marmanillo):</span>
-          <span data-cms-key="cotiz_telefono_gerencia" class="text-cyan-300 font-mono font-bold text-sm">+51 954 928 201</span>
+          <span class="text-slate-300 block text-[11px]">Gerencia General (Ing. Gustavo Marmanillo):</span>
+          <span data-cms-key="cotiz_telefono_gerencia" class="text-cyan-300 font-mono font-bold text-xs sm:text-sm">+51 954 928 201</span>
         </div>
       </div>
+
     </div>
   </section>
 
   <!-- FORMULARIO Y CHATBOT -->
-  <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full">
 
     <!-- FORMULARIO DINÁMICO (7 COLUMNAS) -->
-    <div class="lg:col-span-7 bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200 space-y-6">
-      <div class="border-b border-slate-100 pb-4">
-        <span class="text-xs font-black text-[#00a8e8] uppercase tracking-widest block">Mesa de Cotización</span>
-        <h2 class="text-2xl font-black text-[#002b49] mt-0.5">Solicitud de Propuesta Técnica</h2>
-        <p class="text-xs text-slate-500">Ingresa los datos requeridos. Los campos se adaptan al servicio que elijas.</p>
+    <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 lg:p-8 shadow-sm border border-slate-200 space-y-5 sm:space-y-6 w-full">
+      <div class="border-b border-slate-100 pb-3 sm:pb-4">
+        <span class="text-[10px] sm:text-xs font-black text-[#00a8e8] uppercase tracking-widest block">Mesa de Cotización</span>
+        <h2 class="text-xl sm:text-2xl font-black text-[#002b49] mt-0.5">Solicitud de Propuesta Técnica</h2>
+        <p class="text-[11px] sm:text-xs text-slate-500">Ingresa los datos requeridos. Los campos se adaptan al servicio que elijas.</p>
       </div>
 
-      <form id="quoteForm" novalidate class="space-y-5 text-xs">
+      <form id="quoteForm" novalidate class="space-y-4 sm:space-y-5 text-xs">
         
         <!-- Fila 1: Razón Social y Documento -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           <div>
-            <label class="font-bold text-slate-700 block mb-1.5">Nombre o Razón Social *</label>
+            <label class="font-bold text-slate-700 block mb-1">Nombre o Razón Social *</label>
             <input 
               id="qRazon" 
               type="text" 
               placeholder="Ej. Minera o Empresa Contratista S.A.C." 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition text-xs"
             >
-            <span id="errRazon" class="hidden text-[11px] text-rose-500 font-bold mt-1 block"></span>
+            <span id="errRazon" class="hidden text-[10px] text-rose-500 font-bold mt-1 block"></span>
           </div>
 
           <div>
-            <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center justify-between mb-1">
               <label class="font-bold text-slate-700">RUC o DNI *</label>
-              <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-600">
+              <div class="flex items-center space-x-2 text-[10px] font-semibold text-slate-600">
                 <label class="cursor-pointer flex items-center space-x-1">
                   <input type="radio" name="docType" value="RUC" checked class="text-[#00a8e8] focus:ring-[#00a8e8] cursor-pointer">
                   <span>RUC (11)</span>
@@ -84,27 +86,27 @@
               type="text" 
               maxlength="11" 
               placeholder="Ingrese los 11 dígitos de su RUC" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition font-mono tracking-wide"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition font-mono tracking-wide text-xs"
             >
-            <span id="errDoc" class="hidden text-[11px] text-rose-500 font-bold mt-1 block"></span>
+            <span id="errDoc" class="hidden text-[10px] text-rose-500 font-bold mt-1 block"></span>
           </div>
         </div>
 
         <!-- Fila 2: Correo y Celular -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           <div>
-            <label class="font-bold text-slate-700 block mb-1.5">Correo Electrónico *</label>
+            <label class="font-bold text-slate-700 block mb-1">Correo Electrónico *</label>
             <input 
               id="qEmail" 
               type="email" 
               placeholder="contacto@empresa.com" 
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition text-xs"
             >
-            <span id="errEmail" class="hidden text-[11px] text-rose-500 font-bold mt-1 block"></span>
+            <span id="errEmail" class="hidden text-[10px] text-rose-500 font-bold mt-1 block"></span>
           </div>
 
           <div>
-            <label class="font-bold text-slate-700 block mb-1.5">Celular de Contacto (Perú) *</label>
+            <label class="font-bold text-slate-700 block mb-1">Celular de Contacto (Perú) *</label>
             <div class="relative">
               <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold select-none">+51</span>
               <input 
@@ -112,65 +114,65 @@
                 type="text" 
                 maxlength="9" 
                 placeholder="987654321" 
-                class="w-full pl-12 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition font-mono tracking-wide"
+                class="w-full pl-12 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition font-mono tracking-wide text-xs"
               >
             </div>
-            <span id="errPhone" class="hidden text-[11px] text-rose-500 font-bold mt-1 block"></span>
+            <span id="errPhone" class="hidden text-[10px] text-rose-500 font-bold mt-1 block"></span>
           </div>
         </div>
 
-        <!-- Fila 3: Selección de Servicio (CON DOMÓTICA DESTACADO) -->
+        <!-- Fila 3: Selección de Servicio (Scroll táctil en móvil) -->
         <div>
-          <label class="font-bold text-slate-700 block mb-2">Selecciona el Servicio Requerido *</label>
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="serviceButtonsContainer">
+          <label class="font-bold text-slate-700 block mb-1.5">Selecciona el Servicio Requerido *</label>
+          <div class="flex sm:grid sm:grid-cols-5 gap-2 overflow-x-auto pb-1 no-scrollbar w-full" id="serviceButtonsContainer">
             
-            <button type="button" data-svc="Internet Dedicado" class="svc-selector-btn active-svc p-3 rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#00a8e8]">
-              <i class="fa-solid fa-wifi text-lg mb-1 text-[#00a8e8]"></i>
-              <span class="text-[10px] leading-tight">Internet Dedicado</span>
+            <button type="button" data-svc="Internet Dedicado" class="svc-selector-btn active-svc shrink-0 sm:shrink p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#00a8e8]">
+              <i class="fa-solid fa-wifi text-base sm:text-lg mb-1 text-[#00a8e8]"></i>
+              <span class="text-[9px] sm:text-[10px] leading-tight whitespace-nowrap sm:whitespace-normal">Internet Dedicado</span>
             </button>
 
-            <button type="button" data-svc="Fibra Óptica" class="svc-selector-btn p-3 rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#10b981]">
-              <i class="fa-solid fa-network-wired text-lg mb-1 text-[#10b981]"></i>
-              <span class="text-[10px] leading-tight">Fibra Óptica</span>
+            <button type="button" data-svc="Fibra Óptica" class="svc-selector-btn shrink-0 sm:shrink p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#10b981]">
+              <i class="fa-solid fa-network-wired text-base sm:text-lg mb-1 text-[#10b981]"></i>
+              <span class="text-[9px] sm:text-[10px] leading-tight whitespace-nowrap sm:whitespace-normal">Fibra Óptica</span>
             </button>
 
-            <button type="button" data-svc="Torres & STP" class="svc-selector-btn p-3 rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#f59e0b]">
-              <i class="fa-solid fa-tower-broadcast text-lg mb-1 text-[#f59e0b]"></i>
-              <span class="text-[10px] leading-tight">Torres & STP</span>
+            <button type="button" data-svc="Torres & STP" class="svc-selector-btn shrink-0 sm:shrink p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#f59e0b]">
+              <i class="fa-solid fa-tower-broadcast text-base sm:text-lg mb-1 text-[#f59e0b]"></i>
+              <span class="text-[9px] sm:text-[10px] leading-tight whitespace-nowrap sm:whitespace-normal">Torres & STP</span>
             </button>
 
-            <button type="button" data-svc="Laboratorio" class="svc-selector-btn p-3 rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#ef4444]">
-              <i class="fa-solid fa-microchip text-lg mb-1 text-[#ef4444]"></i>
-              <span class="text-[10px] leading-tight">Laboratorio RF</span>
+            <button type="button" data-svc="Laboratorio" class="svc-selector-btn shrink-0 sm:shrink p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-slate-200 text-center font-bold text-slate-700 flex flex-col items-center justify-center transition cursor-pointer hover:border-[#ef4444]">
+              <i class="fa-solid fa-microchip text-base sm:text-lg mb-1 text-[#ef4444]"></i>
+              <span class="text-[9px] sm:text-[10px] leading-tight whitespace-nowrap sm:whitespace-normal">Laboratorio RF</span>
             </button>
 
-            <!-- DOMÓTICA & SMART (DESTACADO CON BADGE Y ESTILO LLAMATIVO) -->
-            <button type="button" data-svc="Domótica" class="svc-selector-btn relative p-3 rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50/70 to-orange-50/70 text-center font-bold text-slate-800 flex flex-col items-center justify-center transition cursor-pointer hover:shadow-md col-span-2 sm:col-span-1">
-              <span class="absolute -top-2.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-amber-500 text-white shadow animate-pulse">
-                ¡NUEVO SERVICIO!
+            <!-- DOMÓTICA & SMART -->
+            <button type="button" data-svc="Domótica" class="svc-selector-btn relative shrink-0 sm:shrink p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50/70 to-orange-50/70 text-center font-bold text-slate-800 flex flex-col items-center justify-center transition cursor-pointer hover:shadow-md">
+              <span class="absolute -top-2.5 px-1.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-wider bg-amber-500 text-white shadow">
+                ¡NUEVO!
               </span>
-              <i class="fa-solid fa-house-signal text-xl mb-1 text-amber-600"></i>
-              <span class="text-[10px] font-black text-amber-950 leading-tight">Domótica & Smart</span>
+              <i class="fa-solid fa-house-signal text-base sm:text-lg mb-1 text-amber-600"></i>
+              <span class="text-[9px] sm:text-[10px] font-black text-amber-950 leading-tight whitespace-nowrap sm:whitespace-normal">Domótica & Smart</span>
             </button>
           </div>
           <input type="hidden" id="selectedServiceInput" value="Internet Dedicado">
         </div>
 
         <!-- SECCIÓN DINÁMICA DE CAMPOS -->
-        <div id="dynamicServiceSection" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+        <div id="dynamicServiceSection" class="p-3.5 sm:p-4 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 space-y-3 sm:space-y-4">
         </div>
 
         <!-- Botón de Envío WhatsApp -->
-        <div class="pt-2">
+        <div class="pt-1">
           <button 
             type="submit" 
-            id="btnSubmitQuote"
-            class="w-full bg-[#10b981] hover:bg-[#059669] text-white font-black py-3.5 px-5 rounded-2xl transition duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20 cursor-pointer text-xs uppercase tracking-wider"
+            id="btnSubmitQuote" 
+            class="w-full bg-[#10b981] hover:bg-[#059669] text-white font-black py-3 sm:py-3.5 px-4 rounded-xl sm:rounded-2xl transition duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20 cursor-pointer text-xs uppercase tracking-wider"
           >
-            <i class="fa-brands fa-whatsapp text-lg"></i>
+            <i class="fa-brands fa-whatsapp text-base sm:text-lg"></i>
             <span>ENVIAR COTIZACIÓN A WHATSAPP</span>
           </button>
-          <span class="text-[11px] text-slate-400 text-center block mt-2">
+          <span class="text-[10px] sm:text-[11px] text-slate-400 text-center block mt-1.5 leading-snug">
             La información se registrará en la base de datos de Supabase y abrirá WhatsApp para contacto inmediato.
           </span>
         </div>
@@ -178,19 +180,19 @@
       </form>
     </div>
 
-    <!-- CHATBOT ASISTENTE CON RESPUESTAS HÍBRIDAS (5 COLUMNAS) -->
-    <div class="lg:col-span-5 space-y-4">
-      <div class="bg-white rounded-3xl shadow-sm border-2 border-[#00a8e8]/40 overflow-hidden flex flex-col h-[580px]">
+    <!-- CHATBOT ASISTENTE (5 COLUMNAS) -->
+    <div class="lg:col-span-5 space-y-4 w-full">
+      <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border-2 border-[#00a8e8]/40 overflow-hidden flex flex-col h-[500px] sm:h-[580px] w-full">
         
         <!-- Cabecera Asistente -->
-        <div class="bg-gradient-to-r from-[#002b49] to-[#00385e] p-4 text-white flex items-center justify-between shadow-sm">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full bg-[#00a8e8] text-[#002b49] flex items-center justify-center font-black text-base shadow">
+        <div class="bg-gradient-to-r from-[#002b49] to-[#00385e] p-3.5 sm:p-4 text-white flex items-center justify-between shadow-sm">
+          <div class="flex items-center space-x-2.5 sm:space-x-3">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#00a8e8] text-[#002b49] flex items-center justify-center font-black text-sm sm:text-base shadow shrink-0">
               <i class="fa-solid fa-robot"></i>
             </div>
             <div>
-              <h3 class="font-black text-xs uppercase tracking-wide">ASISTENTE VIRTUAL INMUTEC</h3>
-              <span class="text-[10px] text-emerald-300 flex items-center space-x-1">
+              <h3 class="font-black text-[11px] sm:text-xs uppercase tracking-wide">ASISTENTE VIRTUAL INMUTEC</h3>
+              <span class="text-[9px] sm:text-[10px] text-emerald-300 flex items-center space-x-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>En línea • Soporte 24/7</span>
               </span>
@@ -202,31 +204,31 @@
         </div>
 
         <!-- Contenedor de Mensajes -->
-        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+        <div id="chatMessages" class="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3 bg-slate-50 text-xs">
         </div>
 
         <!-- Consultas Rápidas -->
         <div class="px-3 py-2 bg-slate-100 border-t border-slate-200">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">CONSULTAS RÁPIDAS:</span>
-          <div class="flex flex-wrap gap-1.5" id="chatQuickOptions">
-            <button type="button" class="quick-btn text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2.5 py-1 rounded-full transition shadow-2xs">Servicios y Cobertura</button>
-            <button type="button" class="quick-btn text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2.5 py-1 rounded-full transition shadow-2xs">Norma STP (NTP 2050)</button>
-            <button type="button" class="quick-btn text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2.5 py-1 rounded-full transition shadow-2xs">Servicio de Domótica</button>
-            <button type="button" class="quick-btn text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2.5 py-1 rounded-full transition shadow-2xs">Contacto con Ingeniero</button>
+          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">CONSULTAS RÁPIDAS:</span>
+          <div class="flex flex-wrap gap-1 sm:gap-1.5" id="chatQuickOptions">
+            <button type="button" class="quick-btn text-[9px] sm:text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2 py-0.5 rounded-full transition shadow-2xs">Servicios y Cobertura</button>
+            <button type="button" class="quick-btn text-[9px] sm:text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2 py-0.5 rounded-full transition shadow-2xs">Norma STP (NTP 2050)</button>
+            <button type="button" class="quick-btn text-[9px] sm:text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2 py-0.5 rounded-full transition shadow-2xs">Servicio de Domótica</button>
+            <button type="button" class="quick-btn text-[9px] sm:text-[10px] font-semibold bg-white border border-slate-300 hover:border-[#00a8e8] hover:text-[#002b49] px-2 py-0.5 rounded-full transition shadow-2xs">Contacto con Ingeniero</button>
           </div>
         </div>
 
         <!-- Input Chat -->
-        <form id="chatForm" class="p-3 bg-white border-t border-slate-200 flex items-center space-x-2">
+        <form id="chatForm" class="p-2.5 sm:p-3 bg-white border-t border-slate-200 flex items-center space-x-2">
           <input 
             id="chatInput" 
             type="text" 
-            placeholder="Escribe tu consulta técnica o saludo..." 
-            class="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition"
+            placeholder="Escribe tu consulta técnica..." 
+            class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition"
           >
           <button 
             type="submit" 
-            class="w-10 h-10 rounded-xl bg-[#002b49] hover:bg-[#00a8e8] hover:text-[#002b49] text-white flex items-center justify-center shrink-0 transition duration-200 shadow cursor-pointer"
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#002b49] hover:bg-[#00a8e8] hover:text-[#002b49] text-white flex items-center justify-center shrink-0 transition duration-200 shadow cursor-pointer"
           >
             <i class="fa-solid fa-paper-plane text-xs"></i>
           </button>
@@ -238,57 +240,57 @@
   </section>
 
   <!-- CANALES INSTITUCIONALES Y SEDES OFICIALES -->
-  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pt-1 w-full">
     <!-- Sede Huancayo -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-      <div class="w-10 h-10 rounded-2xl bg-sky-50 text-[#002b49] flex items-center justify-center text-lg border border-sky-100">
+    <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-2.5 sm:space-y-3 w-full">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-sky-50 text-[#002b49] flex items-center justify-center text-base sm:text-lg border border-sky-100 shrink-0">
         <i class="fa-solid fa-location-dot text-[#00a8e8]"></i>
       </div>
       <div>
-        <span class="text-[10px] font-black uppercase text-[#00a8e8] tracking-widest block">Sede Operativa & Laboratorio</span>
-        <h4 class="font-extrabold text-[#002b49] text-sm">Huancayo - Junín</h4>
+        <span class="text-[9px] sm:text-[10px] font-black uppercase text-[#00a8e8] tracking-widest block">Sede Operativa & Laboratorio</span>
+        <h4 class="font-extrabold text-[#002b49] text-xs sm:text-sm">Huancayo - Junín</h4>
       </div>
       <p data-cms-key="contacto_dir_huancayo" class="text-xs text-slate-600">
         Jr. Salcantay 148 – El Tambo – Huancayo
       </p>
-      <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1 font-mono">
+      <div class="pt-2 border-t border-slate-100 text-[10px] sm:text-[11px] text-slate-500 space-y-0.5 font-mono">
         <div>Teléfonos: (064) 390077 / (064) 595829</div>
         <div>Móvil: +51 954 928 201</div>
       </div>
     </div>
 
     <!-- Sede Huancavelica -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-      <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-[#10b981] flex items-center justify-center text-lg border border-emerald-100">
+    <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-2.5 sm:space-y-3 w-full">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-50 text-[#10b981] flex items-center justify-center text-base sm:text-lg border border-emerald-100 shrink-0">
         <i class="fa-solid fa-map-location-dot"></i>
       </div>
       <div>
-        <span class="text-[10px] font-black uppercase text-[#10b981] tracking-widest block">Sede Regional</span>
-        <h4 class="font-extrabold text-[#002b49] text-sm">Huancavelica</h4>
+        <span class="text-[9px] sm:text-[10px] font-black uppercase text-[#10b981] tracking-widest block">Sede Regional</span>
+        <h4 class="font-extrabold text-[#002b49] text-xs sm:text-sm">Huancavelica</h4>
       </div>
       <p data-cms-key="contacto_dir_huancavelica" class="text-xs text-slate-600">
         Av. Andrés Avelino Cáceres # 698 – Huancavelica
       </p>
-      <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1 font-mono">
+      <div class="pt-2 border-t border-slate-100 text-[10px] sm:text-[11px] text-slate-500 space-y-0.5 font-mono">
         <div>Celular / WhatsApp: +51 954 928 201</div>
         <div>Horario: Lun - Sáb: 8:00 AM - 6:00 PM</div>
       </div>
     </div>
 
     <!-- Canales Digitales y Legales -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 md:col-span-2 lg:col-span-1">
-      <div class="w-10 h-10 rounded-2xl bg-slate-50 text-[#002b49] flex items-center justify-center text-lg border border-slate-200">
+    <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-2.5 sm:space-y-3 md:col-span-2 lg:col-span-1 w-full">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-slate-50 text-[#002b49] flex items-center justify-center text-base sm:text-lg border border-slate-200 shrink-0">
         <i class="fa-solid fa-envelope-open-text text-[#00a8e8]"></i>
       </div>
       <div>
-        <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest block">Contacto Digital</span>
-        <h4 class="font-extrabold text-[#002b49] text-sm">Atención Electrónica</h4>
+        <span class="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest block">Contacto Digital</span>
+        <h4 class="font-extrabold text-[#002b49] text-xs sm:text-sm">Atención Electrónica</h4>
       </div>
-      <div class="text-xs text-slate-600 space-y-1">
+      <div class="text-xs text-slate-600 space-y-0.5">
         <div><strong class="text-slate-700">Correos:</strong> inmuteceirl@gmail.com</div>
         <div class="text-slate-500">gusmarbal@hotmail.com</div>
       </div>
-      <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+      <div class="pt-2 border-t border-slate-100 text-[10px] sm:text-[11px] text-slate-500 space-y-0.5">
         <div><strong>RUC:</strong> 20568327692</div>
         <div><strong>Portal:</strong> www.inmutec.com.pe</div>
       </div>

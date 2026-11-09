@@ -1,14 +1,15 @@
-<div class="space-y-10 animate-fadeIn">
+<div class="space-y-6 sm:space-y-10 animate-fadeIn w-full max-w-full overflow-hidden">
 
   <!-- CABECERA PRINCIPAL -->
-  <section class="relative bg-gradient-to-br from-[#001d32] via-[#002b49] to-[#081b2a] rounded-3xl p-8 lg:p-12 text-white shadow-2xl overflow-hidden border border-[#00a8e8]/30">
+  <section class="relative bg-gradient-to-br from-[#001d32] via-[#002b49] to-[#081b2a] rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-12 text-white shadow-2xl overflow-hidden border border-[#00a8e8]/30 w-full">
     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div class="space-y-3 max-w-2xl">
-        <div class="inline-flex items-center space-x-2 bg-[#00a8e8]/15 border border-[#00a8e8]/40 px-3.5 py-1 rounded-full text-xs font-semibold text-cyan-200">
+      
+      <div class="space-y-2.5 sm:space-y-3 max-w-2xl">
+        <div class="inline-flex items-center space-x-2 bg-[#00a8e8]/15 border border-[#00a8e8]/40 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold text-cyan-200">
           <i class="fa-solid fa-gears text-[#00a8e8]"></i>
           <span>Divisiones de Ingeniería & Telecomunicaciones B2B</span>
         </div>
-        <h1 data-cms-key="svc_hero_titulo" class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+        <h1 data-cms-key="svc_hero_titulo" class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-snug sm:leading-tight break-words">
           Catálogo de Servicios <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00a8e8] via-sky-300 to-emerald-400">Especializados</span>
         </h1>
         <p data-cms-key="svc_hero_subtitulo" class="text-slate-300 text-xs sm:text-sm lg:text-base leading-relaxed font-normal">
@@ -17,88 +18,94 @@
       </div>
 
       <!-- Badge de Homologación -->
-      <div class="bg-white/5 backdrop-blur-xl border border-white/15 p-5 rounded-3xl min-w-[260px] space-y-2 shadow-xl">
-        <span class="text-[10px] font-black uppercase text-[#00a8e8] tracking-wider block">Garantía Operativa</span>
-        <div class="space-y-1 text-xs">
+      <div class="bg-white/5 backdrop-blur-xl border border-white/15 p-4 sm:p-5 rounded-2xl sm:rounded-3xl w-full md:w-auto md:min-w-[260px] space-y-2 shadow-xl">
+        <span class="text-[9px] sm:text-[10px] font-black uppercase text-[#00a8e8] tracking-wider block">Garantía Operativa</span>
+        <div class="space-y-1.5 text-xs">
           <div class="flex items-center space-x-2 text-slate-200">
-            <i class="fa-solid fa-certificate text-[#10b981] text-xs"></i>
-            <span>Normas NTP 2050 & EM/DGE</span>
+            <i class="fa-solid fa-certificate text-[#10b981] text-xs shrink-0"></i>
+            <span class="truncate">Normas NTP 2050 & EM/DGE</span>
           </div>
           <div class="flex items-center space-x-2 text-slate-200">
-            <i class="fa-solid fa-shield-halved text-[#00a8e8] text-xs"></i>
-            <span>Cuadrillas en Altura Homologadas</span>
+            <i class="fa-solid fa-shield-halved text-[#00a8e8] text-xs shrink-0"></i>
+            <span class="truncate">Cuadrillas en Altura Homologadas</span>
           </div>
           <div class="flex items-center space-x-2 text-slate-200">
-            <i class="fa-solid fa-bolt text-[#f59e0b] text-xs"></i>
-            <span>Disponibilidad SLA 99.8%</span>
+            <i class="fa-solid fa-bolt text-[#f59e0b] text-xs shrink-0"></i>
+            <span class="truncate">Disponibilidad SLA 99.8%</span>
           </div>
         </div>
       </div>
+
     </div>
   </section>
 
-  <!-- BARRA DE FILTROS Y CATEGORÍAS RÁPIDAS -->
-  <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
-    <div class="flex flex-wrap gap-2" id="servicesFilterGroup">
-      <button type="button" data-category="all" class="svc-tab-btn active-tab px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer">
+  <!-- BARRA DE FILTROS Y CATEGORÍAS RÁPIDAS (SCROLL HORIZONTAL EN CELULAR) -->
+  <div class="w-full border-b border-slate-200 pb-3 space-y-2">
+    <div class="flex items-center justify-between text-xs text-slate-500 font-semibold px-0.5">
+      <span class="text-[11px] uppercase tracking-wider text-slate-400">Filtrar por Especialidad</span>
+      <span class="text-[11px] font-mono" id="svcCounterText">Mostrando 5 especialidades</span>
+    </div>
+
+    <!-- Contenedor con scroll táctil sin deformar pantalla -->
+    <div class="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar w-full" id="servicesFilterGroup">
+      <button type="button" data-category="all" class="svc-tab-btn active-tab shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer">
         Todos los Servicios
       </button>
-      <button type="button" data-category="datos" class="svc-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+      <button type="button" data-category="datos" class="svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
         Internet & Conectividad
       </button>
-      <button type="button" data-category="fibra" class="svc-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+      <button type="button" data-category="fibra" class="svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
         Fibra Óptica
       </button>
-      <button type="button" data-category="estructuras" class="svc-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
-        Torres & Puesta a Tierra
+      <button type="button" data-category="estructuras" class="svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+        Torres & STP
       </button>
-      <button type="button" data-category="laboratorio" class="svc-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+      <button type="button" data-category="laboratorio" class="svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
         Laboratorio RF
       </button>
-      <button type="button" data-category="domotica" class="svc-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
+      <button type="button" data-category="domotica" class="svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer">
         Domótica & Smart
       </button>
     </div>
-    <span class="text-xs font-mono text-slate-400 font-semibold" id="svcCounterText">Mostrando 5 especialidades</span>
   </div>
 
   <!-- GRID DE TARJETAS TÉCNICAS -->
-  <section class="grid grid-cols-1 md:grid-cols-2 gap-8" id="servicesGrid">
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 w-full" id="servicesGrid">
 
     <!-- SERVICIO 1: INTERNET DEDICADO -->
-    <article class="svc-card bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between" data-cat="datos">
+    <article class="svc-card bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between w-full" data-cat="datos">
       <div>
-        <div class="relative h-60 w-full overflow-hidden bg-slate-900">
+        <div class="relative h-48 sm:h-60 w-full overflow-hidden bg-slate-900">
           <img data-cms-key="svc_internet_img" src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80" alt="Internet Dedicado" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-          <span class="absolute top-4 left-4 bg-[#00a8e8] text-[#002b49] font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Conectividad & Datos</span>
-          <span class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/20">SLA 99.8%</span>
-          <div class="absolute bottom-4 left-4 right-4 text-white">
-            <h3 data-cms-key="svc_internet_titulo" class="text-xl font-black flex items-center space-x-2">
-              <i class="fa-solid fa-wifi text-[#00a8e8]"></i>
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#00a8e8] text-[#002b49] font-black text-[9px] sm:text-[10px] uppercase px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow">Conectividad & Datos</span>
+          <span class="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/20">SLA 99.8%</span>
+          <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+            <h3 data-cms-key="svc_internet_titulo" class="text-lg sm:text-xl font-black flex items-center space-x-2 leading-tight">
+              <i class="fa-solid fa-wifi text-[#00a8e8] shrink-0"></i>
               <span>1. Internet Dedicado y Urbano / Rural</span>
             </h3>
           </div>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <p data-cms-key="svc_internet_desc" class="text-xs text-slate-600 leading-relaxed">
             Suministro de acceso a internet simétrico de alta velocidad y canales dedicados corporativos bajo normativa técnica de proveedores de internet urbano y rural en Huancayo y a nivel nacional.
           </p>
 
           <div class="border-t border-slate-100 pt-3 space-y-2">
-            <span class="text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
-            <ul class="text-xs text-slate-600 space-y-2">
+            <span class="text-[10px] sm:text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
+            <ul class="text-xs text-slate-600 space-y-1.5 sm:space-y-2">
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#00a8e8] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#00a8e8] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_internet_esp1">Canales de banda ancha dedicados con acuerdos SLA de alta disponibilidad.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#00a8e8] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#00a8e8] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_internet_esp2">Soluciones para sectores urbanos, comunidades rurales e industrias.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#00a8e8] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#00a8e8] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_internet_esp3">Monitoreo continuo de latencia y soporte técnico preventivo 24/7.</span>
               </li>
             </ul>
@@ -106,52 +113,52 @@
         </div>
       </div>
 
-      <div class="p-6 pt-0 grid grid-cols-2 gap-3">
-        <button type="button" onclick="window.openServiceModal('datos')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+      <div class="p-4 sm:p-6 pt-0 grid grid-cols-2 gap-2 sm:gap-3">
+        <button type="button" onclick="window.openServiceModal('datos')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 cursor-pointer">
           <i class="fa-regular fa-file-lines text-slate-400"></i>
           <span>Ficha Técnica</span>
         </button>
-        <button type="button" onclick="window.goToQuoteService('Internet Dedicado')" class="w-full bg-[#002b49] hover:bg-[#00a8e8] hover:text-[#002b49] text-white font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
-          <span>Cotizar Servicio</span>
+        <button type="button" onclick="window.goToQuoteService('Internet Dedicado')" class="w-full bg-[#002b49] hover:bg-[#00a8e8] hover:text-[#002b49] text-white font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 shadow-sm cursor-pointer">
+          <span>Cotizar</span>
           <i class="fa-solid fa-arrow-right text-[10px]"></i>
         </button>
       </div>
     </article>
 
     <!-- SERVICIO 2: FIBRA ÓPTICA -->
-    <article class="svc-card bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between" data-cat="fibra">
+    <article class="svc-card bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between w-full" data-cat="fibra">
       <div>
-        <div class="relative h-60 w-full overflow-hidden bg-slate-900">
+        <div class="relative h-48 sm:h-60 w-full overflow-hidden bg-slate-900">
           <img data-cms-key="svc_fibra_img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=900&q=80" alt="Red de Fibra Óptica" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-          <span class="absolute top-4 left-4 bg-[#10b981] text-white font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Infraestructura F.O.</span>
-          <span class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/20">Planta Interna & Externa</span>
-          <div class="absolute bottom-4 left-4 right-4 text-white">
-            <h3 data-cms-key="svc_fibra_titulo" class="text-xl font-black flex items-center space-x-2">
-              <i class="fa-solid fa-network-wired text-[#10b981]"></i>
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#10b981] text-white font-black text-[9px] sm:text-[10px] uppercase px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow">Infraestructura F.O.</span>
+          <span class="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/20">Planta Interna & Externa</span>
+          <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+            <h3 data-cms-key="svc_fibra_titulo" class="text-lg sm:text-xl font-black flex items-center space-x-2 leading-tight">
+              <i class="fa-solid fa-network-wired text-[#10b981] shrink-0"></i>
               <span>2. Red de Fibra Óptica Extremo a Extremo</span>
             </h3>
           </div>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <p data-cms-key="svc_fibra_desc" class="text-xs text-slate-600 leading-relaxed">
             Diseño, tendido y despliegue integral de redes de fibra óptica para máxima confiabilidad y seguridad en las telecomunicaciones de operadores y empresas.
           </p>
 
           <div class="border-t border-slate-100 pt-3 space-y-2">
-            <span class="text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
-            <ul class="text-xs text-slate-600 space-y-2">
+            <span class="text-[10px] sm:text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
+            <ul class="text-xs text-slate-600 space-y-1.5 sm:space-y-2">
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#10b981] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#10b981] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_fibra_esp1">Despliegue integral de Planta Interna y Planta Externa (aéreo, canalizado y postería).</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#10b981] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#10b981] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_fibra_esp2">Fusionado de mufas de precisión, cajas de dispersión y conectores ópticos.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#10b981] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#10b981] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_fibra_esp3">Estudios de campo TSS, levantamiento de rutas y reflectometría (OTDR).</span>
               </li>
             </ul>
@@ -159,52 +166,52 @@
         </div>
       </div>
 
-      <div class="p-6 pt-0 grid grid-cols-2 gap-3">
-        <button type="button" onclick="window.openServiceModal('fibra')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+      <div class="p-4 sm:p-6 pt-0 grid grid-cols-2 gap-2 sm:gap-3">
+        <button type="button" onclick="window.openServiceModal('fibra')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 cursor-pointer">
           <i class="fa-regular fa-file-lines text-slate-400"></i>
           <span>Ficha Técnica</span>
         </button>
-        <button type="button" onclick="window.goToQuoteService('Fibra Óptica')" class="w-full bg-[#002b49] hover:bg-[#10b981] text-white font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
-          <span>Cotizar Servicio</span>
+        <button type="button" onclick="window.goToQuoteService('Fibra Óptica')" class="w-full bg-[#002b49] hover:bg-[#10b981] text-white font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 shadow-sm cursor-pointer">
+          <span>Cotizar</span>
           <i class="fa-solid fa-arrow-right text-[10px]"></i>
         </button>
       </div>
     </article>
 
     <!-- SERVICIO 3: ESTRUCTURAS Y TORRES -->
-    <article class="svc-card bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between" data-cat="estructuras">
+    <article class="svc-card bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between w-full" data-cat="estructuras">
       <div>
-        <div class="relative h-60 w-full overflow-hidden bg-slate-900">
+        <div class="relative h-48 sm:h-60 w-full overflow-hidden bg-slate-900">
           <img data-cms-key="svc_torres_img" src="https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=900&q=80" alt="Torres y Estructuras" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-          <span class="absolute top-4 left-4 bg-[#f59e0b] text-slate-900 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Torres & Tierras</span>
-          <span class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/20">EM/DGE & NTP 2050</span>
-          <div class="absolute bottom-4 left-4 right-4 text-white">
-            <h3 data-cms-key="svc_torres_titulo" class="text-xl font-black flex items-center space-x-2">
-              <i class="fa-solid fa-tower-broadcast text-[#f59e0b]"></i>
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#f59e0b] text-slate-900 font-black text-[9px] sm:text-[10px] uppercase px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow">Torres & Tierras</span>
+          <span class="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/20">NTP 2050</span>
+          <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+            <h3 data-cms-key="svc_torres_titulo" class="text-lg sm:text-xl font-black flex items-center space-x-2 leading-tight">
+              <i class="fa-solid fa-tower-broadcast text-[#f59e0b] shrink-0"></i>
               <span>3. Estructuras Metálicas y Sistemas STP</span>
             </h3>
           </div>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <p data-cms-key="svc_torres_desc" class="text-xs text-slate-600 leading-relaxed">
             Fabricación, montaje e implementación de estructuras verticales y sistemas de protección contra descargas atmosféricas para sitios de radiotransmisión.
           </p>
 
           <div class="border-t border-slate-100 pt-3 space-y-2">
-            <span class="text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
-            <ul class="text-xs text-slate-600 space-y-2">
+            <span class="text-[10px] sm:text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
+            <ul class="text-xs text-slate-600 space-y-1.5 sm:space-y-2">
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#f59e0b] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#f59e0b] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_torres_esp1">Fabricación de torres ventadas, autosoportadas y monopolos fijos.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#f59e0b] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#f59e0b] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_torres_esp2">Diseño e instalación de STP (Sistema de Protección de Tierras).</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#f59e0b] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#f59e0b] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_torres_esp3">Montaje con cuadrillas homologadas para trabajos de alto riesgo en altura.</span>
               </li>
             </ul>
@@ -212,105 +219,105 @@
         </div>
       </div>
 
-      <div class="p-6 pt-0 grid grid-cols-2 gap-3">
-        <button type="button" onclick="window.openServiceModal('estructuras')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+      <div class="p-4 sm:p-6 pt-0 grid grid-cols-2 gap-2 sm:gap-3">
+        <button type="button" onclick="window.openServiceModal('estructuras')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 cursor-pointer">
           <i class="fa-regular fa-file-lines text-slate-400"></i>
           <span>Ficha Técnica</span>
         </button>
-        <button type="button" onclick="window.goToQuoteService('Torres & STP')" class="w-full bg-[#002b49] hover:bg-[#f59e0b] hover:text-slate-900 text-white font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
-          <span>Cotizar Servicio</span>
+        <button type="button" onclick="window.goToQuoteService('Torres & STP')" class="w-full bg-[#002b49] hover:bg-[#f59e0b] hover:text-slate-900 text-white font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 shadow-sm cursor-pointer">
+          <span>Cotizar</span>
           <i class="fa-solid fa-arrow-right text-[10px]"></i>
         </button>
       </div>
     </article>
 
     <!-- SERVICIO 4: LABORATORIO RF -->
-    <article class="svc-card bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between" data-cat="laboratorio">
+    <article class="svc-card bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between w-full" data-cat="laboratorio">
       <div>
-        <div class="relative h-60 w-full overflow-hidden bg-slate-900">
+        <div class="relative h-48 sm:h-60 w-full overflow-hidden bg-slate-900">
           <img data-cms-key="svc_lab_img" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80" alt="Laboratorio de Radio" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-          <span class="absolute top-4 left-4 bg-[#ef4444] text-white font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Laboratorio Propio</span>
-          <span class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/20">Stock de Repuestos</span>
-          <div class="absolute bottom-4 left-4 right-4 text-white">
-            <h3 data-cms-key="svc_lab_titulo" class="text-xl font-black flex items-center space-x-2">
-              <i class="fa-solid fa-microchip text-[#ef4444]"></i>
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#ef4444] text-white font-black text-[9px] sm:text-[10px] uppercase px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow">Laboratorio Propio</span>
+          <span class="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/20">Stock Repuestos</span>
+          <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+            <h3 data-cms-key="svc_lab_titulo" class="text-lg sm:text-xl font-black flex items-center space-x-2 leading-tight">
+              <i class="fa-solid fa-microchip text-[#ef4444] shrink-0"></i>
               <span>4. Laboratorio Técnico de Radiotransmisión</span>
             </h3>
           </div>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <p data-cms-key="svc_lab_desc" class="text-xs text-slate-600 leading-relaxed">
             Laboratorio técnico profesional equipado para diagnóstico, mantenimiento preventivo y correctivo de equipos de telecomunicaciones y radiotransmisión.
           </p>
 
           <div class="border-t border-slate-100 pt-3 space-y-2">
-            <span class="text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
-            <ul class="text-xs text-slate-600 space-y-2">
+            <span class="text-[10px] sm:text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
+            <ul class="text-xs text-slate-600 space-y-1.5 sm:space-y-2">
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#ef4444] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#ef4444] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_lab_esp1">Mantenimiento preventivo y correctivo para equipos de radiotransmisión.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#ef4444] mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-[#ef4444] mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_lab_esp2">Stock permanente de repuestos y módulos de reemplazo inmediato.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-[#ef4444] mt-0.5 text-xs"></i>
-                <span data-cms-key="svc_lab_esp3">Calibración de potencia, modulación y frecuencias de operación en banco RF.</span>
+                <i class="fa-solid fa-circle-check text-[#ef4444] mt-0.5 text-xs shrink-0"></i>
+                <span data-cms-key="svc_lab_esp3">Calibración de potencia, modulación y frecuencias en banco RF.</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      <div class="p-6 pt-0 grid grid-cols-2 gap-3">
-        <button type="button" onclick="window.openServiceModal('laboratorio')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+      <div class="p-4 sm:p-6 pt-0 grid grid-cols-2 gap-2 sm:gap-3">
+        <button type="button" onclick="window.openServiceModal('laboratorio')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 cursor-pointer">
           <i class="fa-regular fa-file-lines text-slate-400"></i>
           <span>Ficha Técnica</span>
         </button>
-        <button type="button" onclick="window.goToQuoteService('Laboratorio')" class="w-full bg-[#002b49] hover:bg-[#ef4444] text-white font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
-          <span>Cotizar Servicio</span>
+        <button type="button" onclick="window.goToQuoteService('Laboratorio')" class="w-full bg-[#002b49] hover:bg-[#ef4444] text-white font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 shadow-sm cursor-pointer">
+          <span>Cotizar</span>
           <i class="fa-solid fa-arrow-right text-[10px]"></i>
         </button>
       </div>
     </article>
 
     <!-- SERVICIO 5: DOMÓTICA E INMÓTICA -->
-    <article class="svc-card bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between" data-cat="domotica">
+    <article class="svc-card bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between w-full md:col-span-2" data-cat="domotica">
       <div>
-        <div class="relative h-60 w-full overflow-hidden bg-slate-900">
-          <img data-cms-key="svc_domotica_img" src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=900&q=80" alt="Domótica Inteligente" class="w-full h-full object-cover">
+        <div class="relative h-48 sm:h-64 w-full overflow-hidden bg-slate-900">
+          <img data-cms-key="svc_domotica_img" src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&q=80" alt="Domótica Inteligente" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-          <span class="absolute top-4 left-4 bg-purple-600 text-white font-black text-[10px] uppercase px-3 py-1 rounded-full shadow">Automatización Smart</span>
-          <span class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/20">Edificios & Residencias</span>
-          <div class="absolute bottom-4 left-4 right-4 text-white">
-            <h3 data-cms-key="svc_domotica_titulo" class="text-xl font-black flex items-center space-x-2">
-              <i class="fa-solid fa-house-signal text-purple-400"></i>
-              <span>5. Domótica y Automatización Inteligente</span>
+          <span class="absolute top-3 left-3 sm:top-4 sm:left-4 bg-purple-600 text-white font-black text-[9px] sm:text-[10px] uppercase px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow">Automatización Smart</span>
+          <span class="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/60 backdrop-blur-md text-white font-mono text-[9px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/20">Edificios & Residencias</span>
+          <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+            <h3 data-cms-key="svc_domotica_titulo" class="text-lg sm:text-2xl font-black flex items-center space-x-2 leading-tight">
+              <i class="fa-solid fa-house-signal text-purple-400 shrink-0"></i>
+              <span>5. Domótica y Automatización Inteligente (IoT)</span>
             </h3>
           </div>
         </div>
 
-        <div class="p-6 space-y-4">
+        <div class="p-4 sm:p-6 space-y-3 sm:space-y-4">
           <p data-cms-key="svc_domotica_desc" class="text-xs text-slate-600 leading-relaxed">
             Ingeniería de automatización integral para el control de accesos, cámaras perimétricas con IA, iluminación inteligente y gestión energética centralizada en edificaciones.
           </p>
 
           <div class="border-t border-slate-100 pt-3 space-y-2">
-            <span class="text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
-            <ul class="text-xs text-slate-600 space-y-2">
+            <span class="text-[10px] sm:text-[11px] font-black text-[#002b49] uppercase tracking-wider block">Especificaciones Técnicas:</span>
+            <ul class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-600">
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-purple-600 mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-purple-600 mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_domotica_esp1">Control centralizado de iluminación y climatización vía smartphone.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-purple-600 mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-purple-600 mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_domotica_esp2">Cerraduras biométricas, reconocimiento facial y porteros IP.</span>
               </li>
               <li class="flex items-start space-x-2">
-                <i class="fa-solid fa-circle-check text-purple-600 mt-0.5 text-xs"></i>
+                <i class="fa-solid fa-circle-check text-purple-600 mt-0.5 text-xs shrink-0"></i>
                 <span data-cms-key="svc_domotica_esp3">Sensores perimétricos y cámaras inteligentes con analítica de video.</span>
               </li>
             </ul>
@@ -318,13 +325,13 @@
         </div>
       </div>
 
-      <div class="p-6 pt-0 grid grid-cols-2 gap-3">
-        <button type="button" onclick="window.openServiceModal('domotica')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer">
+      <div class="p-4 sm:p-6 pt-0 grid grid-cols-2 gap-2 sm:gap-3">
+        <button type="button" onclick="window.openServiceModal('domotica')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 cursor-pointer">
           <i class="fa-regular fa-file-lines text-slate-400"></i>
           <span>Ficha Técnica</span>
         </button>
-        <button type="button" onclick="window.goToQuoteService('Domótica')" class="w-full bg-[#002b49] hover:bg-purple-600 text-white font-bold py-2.5 px-3 rounded-2xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
-          <span>Cotizar Servicio</span>
+        <button type="button" onclick="window.goToQuoteService('Domótica')" class="w-full bg-[#002b49] hover:bg-purple-600 text-white font-bold py-2 sm:py-2.5 px-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs transition flex items-center justify-center space-x-1 shadow-sm cursor-pointer">
+          <span>Cotizar Domótica</span>
           <i class="fa-solid fa-arrow-right text-[10px]"></i>
         </button>
       </div>
@@ -333,50 +340,50 @@
   </section>
 
   <!-- BANNER TÉCNICO INFERIOR / TDR -->
-  <section class="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
-    <div class="flex items-center space-x-4">
-      <div class="w-14 h-14 rounded-2xl bg-[#00a8e8]/10 text-[#00a8e8] flex items-center justify-center text-3xl shrink-0">
+  <section class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 w-full">
+    <div class="flex items-center space-x-3 sm:space-x-4 w-full md:w-auto">
+      <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#00a8e8]/10 text-[#00a8e8] flex items-center justify-center text-2xl sm:text-3xl shrink-0">
         <i class="fa-solid fa-file-contract"></i>
       </div>
       <div>
-        <h4 data-cms-key="svc_banner_tdr_titulo" class="text-base font-black text-[#002b49]">¿Requieres Bases para Licitación o Ficha TDR?</h4>
-        <p data-cms-key="svc_banner_tdr_subtitulo" class="text-xs text-slate-500 mt-0.5">Elaboramos especificaciones técnicas y memorias descriptivas ajustadas a los requerimientos de tu proyecto.</p>
+        <h4 data-cms-key="svc_banner_tdr_titulo" class="text-sm sm:text-base font-black text-[#002b49] leading-tight">¿Requieres Bases para Licitación o Ficha TDR?</h4>
+        <p data-cms-key="svc_banner_tdr_subtitulo" class="text-xs text-slate-500 mt-0.5">Elaboramos especificaciones técnicas y memorias descriptivas ajustadas a tu proyecto.</p>
       </div>
     </div>
-    <button onclick="window.goToQuoteService('Internet Dedicado')" class="shrink-0 bg-[#002b49] hover:bg-[#00a8e8] hover:text-[#002b49] text-white font-bold text-xs py-3 px-6 rounded-2xl transition shadow-md flex items-center space-x-2 cursor-pointer">
+    <button onclick="window.goToQuoteService('Internet Dedicado')" class="w-full md:w-auto shrink-0 bg-[#002b49] hover:bg-[#00a8e8] hover:text-[#002b49] text-white font-bold text-xs py-2.5 sm:py-3 px-5 sm:px-6 rounded-xl sm:rounded-2xl transition shadow-md flex items-center justify-center space-x-2 cursor-pointer">
       <i class="fa-solid fa-headset text-sm"></i>
       <span>Hablar con un Ingeniero</span>
     </button>
   </section>
 
-  <!-- MODAL DE ESPECIFICACIONES TÉCNICAS (DETALLE CORPORATIVO) -->
-  <div id="serviceDetailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl relative border border-slate-200 animate-fadeIn space-y-4">
-      <button onclick="window.closeServiceModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 text-lg cursor-pointer">
+  <!-- MODAL DE ESPECIFICACIONES TÉCNICAS (RESPONSIVO EN CELULAR) -->
+  <div id="serviceDetailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border border-slate-200 animate-fadeIn space-y-4">
+      <button onclick="window.closeServiceModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 text-lg cursor-pointer">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
-      <div class="flex items-center space-x-3">
-        <div id="modalIconBox" class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"></div>
-        <div>
-          <span id="modalCategory" class="text-[10px] font-black uppercase tracking-wider block"></span>
-          <h3 id="modalTitle" class="text-xl font-black text-[#002b49]"></h3>
+      <div class="flex items-center space-x-3 pr-6">
+        <div id="modalIconBox" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shrink-0"></div>
+        <div class="min-w-0">
+          <span id="modalCategory" class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider block truncate"></span>
+          <h3 id="modalTitle" class="text-base sm:text-xl font-black text-[#002b49] leading-tight"></h3>
         </div>
       </div>
 
       <div class="border-t border-slate-100 pt-3 space-y-3 text-xs">
         <p id="modalDesc" class="text-slate-600 leading-relaxed"></p>
-        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-          <span class="font-extrabold text-[#002b49] text-[11px] block uppercase">Entregables y Garantías:</span>
+        <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 space-y-2">
+          <span class="font-extrabold text-[#002b49] text-[10px] sm:text-[11px] block uppercase">Entregables y Garantías:</span>
           <ul id="modalDeliverables" class="space-y-1.5 text-slate-600 list-disc list-inside"></ul>
         </div>
       </div>
 
-      <div class="pt-2 flex justify-end space-x-3">
-        <button onclick="window.closeServiceModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition cursor-pointer">
+      <div class="pt-2 flex justify-end space-x-2 sm:space-x-3">
+        <button onclick="window.closeServiceModal()" class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition cursor-pointer">
           Cerrar
         </button>
-        <button id="modalActionBtn" class="px-5 py-2.5 rounded-xl bg-[#002b49] text-white font-bold text-xs hover:bg-[#00a8e8] hover:text-[#002b49] transition shadow cursor-pointer">
+        <button id="modalActionBtn" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#002b49] text-white font-bold text-xs hover:bg-[#00a8e8] hover:text-[#002b49] transition shadow cursor-pointer">
           Solicitar este Servicio
         </button>
       </div>
