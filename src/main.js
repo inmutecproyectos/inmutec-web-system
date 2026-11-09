@@ -398,16 +398,16 @@ async function initCotizacionModule() {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="font-bold text-slate-700 block mb-1">Tipo de Equipo y Marca *</label>
-            <input id="qLabEquipo" type="text" placeholder="Ej. Radiotransmisor Motorola / Kenwood" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white">
+            <input id="qLabEquipo" type="text" placeholder="Ej. Radiotransmisor Motorola / Kenwood" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs">
           </div>
           <div>
             <label class="font-bold text-slate-700 block mb-1">Cantidad de Equipos *</label>
-            <input id="qLabCantidad" type="number" min="1" value="1" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white font-mono">
+            <input id="qLabCantidad" type="number" min="1" value="1" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white font-mono text-xs">
           </div>
         </div>
         <div>
           <label class="font-bold text-slate-700 block mb-1">Detalle de la Falla o Trabajo Requerido *</label>
-          <textarea id="qLabFalla" rows="3" placeholder="Indicar si no enciende, pérdida de potencia, calibración de frecuencia o mantenimiento..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white"></textarea>
+          <textarea id="qLabFalla" rows="3" placeholder="Indicar si no enciende, pérdida de potencia, calibración de frecuencia o mantenimiento..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs"></textarea>
         </div>
         <div class="flex items-center space-x-2 text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200">
           <i class="fa-solid fa-location-dot text-[#00a8e8]"></i>
@@ -537,442 +537,7 @@ export async function verificarYMontarAdminProforma() {
 }
 
 // ========================================================
-// SISTEMA DE EMISIÓN DE PROFORMAS OFICIALES (ADMIN CMS)
-// ========================================================
-
-// 1. Contador Correlativo Dinámico
-window.obtenerSiguienteNumeroProforma = async function() {
-  let siguiente = 1070;
-  try {
-    const { count, error } = await supabase.from("cotizaciones").select("*", { count: "exact", head: true });
-    if (!error && typeof count === "number") {
-      siguiente = 1070 + count;
-    }
-  } catch (e) {
-    const guardado = localStorage.getItem("inmutec_ultimo_correlativo");
-    if (guardado) siguiente = parseInt(guardado, 10) + 1;
-  }
-  return String(siguiente).padStart(6, "0");
-};
-
-// 2. Fecha y Hora Actual de Huancayo
-window.generarFechaHoraHuancayo = function() {
-  const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-  const ahora = new Date();
-  const dia = ahora.getDate();
-  const mes = meses[ahora.getMonth()];
-  const anio = ahora.getFullYear();
-
-  let horas = ahora.getHours();
-  const minutos = String(ahora.getMinutes()).padStart(2, "0");
-  const ampm = horas >= 12 ? "PM" : "AM";
-  horas = horas % 12;
-  horas = horas ? horas : 12;
-
-  return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
-};
-
-// 3. Abrir / Cerrar Mesa de Proformas al presionar el Botón
-window.toggleProformaWorkspace = async function() {
-  const box = document.getElementById("proformaWorkspaceContainer");
-  const txt = document.getElementById("btnToggleProformaText");
-  const icon = document.getElementById("btnToggleIcon");
-  if (!box) return;
-
-  if (box.classList.contains("hidden")) {
-    box.classList.remove("hidden");
-    if (txt) txt.textContent = "Ocultar Mesa de Proforma";
-    if (icon) icon.classList.add("rotate-180");
-
-    // Inicializar correlativo y fecha/hora
-    const num = await window.obtenerSiguienteNumeroProforma();
-    const fechaHora = window.generarFechaHoraHuancayo();
-
-    const inputNum = document.getElementById("admin_prof_numero");
-    const inputFecha = document.getElementById("admin_prof_fecha");
-    if (inputNum) inputNum.value = num;
-    if (inputFecha) inputFecha.value = fechaHora;
-
-    // Tomar el servicio seleccionado actualmente en el formulario
-    const servicioActual = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
-    window.aplicarPlantillaServicio(servicioActual);
-  } else {
-    box.classList.add("hidden");
-    if (txt) txt.textContent = "Realizar Nueva Proforma";
-    if (icon) icon.classList.remove("rotate-180");
-  }
-};
-
-// 4. Plantillas Técnicas para los 5 Servicios
-window.aplicarPlantillaServicio = function(servicio) {
-  document.querySelectorAll(".srv-admin-filter").forEach(b => {
-    b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
-    if (b.dataset.filter === servicio) b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
-  });
-
-  if (servicio === "Fibra Óptica") {
-    window.itemsProformaAdmin = [
-      {
-        descripcion: "Tendido de fibra óptica monomodo ADSS, sangrado de mufas troncales FOSC y pruebas reflectométricas OTDR por hilo.",
-        cant: 1,
-        unidad: "GLB",
-        precio: 3500.00
-      }
-    ];
-  } else if (servicio === "Torres & STP") {
-    window.itemsProformaAdmin = [
-      {
-        descripcion: "Mantenimiento preventivo de torre ventada, cambio de retenidas y protocolo de resistividad STP NTP 2050 (< 5 Ohmios).",
-        cant: 1,
-        unidad: "SERV",
-        precio: 2800.00
-      }
-    ];
-  } else if (servicio === "Laboratorio RF" || servicio === "Laboratorio") {
-    window.itemsProformaAdmin = [
-      {
-        descripcion: "Diagnóstico en banco RF, calibración de potencias, alineamiento de frecuencia y mantenimiento electrónico.",
-        cant: 1,
-        unidad: "UND",
-        precio: 1400.00
-      }
-    ];
-  } else if (servicio === "Domótica & Smart" || servicio === "Domótica") {
-    const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => "• " + c.value);
-    const detalleDomo = checks.length > 0 
-      ? `Implementación Smart de Domótica & Seguridad Corporativa:\n${checks.join("\n")}`
-      : "Implementación integral de sistema smart residencial/corporativo (Iluminación, Accesos y Cámaras IP IA).";
-
-    window.itemsProformaAdmin = [
-      {
-        descripcion: detalleDomo,
-        cant: 1,
-        unidad: "GLB",
-        precio: 4200.00
-      }
-    ];
-  } else {
-    window.itemsProformaAdmin = [
-      {
-        descripcion: "Suministro e instalación de enlace de Internet Dedicado corporativo simétrico 1:1 con SLA 99.8% y monitoreo NOC 24/7.",
-        cant: 1,
-        unidad: "MES",
-        precio: 1800.00
-      }
-    ];
-  }
-
-  window.renderizarItemsAdmin();
-  window.actualizarDocumentoEnVivo();
-};
-
-// 5. Renderizado Dinámico de Ítems
-window.renderizarItemsAdmin = function() {
-  const tbody = document.getElementById("tabla_items_body_admin");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  window.itemsProformaAdmin.forEach((item, index) => {
-    const total = (item.cant * item.precio).toFixed(2);
-    const tr = document.createElement("tr");
-    tr.className = "border-b border-slate-300";
-    tr.innerHTML = `
-      <td class="border border-slate-400 px-2 py-2 text-center font-bold">${String(index + 1).padStart(2, '0')}</td>
-      <td class="border border-slate-400 px-3 py-1.5">
-        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
-      </td>
-      <td class="border border-slate-400 px-2 py-1.5 text-center">
-        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
-      </td>
-      <td class="border border-slate-400 px-2 py-1.5 text-center font-semibold">
-        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
-      </td>
-      <td class="border border-slate-400 px-3 py-1.5 text-right">
-        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
-      </td>
-      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-800 font-mono">S/ ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-      <td class="border border-slate-400 px-1 py-1 text-center print:hidden">
-        <button onclick="window.eliminarFilaItem(${index})" class="text-red-500 hover:text-red-700 text-xs px-1" title="Eliminar fila">&times;</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  window.calcularTotalesProformaAdmin();
-};
-
-window.eliminarFilaItem = function(idx) {
-  if (window.itemsProformaAdmin.length > 1) {
-    window.itemsProformaAdmin.splice(idx, 1);
-    window.renderizarItemsAdmin();
-  } else {
-    alert("La proforma debe contener al menos un ítem cotizado.");
-  }
-};
-
-window.agregarFilaItem = function() {
-  window.itemsProformaAdmin.push({
-    descripcion: "Trabajos o suministros complementarios para infraestructura técnica.",
-    cant: 1,
-    unidad: "UND",
-    precio: 350.00
-  });
-  window.renderizarItemsAdmin();
-};
-
-window.calcularTotalesProformaAdmin = function() {
-  const neto = window.itemsProformaAdmin.reduce((acc, it) => acc + (it.cant * it.precio), 0);
-  const inputDcto = document.getElementById("input_descuento_admin");
-  const descuento = inputDcto ? (parseFloat(inputDcto.value) || 0) : 0;
-  const subtotal = Math.max(0, neto - descuento);
-  const igv = subtotal * 0.18;
-  const total = subtotal + igv;
-
-  const f = n => `S/ ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  if (document.getElementById("calc_neto_admin")) {
-    document.getElementById("calc_neto_admin").textContent = f(neto);
-    document.getElementById("calc_subtotal_admin").textContent = f(subtotal);
-    document.getElementById("calc_igv_admin").textContent = f(igv);
-    document.getElementById("calc_total_admin").textContent = f(total);
-  }
-};
-
-window.actualizarDocumentoEnVivo = function() {
-  const cli = document.getElementById("qRazon")?.value.trim() || "EMPRESA / CLIENTE REGISTRADO";
-  const doc = document.getElementById("qDoc")?.value.trim() || "-";
-  const lug = document.getElementById("qLugar")?.value.trim() || "Huancayo";
-  const checkedRadio = document.querySelector("input[name='docType']:checked");
-  const tipoDoc = checkedRadio ? checkedRadio.value : "RUC";
-
-  const num = document.getElementById("admin_prof_numero")?.value || "001070";
-  const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
-
-  if (document.getElementById("prof_vista_cliente")) document.getElementById("prof_vista_cliente").textContent = cli;
-  if (document.getElementById("prof_vista_doc")) document.getElementById("prof_vista_doc").textContent = `${tipoDoc}: ${doc}`;
-  if (document.getElementById("prof_vista_lugar")) document.getElementById("prof_vista_lugar").textContent = `Lugar de Obra: ${lug}`;
-  if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num;
-  if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
-};
-
-window.sincronizarConProformaAdmin = function() {
-  window.actualizarDocumentoEnVivo();
-};
-
-// 6. Descarga en PDF (PC / Laptop)
-window.descargarProformaPDF = function() {
-  const element = document.getElementById("documento_proforma_imprimible");
-  if (!element || typeof html2pdf === "undefined") {
-    alert("Generador de PDF cargando, intente nuevamente en 2 segundos.");
-    return;
-  }
-  const cliente = (document.getElementById("prof_vista_cliente")?.textContent || "CLIENTE").replace(/\s+/g, '_');
-  const num = document.getElementById("prof_vista_numero")?.textContent || "001070";
-
-  const opt = {
-    margin: [8, 8, 8, 8],
-    filename: `PROFORMA_${num}_INMUTEC_${cliente}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(element).save();
-
-  localStorage.setItem("inmutec_ultimo_correlativo", num);
-};
-
-// 7. Despacho por WhatsApp (Móvil)
-window.enviarProformaWhatsApp = function() {
-  const cli = document.getElementById("prof_vista_cliente")?.textContent || "Cliente";
-  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
-  const num = document.getElementById("prof_vista_numero")?.textContent || "001070";
-  const fec = document.getElementById("prof_vista_fecha")?.textContent || "";
-  const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Integrales";
-
-  let txt = `*MULTISERVICIOS GENERALES INMUTEC E.I.R.L.*\n`;
-  txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n`;
-  txt += `📅 ${fec}\n\n`;
-  txt += `👤 *Cliente:* ${cli}\n`;
-  txt += `🛠 *Especialidad:* ${svc}\n\n`;
-  txt += `*DETALLE DE PARTIDAS:*\n`;
-
-  window.itemsProformaAdmin.forEach((it, i) => {
-    txt += `${i + 1}. ${it.descripcion} (${it.cant} ${it.unidad}) -> S/ ${(it.cant * it.precio).toFixed(2)}\n`;
-  });
-
-  txt += `\n*TOTAL GENERAL A FACTURAR (Inc. IGV):* ${tot}\n`;
-  txt += `💳 *Cuentas Bancarias Corporativas:*\n`;
-  txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
-  txt += `• BANCO BBVA: 00110235930201930055 (CCI: 01123500020193005593)\n`;
-  txt += `\n_Emitido desde la Mesa de Administración de INMUTEC E.I.R.L._`;
-
-  window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(txt)}`, "_blank");
-};
-
-// 8. Despacho por Email
-window.enviarProformaCorreo = function() {
-  const cli = document.getElementById("prof_vista_cliente")?.textContent || "Cliente";
-  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
-  const emailDestino = document.getElementById("qEmail")?.value || "inmuteceirl@gmail.com";
-
-  const subject = `Propuesta Técnica Económica INMUTEC - ${cli}`;
-  const body = `Estimados Señores:\n\nAdjuntamos la propuesta técnica comercial por el importe total de ${tot} (100% Facturado).\n\nQuedamos a su atenta respuesta.\n\nCentral Telefónica: 954928201 / 064595829\nEmail: inmuteceirl@gmail.com`;
-
-  window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-};
-
-function initChatbot() {
-  const chatMessages = document.getElementById("chatMessages");
-  if (!chatMessages) return;
-
-  chatMessages.innerHTML = `
-    <div class="flex items-start space-x-2">
-      <div class="w-7 h-7 rounded-full bg-[#002b49] text-[#00a8e8] flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
-        <i class="fa-solid fa-robot"></i>
-      </div>
-      <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-slate-700 max-w-[88%] leading-relaxed">
-        Hola, soy el asistente técnico de <strong>INMUTEC E.I.R.L.</strong> ¿En qué puedo orientarte hoy? Puedes escribir en el teclado o seleccionar una de las alternativas de abajo.
-      </div>
-    </div>
-  `;
-}
-
-function appendBotMessage(text, sender, isButton = false) {
-  const chatMessages = document.getElementById("chatMessages");
-  if (!chatMessages) return;
-
-  const wrap = document.createElement("div");
-  wrap.className = sender === "user" ? "flex justify-end" : "flex items-start space-x-2";
-
-  if (sender === "user") {
-    wrap.innerHTML = `
-      <div class="bg-[#002b49] text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] leading-relaxed">
-        ${text}
-      </div>
-    `;
-  } else {
-    let btnHtml = "";
-    if (isButton) {
-      btnHtml = `
-        <div class="mt-2.5 pt-2 border-t border-slate-100">
-          <a href="https://wa.me/${WHATSAPP_PHONE}?text=Hola%20Ing.%20Marmanillo,%20solicito%20asistencia%20t%C3%A9cnica%20especializada" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#10b981] hover:bg-[#059669] text-white px-3 py-1.5 rounded-xl font-bold text-[10px] transition shadow">
-            <i class="fa-brands fa-whatsapp"></i>
-            <span>Consultar con un Ingeniero por WhatsApp</span>
-          </a>
-        </div>
-      `;
-    }
-    wrap.innerHTML = `
-      <div class="w-7 h-7 rounded-full bg-[#002b49] text-[#00a8e8] flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
-        <i class="fa-solid fa-robot"></i>
-      </div>
-      <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-slate-700 max-w-[85%] leading-relaxed">
-        ${text}
-        ${btnHtml}
-      </div>
-    `;
-  }
-
-  chatMessages.appendChild(wrap);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function processBotQuery(userText) {
-  const clean = userText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  let match = null;
-
-  for (const item of BOT_KNOWLEDGE) {
-    if (item.keys.some(k => clean.includes(k))) {
-      match = item.reply;
-      break;
-    }
-  }
-
-  setTimeout(() => {
-    if (match) {
-      appendBotMessage(match, "bot");
-    } else {
-      appendBotMessage(
-        "Para brindarte una propuesta o peritaje técnico exacto sobre este requerimiento, es conveniente que uno de nuestros ingenieros revise los detalles.",
-        "bot",
-        true
-      );
-    }
-  }, 250);
-}
-
-// ========================================================
-// 6. FUNCIONES GLOBALES PARA MODALES (SERVICIOS Y PORTAFOLIO)
-// ========================================================
-window.openServiceModal = function(key) {
-  const s = serviceDataMap[key];
-  if (!s) return;
-  document.getElementById("modalCategory").textContent = s.category;
-  document.getElementById("modalTitle").textContent = s.title;
-  document.getElementById("modalDesc").textContent = s.desc;
-
-  const iconBox = document.getElementById("modalIconBox");
-  if (iconBox) {
-    iconBox.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${s.iconClass.split(' ').slice(0, 2).join(' ')}`;
-    iconBox.innerHTML = `<i class="${s.iconClass.split(' ').slice(2).join(' ')}"></i>`;
-  }
-
-  const delivUl = document.getElementById("modalDeliverables");
-  if (delivUl) {
-    delivUl.innerHTML = s.deliverables.map(d => `<li>${d}</li>`).join("");
-  }
-
-  const actionBtn = document.getElementById("modalActionBtn");
-  if (actionBtn) {
-    actionBtn.onclick = () => {
-      window.closeServiceModal();
-      window.goToQuoteService(s.serviceName);
-    };
-  }
-
-  document.getElementById("serviceDetailModal")?.classList.remove("hidden");
-};
-
-window.closeServiceModal = function() {
-  document.getElementById("serviceDetailModal")?.classList.add("hidden");
-};
-
-window.goToQuoteService = function(serviceName) {
-  sessionStorage.setItem("inmutec_prefill_service", serviceName);
-  window.location.hash = "cotizacion";
-};
-
-window.openProjectModal = function(key) {
-  const p = projectDataMap[key];
-  if (!p) return;
-  document.getElementById("projModalTag").textContent = p.tag;
-  document.getElementById("projModalTitle").textContent = p.title;
-  document.getElementById("projModalClient").textContent = p.client;
-  document.getElementById("projModalDesc").textContent = p.desc;
-
-  const toolsUl = document.getElementById("projModalTools");
-  if (toolsUl) {
-    toolsUl.innerHTML = p.tools.map(t => `<li>${t}</li>`).join("");
-  }
-
-  const stdsUl = document.getElementById("projModalStandards");
-  if (stdsUl) {
-    stdsUl.innerHTML = p.standards.map(s => `<li>${s}</li>`).join("");
-  }
-
-  document.getElementById("projectDetailModal")?.classList.remove("hidden");
-};
-
-window.closeProjectModal = function() {
-  document.getElementById("projectDetailModal")?.classList.add("hidden");
-};
-
-window.quoteSimilarProject = function() {
-  window.closeProjectModal();
-  window.location.hash = "cotizacion";
-};
-
-// ========================================================
-// SISTEMA DE EMISIÓN DE PROFORMAS OFICIALES (ADMIN CMS)
+// 6. SISTEMA DE EMISIÓN DE PROFORMAS OFICIALES (ADMIN CMS)
 // ========================================================
 
 // 1. Contador Correlativo Dinámico (Solo lectura)
@@ -1171,7 +736,7 @@ window.calcularTotalesProformaAdmin = function() {
   }
 };
 
-// Sincronización formulario hacia la proforma
+// Sincronización de campos de cabecera en vivo
 window.actualizarDocumentoEnVivo = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
@@ -1180,6 +745,7 @@ window.actualizarDocumentoEnVivo = function() {
   if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
 };
 
+// Sincronización desde el formulario hacia la proforma
 window.sincronizarConProformaAdmin = function() {
   const cli = document.getElementById("qRazon")?.value.trim();
   const doc = document.getElementById("qDoc")?.value.trim();
@@ -1313,3 +879,369 @@ window.enviarProformaCorreo = function() {
 
   window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
+
+// ========================================================
+// 7. FUNCIONES GLOBALES PARA MODALES (SERVICIOS Y PORTAFOLIO)
+// ========================================================
+window.openServiceModal = function(key) {
+  const s = serviceDataMap[key];
+  if (!s) return;
+  document.getElementById("modalCategory").textContent = s.category;
+  document.getElementById("modalTitle").textContent = s.title;
+  document.getElementById("modalDesc").textContent = s.desc;
+
+  const iconBox = document.getElementById("modalIconBox");
+  if (iconBox) {
+    iconBox.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${s.iconClass.split(' ').slice(0, 2).join(' ')}`;
+    iconBox.innerHTML = `<i class="${s.iconClass.split(' ').slice(2).join(' ')}"></i>`;
+  }
+
+  const delivUl = document.getElementById("modalDeliverables");
+  if (delivUl) {
+    delivUl.innerHTML = s.deliverables.map(d => `<li>${d}</li>`).join("");
+  }
+
+  const actionBtn = document.getElementById("modalActionBtn");
+  if (actionBtn) {
+    actionBtn.onclick = () => {
+      window.closeServiceModal();
+      window.goToQuoteService(s.serviceName);
+    };
+  }
+
+  document.getElementById("serviceDetailModal")?.classList.remove("hidden");
+};
+
+window.closeServiceModal = function() {
+  document.getElementById("serviceDetailModal")?.classList.add("hidden");
+};
+
+window.goToQuoteService = function(serviceName) {
+  sessionStorage.setItem("inmutec_prefill_service", serviceName);
+  window.location.hash = "cotizacion";
+};
+
+window.openProjectModal = function(key) {
+  const p = projectDataMap[key];
+  if (!p) return;
+  document.getElementById("projModalTag").textContent = p.tag;
+  document.getElementById("projModalTitle").textContent = p.title;
+  document.getElementById("projModalClient").textContent = p.client;
+  document.getElementById("projModalDesc").textContent = p.desc;
+
+  const toolsUl = document.getElementById("projModalTools");
+  if (toolsUl) {
+    toolsUl.innerHTML = p.tools.map(t => `<li>${t}</li>`).join("");
+  }
+
+  const stdsUl = document.getElementById("projModalStandards");
+  if (stdsUl) {
+    stdsUl.innerHTML = p.standards.map(s => `<li>${s}</li>`).join("");
+  }
+
+  document.getElementById("projectDetailModal")?.classList.remove("hidden");
+};
+
+window.closeProjectModal = function() {
+  document.getElementById("projectDetailModal")?.classList.add("hidden");
+};
+
+window.quoteSimilarProject = function() {
+  window.closeProjectModal();
+  window.location.hash = "cotizacion";
+};
+
+// ========================================================
+// 8. CHATBOT Y MENSAJERÍA
+// ========================================================
+function initChatbot() {
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) return;
+
+  chatMessages.innerHTML = `
+    <div class="flex items-start space-x-2">
+      <div class="w-7 h-7 rounded-full bg-[#002b49] text-[#00a8e8] flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-slate-700 max-w-[88%] leading-relaxed">
+        Hola, soy el asistente técnico de <strong>INMUTEC E.I.R.L.</strong> ¿En qué puedo orientarte hoy? Puedes escribir en el teclado o seleccionar una de las alternativas de abajo.
+      </div>
+    </div>
+  `;
+}
+
+function appendBotMessage(text, sender, isButton = false) {
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = sender === "user" ? "flex justify-end" : "flex items-start space-x-2";
+
+  if (sender === "user") {
+    wrap.innerHTML = `
+      <div class="bg-[#002b49] text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] leading-relaxed">
+        ${text}
+      </div>
+    `;
+  } else {
+    let btnHtml = "";
+    if (isButton) {
+      btnHtml = `
+        <div class="mt-2.5 pt-2 border-t border-slate-100">
+          <a href="https://wa.me/${WHATSAPP_PHONE}?text=Hola%20Ing.%20Marmanillo,%20solicito%20asistencia%20t%C3%A9cnica%20especializada" target="_blank" class="inline-flex items-center space-x-1.5 bg-[#10b981] hover:bg-[#059669] text-white px-3 py-1.5 rounded-xl font-bold text-[10px] transition shadow">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>Consultar con un Ingeniero por WhatsApp</span>
+          </a>
+        </div>
+      `;
+    }
+    wrap.innerHTML = `
+      <div class="w-7 h-7 rounded-full bg-[#002b49] text-[#00a8e8] flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-slate-700 max-w-[85%] leading-relaxed">
+        ${text}
+        ${btnHtml}
+      </div>
+    `;
+  }
+
+  chatMessages.appendChild(wrap);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function processBotQuery(userText) {
+  const clean = userText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  let match = null;
+
+  for (const item of BOT_KNOWLEDGE) {
+    if (item.keys.some(k => clean.includes(k))) {
+      match = item.reply;
+      break;
+    }
+  }
+
+  setTimeout(() => {
+    if (match) {
+      appendBotMessage(match, "bot");
+    } else {
+      appendBotMessage(
+        "Para brindarte una propuesta o peritaje técnico exacto sobre este requerimiento, es conveniente que uno de nuestros ingenieros revise los detalles.",
+        "bot",
+        true
+      );
+    }
+  }, 250);
+}
+
+// ========================================================
+// 9. INICIALIZACIÓN GLOBAL DE EVENTOS (ROUTER, AUTH Y CMS)
+// ========================================================
+document.addEventListener("DOMContentLoaded", async () => {
+  // Manejo de Rutas por Hash
+  window.addEventListener("hashchange", () => {
+    const mod = window.location.hash.replace("#", "") || "inicio";
+    loadModule(mod);
+  });
+
+  // Navegación por botones del Header
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const target = tab.getAttribute("data-module");
+      window.location.hash = target;
+    });
+  });
+
+  // Gestión de Sesión Supabase CMS
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      isAdminLoggedIn = true;
+      document.getElementById("adminTopBar")?.classList.remove("hidden");
+      const txtLogin = document.getElementById("txtLoginBtn");
+      if (txtLogin) txtLogin.textContent = "Admin";
+    }
+  } catch (err) {
+    console.warn("Verificación de sesión omitida:", err);
+  }
+
+  // Cargar módulo inicial según hash
+  const initialHash = window.location.hash.replace("#", "") || "inicio";
+  await loadModule(initialHash);
+
+  // Modal Login Admin
+  const btnOpenLogin = document.getElementById("btnOpenLoginModal");
+  const loginModal = document.getElementById("loginModal");
+  const btnCloseLogin = document.getElementById("btnCloseLoginModal");
+  const adminLoginForm = document.getElementById("adminLoginForm");
+
+  if (btnOpenLogin && loginModal) {
+    btnOpenLogin.addEventListener("click", () => {
+      if (isAdminLoggedIn) {
+        window.location.hash = "cotizacion";
+      } else {
+        loginModal.classList.remove("hidden");
+      }
+    });
+  }
+
+  if (btnCloseLogin && loginModal) {
+    btnCloseLogin.addEventListener("click", () => loginModal.classList.add("hidden"));
+  }
+
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPass").value.trim();
+      const errSpan = document.getElementById("loginErrorMsg");
+
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        isAdminLoggedIn = true;
+        loginModal.classList.add("hidden");
+        document.getElementById("adminTopBar")?.classList.remove("hidden");
+        const txtLogin = document.getElementById("txtLoginBtn");
+        if (txtLogin) txtLogin.textContent = "Admin";
+
+        enableAdminEditMode();
+        if (window.location.hash === "#cotizacion") {
+          await verificarYMontarAdminProforma();
+        }
+      } catch (err) {
+        if (errSpan) {
+          errSpan.textContent = "Credenciales incorrectas de Supabase.";
+          errSpan.classList.remove("hidden");
+        }
+      }
+    });
+  }
+
+  // Cerrar Sesión Admin
+  const btnCerrarSesion = document.getElementById("btnAdminCerrarSesion");
+  if (btnCerrarSesion) {
+    btnCerrarSesion.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      isAdminLoggedIn = false;
+      document.getElementById("adminTopBar")?.classList.add("hidden");
+      const txtLogin = document.getElementById("txtLoginBtn");
+      if (txtLogin) txtLogin.textContent = "Login";
+      disableAdminEditMode();
+      await verificarYMontarAdminProforma();
+    });
+  }
+
+  // Eventos de Chatbot
+  document.addEventListener("submit", (e) => {
+    if (e.target && e.target.id === "chatForm") {
+      e.preventDefault();
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendBotMessage(msg, "user");
+      input.value = "";
+      processBotQuery(msg);
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (e.target && e.target.classList.contains("quick-btn")) {
+      const q = e.target.textContent.trim();
+      appendBotMessage(q, "user");
+      processBotQuery(q);
+    }
+    if (e.target && (e.target.id === "btnResetChat" || e.target.closest("#btnResetChat"))) {
+      initChatbot();
+    }
+  });
+
+  // Editor Modal CMS para textos e imágenes en vivo
+  document.addEventListener("click", (e) => {
+    if (!isAdminLoggedIn) return;
+    const editableTarget = e.target.closest("[data-cms-key]");
+    if (!editableTarget) return;
+
+    e.preventDefault();
+    currentEditingElement = editableTarget;
+    currentEditingKey = editableTarget.getAttribute("data-cms-key");
+    isEditingImage = editableTarget.tagName === "IMG";
+
+    const modal = document.getElementById("cmsEditorModal");
+    const title = document.getElementById("cmsModalFieldTitle");
+    const textBlock = document.getElementById("cmsTextEditorBlock");
+    const imageBlock = document.getElementById("cmsImageEditorBlock");
+    const textInput = document.getElementById("cmsTextInput");
+    const imgPreview = document.getElementById("cmsImagePreview");
+    const imgPlaceholder = document.getElementById("cmsImagePlaceholder");
+
+    if (modal && title) {
+      title.textContent = `Editando: ${currentEditingKey}`;
+      if (isEditingImage) {
+        textBlock.classList.add("hidden");
+        imageBlock.classList.remove("hidden");
+        imgPreview.src = editableTarget.src;
+        imgPreview.classList.remove("hidden");
+        imgPlaceholder.classList.add("hidden");
+      } else {
+        imageBlock.classList.add("hidden");
+        textBlock.classList.remove("hidden");
+        textInput.value = editableTarget.innerHTML.trim();
+      }
+      modal.classList.remove("hidden");
+    }
+  });
+
+  // Guardar Cambios CMS en Supabase
+  const btnSaveCms = document.getElementById("btnSaveCms");
+  const btnCancelCms = document.getElementById("btnCancelCms");
+  const btnCloseCmsModal = document.getElementById("btnCloseCmsModal");
+  const cmsModal = document.getElementById("cmsEditorModal");
+
+  const closeCmsModal = () => {
+    if (cmsModal) cmsModal.classList.add("hidden");
+    currentEditingElement = null;
+    currentEditingKey = null;
+  };
+
+  if (btnCancelCms) btnCancelCms.onclick = closeCmsModal;
+  if (btnCloseCmsModal) btnCloseCmsModal.onclick = closeCmsModal;
+
+  if (btnSaveCms) {
+    btnSaveCms.onclick = async () => {
+      if (!currentEditingElement || !currentEditingKey) return;
+      btnSaveCms.disabled = true;
+      btnSaveCms.textContent = "Guardando...";
+
+      try {
+        let nuevoValor = "";
+        if (isEditingImage) {
+          const fileInput = document.getElementById("cmsFileInput");
+          if (fileInput.files.length > 0) {
+            nuevoValor = await uploadImageToSupabase(fileInput.files[0]);
+            currentEditingElement.src = nuevoValor;
+          } else {
+            nuevoValor = currentEditingElement.src;
+          }
+        } else {
+          nuevoValor = document.getElementById("cmsTextInput").value;
+          currentEditingElement.innerHTML = nuevoValor;
+        }
+
+        await supabase.from("cms_content").upsert({
+          clave: currentEditingKey,
+          valor: nuevoValor,
+          actualizado_el: new Date().toISOString()
+        });
+
+        closeCmsModal();
+      } catch (err) {
+        alert("Error al guardar en base de datos: " + err.message);
+      } finally {
+        btnSaveCms.disabled = false;
+        btnSaveCms.textContent = "Guardar Cambios en Base de Datos";
+      }
+    };
+  }
+});
