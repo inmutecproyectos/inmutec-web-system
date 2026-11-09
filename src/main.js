@@ -19,14 +19,7 @@ let currentEditingKey = null;
 let isEditingImage = false;
 
 // Estado reactivo de ítems de la Proforma Admin
-window.itemsProformaAdmin = [
-  {
-    descripcion: "Trabajos de fusión y acondicionamiento en varias MUFAS 122 FUSIONES\nInstalación y acondicionamiento de ODF en site 28 FUSIONES\nMEDCIONES CON OTDR EXFO 28 HILOS",
-    cant: 1,
-    unidad: "UND",
-    precio: 3500.00
-  }
-];
+window.itemsProformaAdmin = [];
 
 // 2. Configuración de Rutas de Plantillas
 const modulesConfig = {
@@ -373,14 +366,16 @@ function initInicioModule() {
 }
 
 // ========================================================
-// 5. MÓDULO COTIZACIÓN: FORMULARIO, CHATBOT Y PROFORMA ADMIN
+// 5. MÓDULO COTIZACIÓN: FORMULARIO, CHATBOT Y PROFORMA
 // ========================================================
 async function initCotizacionModule() {
   const dynamicContainer = document.getElementById("dynamicServiceSection");
   const hiddenSvcInput = document.getElementById("selectedServiceInput");
 
-  // Inyección de la proforma modular si el administrador está activo
-  await verificarYMontarAdminProforma();
+  // Inyectar el botón / mesa de proforma si el administrador está activo
+  if (isAdminLoggedIn) {
+    await verificarYMontarAdminProforma();
+  }
 
   window.renderCotizacionCampos = function(serviceName) {
     if (!dynamicContainer) return;
@@ -434,19 +429,19 @@ async function initCotizacionModule() {
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
-            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Iluminación Smart & Escenas Arquitectónicas" checked>
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Iluminación Smart & Escenas Arquitectónicas" checked onchange="window.sincronizarConProformaAdmin()">
             <span>💡 Iluminación & Dimerización Smart</span>
           </label>
           <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
-            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Control de Acceso Biométrico y Cerraduras Digitales" checked>
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Control de Acceso Biométrico y Cerraduras Digitales" checked onchange="window.sincronizarConProformaAdmin()">
             <span>🔐 Accesos Digitales & Motores</span>
           </label>
           <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
-            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="CCTV con Detección IA & Audio Bidireccional">
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="CCTV con Detección IA & Audio Bidireccional" onchange="window.sincronizarConProformaAdmin()">
             <span>📷 Seguridad Perimetral con IA</span>
           </label>
           <label class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200 cursor-pointer hover:border-amber-400 transition">
-            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Monitoreo Energético y Automatización de Tableros">
+            <input type="checkbox" class="chk-domo-item text-amber-600 rounded" value="Monitoreo Energético y Automatización de Tableros" onchange="window.sincronizarConProformaAdmin()">
             <span>⚡ Telemetría Eléctrica & Ahorro</span>
           </label>
         </div>
@@ -514,10 +509,10 @@ export async function verificarYMontarAdminProforma() {
 
   if (isAdminLoggedIn) {
     try {
-      const resp = await fetch("./modules/cotizacion/admin-proforma.html");
+      const resp = await fetch("./modules/cotizacion/admin-proforma.html?v=" + Date.now());
       if (resp.ok) {
         container.innerHTML = await resp.text();
-        
+
         // Cargar html2pdf para PC si no existe
         if (!document.getElementById("html2pdf-script")) {
           const script = document.createElement("script");
@@ -526,8 +521,12 @@ export async function verificarYMontarAdminProforma() {
           document.head.appendChild(script);
         }
 
-        window.renderizarItemsAdmin();
-        window.sincronizarConProformaAdmin();
+        // Actualizar etiqueta del correlativo
+        const badge = document.getElementById("admin_proforma_counter_badge");
+        if (badge) {
+          const num = await window.obtenerSiguienteNumeroProforma();
+          badge.textContent = `Siguiente: #${num}`;
+        }
       }
     } catch (e) {
       console.error("Error al cargar admin-proforma.html:", e);
@@ -537,7 +536,137 @@ export async function verificarYMontarAdminProforma() {
   }
 }
 
-// Funciones globales de la Proforma Admin
+// ========================================================
+// SISTEMA DE EMISIÓN DE PROFORMAS OFICIALES (ADMIN CMS)
+// ========================================================
+
+// 1. Contador Correlativo Dinámico
+window.obtenerSiguienteNumeroProforma = async function() {
+  let siguiente = 1070;
+  try {
+    const { count, error } = await supabase.from("cotizaciones").select("*", { count: "exact", head: true });
+    if (!error && typeof count === "number") {
+      siguiente = 1070 + count;
+    }
+  } catch (e) {
+    const guardado = localStorage.getItem("inmutec_ultimo_correlativo");
+    if (guardado) siguiente = parseInt(guardado, 10) + 1;
+  }
+  return String(siguiente).padStart(6, "0");
+};
+
+// 2. Fecha y Hora Actual de Huancayo
+window.generarFechaHoraHuancayo = function() {
+  const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+  const ahora = new Date();
+  const dia = ahora.getDate();
+  const mes = meses[ahora.getMonth()];
+  const anio = ahora.getFullYear();
+
+  let horas = ahora.getHours();
+  const minutos = String(ahora.getMinutes()).padStart(2, "0");
+  const ampm = horas >= 12 ? "PM" : "AM";
+  horas = horas % 12;
+  horas = horas ? horas : 12;
+
+  return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
+};
+
+// 3. Abrir / Cerrar Mesa de Proformas al presionar el Botón
+window.toggleProformaWorkspace = async function() {
+  const box = document.getElementById("proformaWorkspaceContainer");
+  const txt = document.getElementById("btnToggleProformaText");
+  const icon = document.getElementById("btnToggleIcon");
+  if (!box) return;
+
+  if (box.classList.contains("hidden")) {
+    box.classList.remove("hidden");
+    if (txt) txt.textContent = "Ocultar Mesa de Proforma";
+    if (icon) icon.classList.add("rotate-180");
+
+    // Inicializar correlativo y fecha/hora
+    const num = await window.obtenerSiguienteNumeroProforma();
+    const fechaHora = window.generarFechaHoraHuancayo();
+
+    const inputNum = document.getElementById("admin_prof_numero");
+    const inputFecha = document.getElementById("admin_prof_fecha");
+    if (inputNum) inputNum.value = num;
+    if (inputFecha) inputFecha.value = fechaHora;
+
+    // Tomar el servicio seleccionado actualmente en el formulario
+    const servicioActual = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
+    window.aplicarPlantillaServicio(servicioActual);
+  } else {
+    box.classList.add("hidden");
+    if (txt) txt.textContent = "Realizar Nueva Proforma";
+    if (icon) icon.classList.remove("rotate-180");
+  }
+};
+
+// 4. Plantillas Técnicas para los 5 Servicios
+window.aplicarPlantillaServicio = function(servicio) {
+  document.querySelectorAll(".srv-admin-filter").forEach(b => {
+    b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+    if (b.dataset.filter === servicio) b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+  });
+
+  if (servicio === "Fibra Óptica") {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Tendido de fibra óptica monomodo ADSS, sangrado de mufas troncales FOSC y pruebas reflectométricas OTDR por hilo.",
+        cant: 1,
+        unidad: "GLB",
+        precio: 3500.00
+      }
+    ];
+  } else if (servicio === "Torres & STP") {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Mantenimiento preventivo de torre ventada, cambio de retenidas y protocolo de resistividad STP NTP 2050 (< 5 Ohmios).",
+        cant: 1,
+        unidad: "SERV",
+        precio: 2800.00
+      }
+    ];
+  } else if (servicio === "Laboratorio RF" || servicio === "Laboratorio") {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Diagnóstico en banco RF, calibración de potencias, alineamiento de frecuencia y mantenimiento electrónico.",
+        cant: 1,
+        unidad: "UND",
+        precio: 1400.00
+      }
+    ];
+  } else if (servicio === "Domótica & Smart" || servicio === "Domótica") {
+    const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => "• " + c.value);
+    const detalleDomo = checks.length > 0 
+      ? `Implementación Smart de Domótica & Seguridad Corporativa:\n${checks.join("\n")}`
+      : "Implementación integral de sistema smart residencial/corporativo (Iluminación, Accesos y Cámaras IP IA).";
+
+    window.itemsProformaAdmin = [
+      {
+        descripcion: detalleDomo,
+        cant: 1,
+        unidad: "GLB",
+        precio: 4200.00
+      }
+    ];
+  } else {
+    window.itemsProformaAdmin = [
+      {
+        descripcion: "Suministro e instalación de enlace de Internet Dedicado corporativo simétrico 1:1 con SLA 99.8% y monitoreo NOC 24/7.",
+        cant: 1,
+        unidad: "MES",
+        precio: 1800.00
+      }
+    ];
+  }
+
+  window.renderizarItemsAdmin();
+  window.actualizarDocumentoEnVivo();
+};
+
+// 5. Renderizado Dinámico de Ítems
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -548,20 +677,20 @@ window.renderizarItemsAdmin = function() {
     const tr = document.createElement("tr");
     tr.className = "border-b border-slate-300";
     tr.innerHTML = `
-      <td class="border border-slate-400 px-2 py-1.5 text-center font-bold">${String(index + 1).padStart(2, '0')}</td>
+      <td class="border border-slate-400 px-2 py-2 text-center font-bold">${String(index + 1).padStart(2, '0')}</td>
       <td class="border border-slate-400 px-3 py-1.5">
         <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
       </td>
       <td class="border border-slate-400 px-2 py-1.5 text-center">
-        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
+        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
       </td>
       <td class="border border-slate-400 px-2 py-1.5 text-center font-semibold">
-        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
+        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
       </td>
       <td class="border border-slate-400 px-3 py-1.5 text-right">
-        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
+        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
       </td>
-      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-800">S/ ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+      <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-800 font-mono">S/ ${parseFloat(total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
       <td class="border border-slate-400 px-1 py-1 text-center print:hidden">
         <button onclick="window.eliminarFilaItem(${index})" class="text-red-500 hover:text-red-700 text-xs px-1" title="Eliminar fila">&times;</button>
       </td>
@@ -577,16 +706,16 @@ window.eliminarFilaItem = function(idx) {
     window.itemsProformaAdmin.splice(idx, 1);
     window.renderizarItemsAdmin();
   } else {
-    alert("La cotización debe tener al menos 1 ítem.");
+    alert("La proforma debe contener al menos un ítem cotizado.");
   }
 };
 
 window.agregarFilaItem = function() {
   window.itemsProformaAdmin.push({
-    descripcion: "Suministro e instalación complementaria para infraestructura técnica.",
+    descripcion: "Trabajos o suministros complementarios para infraestructura técnica.",
     cant: 1,
     unidad: "UND",
-    precio: 500.00
+    precio: 350.00
   });
   window.renderizarItemsAdmin();
 };
@@ -608,85 +737,78 @@ window.calcularTotalesProformaAdmin = function() {
   }
 };
 
-window.sincronizarConProformaAdmin = function() {
-  const cli = document.getElementById("qRazon")?.value.trim() || "JORGE QUISPE";
+window.actualizarDocumentoEnVivo = function() {
+  const cli = document.getElementById("qRazon")?.value.trim() || "EMPRESA / CLIENTE REGISTRADO";
   const doc = document.getElementById("qDoc")?.value.trim() || "-";
   const lug = document.getElementById("qLugar")?.value.trim() || "Huancayo";
   const checkedRadio = document.querySelector("input[name='docType']:checked");
   const tipoDoc = checkedRadio ? checkedRadio.value : "RUC";
 
-  if (document.getElementById("prof_vista_cliente")) {
-    document.getElementById("prof_vista_cliente").textContent = cli;
-    document.getElementById("prof_vista_doc").textContent = `${tipoDoc}: ${doc}`;
-    document.getElementById("prof_vista_lugar").textContent = `Lugar de Obra: ${lug}`;
-  }
-};
+  const num = document.getElementById("admin_prof_numero")?.value || "001070";
+  const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
 
-window.actualizarCabeceraProforma = function() {
-  const num = document.getElementById("admin_prof_numero")?.value || "# 001070";
-  const fec = document.getElementById("admin_prof_fecha")?.value || "HUANCAYO, 24 DE AGOSTO 2026";
-  if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num.replace("#", "").trim();
+  if (document.getElementById("prof_vista_cliente")) document.getElementById("prof_vista_cliente").textContent = cli;
+  if (document.getElementById("prof_vista_doc")) document.getElementById("prof_vista_doc").textContent = `${tipoDoc}: ${doc}`;
+  if (document.getElementById("prof_vista_lugar")) document.getElementById("prof_vista_lugar").textContent = `Lugar de Obra: ${lug}`;
+  if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num;
   if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
 };
 
-window.cargarPlantillaJorge = function() {
-  const inputRazon = document.getElementById("qRazon");
-  const inputDoc = document.getElementById("qDoc");
-  if (inputRazon) inputRazon.value = "JORGE QUISPE";
-  if (inputDoc) inputDoc.value = "10458923145";
-
-  window.itemsProformaAdmin = [{
-    descripcion: "Trabajos de fusión y acondicionamiento en varias MUFAS 122 FUSIONES\nInstalación y acondicionamiento de ODF en site 28 FUSIONES\nMEDCIONES CON OTDR EXFO 28 HILOS",
-    cant: 1,
-    unidad: "UND",
-    precio: 3500.00
-  }];
-  window.renderizarItemsAdmin();
-  window.sincronizarConProformaAdmin();
+window.sincronizarConProformaAdmin = function() {
+  window.actualizarDocumentoEnVivo();
 };
 
+// 6. Descarga en PDF (PC / Laptop)
 window.descargarProformaPDF = function() {
   const element = document.getElementById("documento_proforma_imprimible");
   if (!element || typeof html2pdf === "undefined") {
-    alert("Generando motor PDF, intente en 2 segundos...");
+    alert("Generador de PDF cargando, intente nuevamente en 2 segundos.");
     return;
   }
   const cliente = (document.getElementById("prof_vista_cliente")?.textContent || "CLIENTE").replace(/\s+/g, '_');
+  const num = document.getElementById("prof_vista_numero")?.textContent || "001070";
+
   const opt = {
-    margin: [10, 10, 10, 10],
-    filename: `COTIZACION_INMUTEC_${cliente}.pdf`,
+    margin: [8, 8, 8, 8],
+    filename: `PROFORMA_${num}_INMUTEC_${cliente}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
   html2pdf().set(opt).from(element).save();
+
+  localStorage.setItem("inmutec_ultimo_correlativo", num);
 };
 
+// 7. Despacho por WhatsApp (Móvil)
 window.enviarProformaWhatsApp = function() {
   const cli = document.getElementById("prof_vista_cliente")?.textContent || "Cliente";
   const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
   const num = document.getElementById("prof_vista_numero")?.textContent || "001070";
-  const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Generales";
+  const fec = document.getElementById("prof_vista_fecha")?.textContent || "";
+  const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Integrales";
 
   let txt = `*MULTISERVICIOS GENERALES INMUTEC E.I.R.L.*\n`;
-  txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n\n`;
+  txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n`;
+  txt += `📅 ${fec}\n\n`;
   txt += `👤 *Cliente:* ${cli}\n`;
-  txt += `🛠 *Servicio:* ${svc}\n\n`;
-  txt += `*DETALLE DE PROPUESTA:*\n`;
+  txt += `🛠 *Especialidad:* ${svc}\n\n`;
+  txt += `*DETALLE DE PARTIDAS:*\n`;
 
   window.itemsProformaAdmin.forEach((it, i) => {
     txt += `${i + 1}. ${it.descripcion} (${it.cant} ${it.unidad}) -> S/ ${(it.cant * it.precio).toFixed(2)}\n`;
   });
 
-  txt += `\n*TOTAL FACTURADO (Inc. IGV):* ${tot}\n`;
-  txt += `💳 *Cuentas Bancarias:*\n`;
+  txt += `\n*TOTAL GENERAL A FACTURAR (Inc. IGV):* ${tot}\n`;
+  txt += `💳 *Cuentas Bancarias Corporativas:*\n`;
   txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
   txt += `• BANCO BBVA: 00110235930201930055 (CCI: 01123500020193005593)\n`;
-  txt += `📅 *Validez:* 05 días calendario.`;
+  txt += `\n_Emitido desde la Mesa de Administración de INMUTEC E.I.R.L._`;
 
   window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
+// 8. Despacho por Email
 window.enviarProformaCorreo = function() {
   const cli = document.getElementById("prof_vista_cliente")?.textContent || "Cliente";
   const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
@@ -1365,7 +1487,6 @@ function clearError(input, errorEl) {
 
 // Inicialización de la SPA y comprobación de sesión Supabase
 window.addEventListener("DOMContentLoaded", async () => {
-  // Comprobar si hay una sesión guardada en Supabase
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {

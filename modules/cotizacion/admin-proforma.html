@@ -1,161 +1,220 @@
-<!-- Módulo Exclusivo Admin: Generador y Emisor de Proformas Técnicas INMUTEC -->
-<div class="bg-gradient-to-br from-slate-900 via-slate-800 to-[#002b49] text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-400/60 shadow-2xl space-y-6">
-  
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/80 pb-5">
-    <div>
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-400 text-slate-900 uppercase tracking-wider">
-          <i class="fa-solid fa-lock-open mr-1"></i> Módulo Exclusivo CMS Admin
-        </span>
-        <span class="text-xs text-slate-400">Generación y Liquidación de Proformas</span>
+<!-- MÓDULO ADMINISTRATIVO EXCLUSIVO: GENERADOR Y EMISOR DE PROFORMAS TÉCNICAS -->
+<div class="space-y-6">
+
+  <!-- BARRA DE ACTIVACIÓN (DESPLEGABLE BAJO DEMANDA) -->
+  <div class="bg-gradient-to-r from-slate-900 via-[#002b49] to-slate-900 border-2 border-amber-400/80 p-4 sm:p-5 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-12 h-12 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center text-xl font-black shadow-md">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
       </div>
-      <h3 class="text-xl sm:text-2xl font-black text-white mt-1">Mesa Oficial de Emisión de Proformas</h3>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider">Módulo CMS Activo</span>
+          <span class="text-xs text-slate-300 font-mono" id="admin_proforma_counter_badge">Correlativo listo</span>
+        </div>
+        <h3 class="text-base sm:text-lg font-black text-white">Mesa Oficial de Emisión de Proformas</h3>
+      </div>
     </div>
 
-    <!-- Acciones de Descarga / Envío -->
-    <div class="flex flex-wrap items-center gap-2">
-      <button type="button" onclick="descargarProformaPDF()" 
-              class="bg-[#00a8e8] hover:bg-[#0092ca] text-[#002b49] font-black text-xs px-4 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2">
-        <i class="fa-solid fa-file-pdf text-sm"></i> Descargar PDF (PC)
-      </button>
-      <button type="button" onclick="enviarProformaWhatsApp()" 
-              class="bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2">
-        <i class="fa-brands fa-whatsapp text-sm"></i> Enviar WhatsApp
-      </button>
-      <button type="button" onclick="enviarProformaCorreo()" 
-              class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-3 py-2.5 rounded-xl transition flex items-center gap-1.5">
-        <i class="fa-solid fa-envelope"></i> Email
+    <div class="flex items-center space-x-3 w-full md:w-auto">
+      <button 
+        type="button" 
+        id="btnToggleProformaDesk" 
+        onclick="toggleProformaWorkspace()"
+        class="w-full md:w-auto bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase px-5 py-3 rounded-2xl shadow-lg transition duration-200 flex items-center justify-center space-x-2 cursor-pointer"
+      >
+        <i class="fa-solid fa-folder-plus text-sm"></i>
+        <span id="btnToggleProformaText">Realizar Nueva Proforma</span>
+        <i class="fa-solid fa-chevron-down text-xs transition duration-300" id="btnToggleIcon"></i>
       </button>
     </div>
   </div>
 
-  <!-- Controles de Configuración Rápida -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-800/80 p-4 rounded-2xl border border-slate-700 text-xs">
-    <div>
-      <label class="block text-slate-300 font-semibold mb-1">Nº Proforma Correlativo</label>
-      <input type="text" id="admin_prof_numero" value="# 001070" 
-             class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 font-mono text-amber-400 font-bold"
-             oninput="actualizarCabeceraProforma()">
-    </div>
-    <div>
-      <label class="block text-slate-300 font-semibold mb-1">Fecha Emisión</label>
-      <input type="text" id="admin_prof_fecha" value="HUANCAYO, 24 DE AGOSTO 2026" 
-             class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-1.5 text-slate-200"
-             oninput="actualizarCabeceraProforma()">
-    </div>
-    <div class="md:col-span-2 flex items-end gap-2">
-      <button type="button" onclick="cargarPlantillaJorge()" 
-              class="flex-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-bolt"></i> Cargar Proforma Modelo (Jorge Quispe)
-      </button>
-      <button type="button" onclick="agregarFilaItem()" 
-              class="flex-1 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-plus"></i> Añadir Nuevo Ítem
-      </button>
-    </div>
-  </div>
+  <!-- MESA DE TRABAJO Y DOCUMENTO (OCULTO HASTA PRESIONAR EL BOTÓN) -->
+  <div id="proformaWorkspaceContainer" class="hidden space-y-6 animate-fadeIn">
 
-  <!-- Plantilla A4 Renderizada (Idéntica al formato corporativo) -->
-  <div class="bg-slate-100 p-4 sm:p-6 rounded-2xl overflow-x-auto text-slate-800">
-    <div id="documento_proforma_imprimible" class="min-w-[700px] max-w-[820px] mx-auto bg-white p-8 text-xs font-sans shadow-md border border-slate-300 space-y-5">
-      
-      <!-- Cabecera Institucional -->
-      <div class="flex justify-between items-start border-b-2 border-slate-900 pb-3">
+    <!-- PANEL DE CONTROL Y FILTROS TÉCNICOS -->
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 text-white space-y-5 shadow-2xl">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h2 class="text-base font-black text-[#002b49] tracking-tight">MULTISERVICIOS GENERALES INMUTEC E.I.R.L.</h2>
-          <p class="text-[11px] text-slate-600">CENTRAL TELEFÓNICA : 954928201 TEL: 064595829</p>
-          <p class="text-[11px] text-slate-600">EMAIL: inmuteceirl@gmail.com, gusmarbal@gmail.com</p>
+          <span class="text-[10px] font-mono text-cyan-300 uppercase tracking-widest block">Configuración de Emisión</span>
+          <h4 class="text-sm sm:text-base font-black text-white">Parámetros del Documento & Selección de Especialidad</h4>
         </div>
-        <div class="text-right">
-          <div class="inline-block bg-slate-50 border border-slate-400 px-3 py-1 rounded text-center">
-            <span class="text-[9px] block font-bold text-slate-500 uppercase">PROFORMA</span>
-            <span id="prof_vista_numero" class="text-sm font-black text-red-600 font-mono tracking-wider">001070</span>
-          </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="descargarProformaPDF()" class="bg-[#00a8e8] hover:bg-[#0092ca] text-[#002b49] font-black text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-file-pdf"></i> Descargar PDF (PC)
+          </button>
+          <button type="button" onclick="enviarProformaWhatsApp()" class="bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-brands fa-whatsapp"></i> Despachar WhatsApp
+          </button>
+          <button type="button" onclick="enviarProformaCorreo()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-envelope"></i> Email
+          </button>
         </div>
       </div>
 
-      <!-- Ciudad, Fecha y Cliente -->
-      <div class="space-y-2">
-        <p class="font-bold text-right text-[11px]" id="prof_vista_fecha">HUANCAYO, 24 DE AGOSTO 2026</p>
+      <!-- Filtro de los 5 Servicios de INMUTEC -->
+      <div>
+        <label class="block text-xs font-bold text-slate-300 mb-2">Cargar Plantilla Base por Servicio:</label>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <button type="button" onclick="aplicarPlantillaServicio('Internet Dedicado')" class="srv-admin-filter p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#00a8e8] text-center font-bold text-xs transition" data-filter="Internet Dedicado">
+            <i class="fa-solid fa-wifi text-[#00a8e8] block mb-1"></i> Internet Dedicado
+          </button>
+          <button type="button" onclick="aplicarPlantillaServicio('Fibra Óptica')" class="srv-admin-filter p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#10b981] text-center font-bold text-xs transition" data-filter="Fibra Óptica">
+            <i class="fa-solid fa-network-wired text-[#10b981] block mb-1"></i> Fibra Óptica
+          </button>
+          <button type="button" onclick="aplicarPlantillaServicio('Torres & STP')" class="srv-admin-filter p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#f59e0b] text-center font-bold text-xs transition" data-filter="Torres & STP">
+            <i class="fa-solid fa-tower-broadcast text-[#f59e0b] block mb-1"></i> Torres & STP
+          </button>
+          <button type="button" onclick="aplicarPlantillaServicio('Laboratorio RF')" class="srv-admin-filter p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#ef4444] text-center font-bold text-xs transition" data-filter="Laboratorio RF">
+            <i class="fa-solid fa-microchip text-[#ef4444] block mb-1"></i> Laboratorio RF
+          </button>
+          <button type="button" onclick="aplicarPlantillaServicio('Domótica & Smart')" class="srv-admin-filter p-2.5 rounded-xl border-2 border-amber-400 bg-amber-400/10 hover:bg-amber-400/20 text-center font-black text-xs text-amber-300 transition" data-filter="Domótica & Smart">
+            <i class="fa-solid fa-house-signal text-amber-400 block mb-1"></i> Domótica & Smart
+          </button>
+        </div>
+      </div>
+
+      <!-- Datos Operativos del Documento -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
         <div>
-          <p class="font-bold uppercase text-slate-900">SEÑORES:</p>
-          <p id="prof_vista_cliente" class="font-black text-sm uppercase text-[#002b49]">JORGE QUISPE</p>
-          <p id="prof_vista_doc" class="text-[11px] font-semibold text-slate-600">RUC: -</p>
-          <p id="prof_vista_lugar" class="text-[11px] text-slate-600">Lugar: Huancayo</p>
-          <p class="font-bold text-slate-800 mt-1">PRESENTE.-</p>
+          <label class="block text-slate-400 font-semibold mb-1">Nº Proforma Correlativo</label>
+          <input type="text" id="admin_prof_numero" class="w-full bg-slate-950 border border-slate-600 rounded-xl px-3.5 py-2 font-mono text-amber-400 font-black text-sm" oninput="actualizarDocumentoEnVivo()">
         </div>
-        <p class="text-[11px] text-slate-700 leading-relaxed">
-          ESTIMADOS SEÑORES:<br>
-          EN ATENCIÓN A SU SOLICITUD. SÍRVASE A ENCONTRAR EN LA PRESENTE NUESTRA PROPUESTA POR LOS SERVICIOS REQUERIDOS. QUEDAMOS EN LA ESPERA DE SU AMABLE RESPUESTA CONFIRMÁNDONOS SU ACEPTACIÓN.
-        </p>
-      </div>
-
-      <!-- Tabla de Ítems Cotizados -->
-      <table class="w-full border-collapse border border-slate-400 text-xs">
-        <thead>
-          <tr class="bg-slate-100 text-slate-900 font-bold">
-            <th class="border border-slate-400 px-2 py-1.5 text-center w-12">ITEM</th>
-            <th class="border border-slate-400 px-3 py-1.5 text-left">DESCRIPCION</th>
-            <th class="border border-slate-400 px-2 py-1.5 text-center w-16">CANT.</th>
-            <th class="border border-slate-400 px-2 py-1.5 text-center w-16">UNIDAD</th>
-            <th class="border border-slate-400 px-3 py-1.5 text-right w-24">PRECIO</th>
-            <th class="border border-slate-400 px-3 py-1.5 text-right w-24">IMPORTE</th>
-            <th class="border border-slate-400 px-1 py-1 text-center w-8 print:hidden"></th>
-          </tr>
-        </thead>
-        <tbody id="tabla_items_body_admin">
-          <!-- Renderizado dinámico -->
-        </tbody>
-      </table>
-
-      <!-- Desglose Financiero, Cuentas e IGV -->
-      <div class="grid grid-cols-12 gap-4 items-start pt-2">
-        <div class="col-span-7 space-y-2 text-[10px] text-slate-700">
-          <p><span class="font-bold">Forma de pago:</span> 50% INICIAL y 50 % validación de la documentación en un plazo de 5 días calendarios.</p>
-          <div class="bg-slate-50 border border-slate-300 p-2 rounded space-y-1">
-            <p class="font-bold text-slate-900 uppercase">Cuenta depósito / Transferencia:</p>
-            <p><span class="font-bold">BANCO DE LA NACIÓN:</span> 00-421-038902 <br> <span class="font-semibold text-slate-600">CCI:</span> 018-421-00421038902-81</p>
-            <p><span class="font-bold">BANCO BBVA:</span> 00110235930201930055 <br> <span class="font-semibold text-slate-600">CCI:</span> 01123500020193005593</p>
-          </div>
-          <div>
-            <p class="font-bold">Consideraciones:</p>
-            <p>Validez de cotización 05 días calendario.</p>
-            <p>Precios sujetos a cambios.</p>
-            <p class="font-bold text-red-700">NOTA: COTIZACIÓN AL 100 % FACTURADO.</p>
-          </div>
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Fecha & Hora Automática</label>
+          <input type="text" id="admin_prof_fecha" class="w-full bg-slate-950 border border-slate-600 rounded-xl px-3.5 py-2 text-slate-200" oninput="actualizarDocumentoEnVivo()">
         </div>
-
-        <div class="col-span-5 border border-slate-400 rounded overflow-hidden">
-          <table class="w-full text-xs">
-            <tr class="border-b border-slate-300">
-              <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">NETO</td>
-              <td class="px-3 py-1.5 text-right font-bold text-slate-800" id="calc_neto_admin">S/ 3,500.00</td>
-            </tr>
-            <tr class="border-b border-slate-300">
-              <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">DCTO</td>
-              <td class="px-3 py-1.5 text-right">
-                <input type="number" id="input_descuento_admin" value="0.00" step="10" min="0" 
-                       class="w-20 text-right border border-slate-300 rounded px-1 py-0.5 text-xs" 
-                       oninput="calcularTotalesProformaAdmin()">
-              </td>
-            </tr>
-            <tr class="border-b border-slate-300">
-              <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">SUBTOTAL</td>
-              <td class="px-3 py-1.5 text-right font-bold text-slate-800" id="calc_subtotal_admin">S/ 3,500.00</td>
-            </tr>
-            <tr class="border-b border-slate-300">
-              <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">I.G.V. (18%)</td>
-              <td class="px-3 py-1.5 text-right font-bold text-slate-800" id="calc_igv_admin">S/ 630.00</td>
-            </tr>
-            <tr class="bg-slate-100 font-bold">
-              <td class="px-3 py-2 text-sm text-[#002b49]">TOTAL</td>
-              <td class="px-3 py-2 text-right text-sm text-red-600" id="calc_total_admin">S/ 4,130.00</td>
-            </tr>
-          </table>
+        <div class="flex items-end">
+          <button type="button" onclick="agregarFilaItem()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 font-bold py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus-circle"></i> Agregar Fila de Trabajo
+          </button>
         </div>
       </div>
-
     </div>
+
+    <!-- DOCUMENTO A4 CORPORATIVO OFICIAL CON LOGO -->
+    <div class="bg-slate-200/80 p-4 sm:p-8 rounded-3xl overflow-x-auto shadow-inner flex justify-center">
+      <div id="documento_proforma_imprimible" class="w-[820px] bg-white p-10 text-slate-800 font-sans text-xs shadow-2xl border border-slate-300 rounded-lg space-y-6">
+        
+        <!-- ENCABEZADO CON LOGO Y CORRELATIVO -->
+        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+          <div class="flex items-center space-x-4">
+            <img 
+              src="./public/assets/inmutec-logo.png" 
+              alt="Logo INMUTEC E.I.R.L." 
+              class="h-16 w-auto object-contain"
+              onerror="this.onerror=null; this.src='https://inmutecproyectos.github.io/inmutec-web-system/public/assets/inmutec-logo.png';"
+            >
+            <div>
+              <h2 class="text-base font-black text-[#002b49] tracking-tight leading-tight">MULTISERVICIOS GENERALES INMUTEC E.I.R.L.</h2>
+              <p class="text-[11px] text-slate-600 font-medium">CENTRAL TELEFÓNICA : 954928201 TEL: 064595829</p>
+              <p class="text-[11px] text-slate-600 font-medium">EMAIL: inmuteceirl@gmail.com, gusmarbal@gmail.com</p>
+            </div>
+          </div>
+          
+          <div class="text-right">
+            <div class="border-2 border-red-600 px-4 py-2 rounded-xl text-center bg-red-50/40">
+              <span class="text-[10px] font-black text-slate-600 block uppercase tracking-wider">PROFORMA</span>
+              <span id="prof_vista_numero" class="text-base font-black text-red-600 font-mono tracking-widest">001070</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FECHA, CLIENTE Y SALUDO -->
+        <div class="space-y-3">
+          <p class="font-bold text-right text-[11px] text-slate-700 tracking-wide font-mono" id="prof_vista_fecha">HUANCAYO, 8 DE NOVIEMBRE 2026 - 10:30 PM</p>
+          
+          <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl space-y-1">
+            <p class="font-black text-slate-500 uppercase text-[10px]">SEÑORES:</p>
+            <p id="prof_vista_cliente" class="font-black text-sm uppercase text-[#002b49]">EMPRESA / CLIENTE REGISTRADO</p>
+            <div class="flex flex-wrap gap-x-6 text-[11px] text-slate-600">
+              <span id="prof_vista_doc">RUC/DNI: -</span>
+              <span id="prof_vista_lugar">Lugar de Obra: Huancayo</span>
+            </div>
+            <p class="font-bold text-slate-800 pt-0.5">PRESENTE.-</p>
+          </div>
+
+          <p class="text-[11px] text-slate-700 leading-relaxed text-justify">
+            ESTIMADOS SEÑORES:<br>
+            EN ATENCIÓN A SU SOLICITUD. SÍRVASE A ENCONTRAR EN LA PRESENTE NUESTRA PROPUESTA POR LOS SERVICIOS REQUERIDOS. QUEDAMOS EN LA ESPERA DE SU AMABLE RESPUESTA CONFIRMÁNDONOS SU ACEPTACIÓN.
+          </p>
+        </div>
+
+        <!-- TABLA DINÁMICA DE CONCEPTOS E IMPORTES -->
+        <table class="w-full border-collapse border border-slate-400 text-xs">
+          <thead>
+            <tr class="bg-slate-100 text-slate-900 font-bold uppercase text-[10px]">
+              <th class="border border-slate-400 px-2 py-2 text-center w-12">ITEM</th>
+              <th class="border border-slate-400 px-3 py-2 text-left">DESCRIPCION</th>
+              <th class="border border-slate-400 px-2 py-2 text-center w-16">CANT.</th>
+              <th class="border border-slate-400 px-2 py-2 text-center w-16">UNIDAD</th>
+              <th class="border border-slate-400 px-3 py-2 text-right w-24">PRECIO</th>
+              <th class="border border-slate-400 px-3 py-2 text-right w-24">IMPORTE</th>
+              <th class="border border-slate-400 px-1 py-1 text-center w-8 print:hidden"></th>
+            </tr>
+          </thead>
+          <tbody id="tabla_items_body_admin">
+            <!-- Renglones inyectados por JavaScript -->
+          </tbody>
+        </table>
+
+        <!-- DESGLOSE ECONÓMICO, CUENTAS BANCARIAS Y TÉRMINOS -->
+        <div class="grid grid-cols-12 gap-4 items-start pt-2">
+          
+          <!-- Datos Bancarios & Notas -->
+          <div class="col-span-7 space-y-2 text-[10px] text-slate-700">
+            <p><span class="font-bold">Forma de pago:</span> 50% INICIAL y 50 % validación de la documentación en un plazo de 5 días calendarios.</p>
+            
+            <div class="bg-slate-50 border border-slate-300 p-2.5 rounded-lg space-y-1">
+              <p class="font-bold text-slate-900 uppercase">Cuentas de Depósito / Transferencia Bancaria:</p>
+              <p><span class="font-bold">BANCO DE LA NACIÓN:</span> 00-421-038902 <br> <span class="font-semibold text-slate-600">CCI:</span> 018-421-00421038902-81</p>
+              <p><span class="font-bold">BANCO BBVA:</span> 00110235930201930055 <br> <span class="font-semibold text-slate-600">CCI:</span> 01123500020193005593</p>
+            </div>
+
+            <div class="pt-0.5 space-y-0.5">
+              <p class="font-bold text-slate-800">Consideraciones:</p>
+              <p>• Validez de cotización: 05 días calendario.</p>
+              <p>• Precios sujetos a cambios de acuerdo a evaluación definitiva en terreno.</p>
+              <p class="font-black text-red-600 mt-1">NOTA: COTIZACIÓN AL 100 % FACTURADO.</p>
+            </div>
+          </div>
+
+          <!-- Liquidación Financiera con IGV -->
+          <div class="col-span-5 border border-slate-400 rounded-lg overflow-hidden">
+            <table class="w-full text-xs">
+              <tr class="border-b border-slate-300">
+                <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">NETO</td>
+                <td class="px-3 py-1.5 text-right font-bold text-slate-800" id="calc_neto_admin">S/ 0.00</td>
+              </tr>
+              <tr class="border-b border-slate-300">
+                <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">DCTO</td>
+                <td class="px-3 py-1.5 text-right">
+                  <input type="number" id="input_descuento_admin" value="0.00" step="10" min="0" 
+                         class="w-20 text-right border border-slate-300 rounded px-1.5 py-0.5 font-mono text-xs focus:outline-none focus:border-[#00a8e8]" 
+                         oninput="calcularTotalesProformaAdmin()">
+                </td>
+              </tr>
+              <tr class="border-b border-slate-300">
+                <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">SUBTOTAL</td>
+                <td class="px-3 py-1.5 text-right font-bold text-slate-800" id="calc_subtotal_admin">S/ 0.00</td>
+              </tr>
+              <tr class="border-b border-slate-300">
+                <td class="px-3 py-1.5 font-bold text-slate-700 bg-slate-50">I.G.V. (18%)</td>
+                <td class="px-3 py-1.5 text-right font-bold text-slate-800" id="calc_igv_admin">S/ 0.00</td>
+              </tr>
+              <tr class="bg-slate-100 font-bold">
+                <td class="px-3 py-2 text-sm text-[#002b49]">TOTAL</td>
+                <td class="px-3 py-2 text-right text-sm text-red-600 font-black font-mono" id="calc_total_admin">S/ 0.00</td>
+              </tr>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
 </div>
