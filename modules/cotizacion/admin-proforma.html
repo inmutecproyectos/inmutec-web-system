@@ -1,18 +1,18 @@
 <!-- MÓDULO ADMINISTRATIVO EXCLUSIVO: GENERADOR Y EMISOR DE PROFORMAS TÉCNICAS -->
-<div class="w-full max-w-full overflow-hidden space-y-4">
+<div class="w-full max-w-full space-y-4">
 
   <!-- BARRA DE ACTIVACIÓN (DESPLEGABLE BAJO DEMANDA) -->
-  <div class="bg-gradient-to-r from-slate-900 via-[#002b49] to-slate-900 border-2 border-amber-400/80 p-4 rounded-2xl sm:rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-3">
+  <div class="bg-gradient-to-r from-slate-900 via-[#002b49] to-slate-900 border-2 border-amber-400/80 p-3.5 sm:p-4 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-3">
     <div class="flex items-center space-x-3 w-full md:w-auto">
-      <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center text-lg sm:text-xl font-black shrink-0 shadow-md">
+      <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center text-lg font-black shrink-0 shadow-md">
         <i class="fa-solid fa-file-invoice-dollar"></i>
       </div>
       <div class="min-w-0 flex-1">
         <div class="flex items-center space-x-2">
-          <span class="bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">Módulo CMS Activo</span>
+          <span class="bg-amber-400 text-slate-950 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">Módulo CMS Activo</span>
           <span class="text-[11px] text-slate-300 font-mono truncate" id="admin_proforma_counter_badge">Correlativo listo</span>
         </div>
-        <h3 class="text-sm sm:text-base font-black text-white truncate">Mesa Oficial de Emisión de Proformas</h3>
+        <h3 class="text-xs sm:text-base font-black text-white truncate">Mesa Oficial de Emisión de Proformas</h3>
       </div>
     </div>
 
@@ -31,57 +31,57 @@
   </div>
 
   <!-- MESA DE TRABAJO Y DOCUMENTO -->
-  <div id="proformaWorkspaceContainer" class="hidden w-full max-w-full space-y-4 animate-fadeIn">
+  <div id="proformaWorkspaceContainer" class="hidden w-full space-y-4 animate-fadeIn">
 
     <!-- PANEL DE CONTROL Y ACCIONES RÁPIDAS -->
-    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white space-y-4 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl p-4 sm:p-5 text-white space-y-4 shadow-2xl">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div>
           <span class="text-[10px] font-mono text-cyan-300 uppercase tracking-widest block">Configuración de Emisión</span>
-          <h4 class="text-xs sm:text-base font-black text-white">Parámetros del Documento & Selección de Especialidad</h4>
+          <h4 class="text-xs sm:text-sm font-black text-white">Parámetros del Documento & Selección de Especialidad</h4>
         </div>
         <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
-          <button type="button" onclick="descargarProformaPDF()" class="bg-[#00a8e8] hover:bg-[#0092ca] text-[#002b49] font-black text-[11px] sm:text-xs py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <button type="button" onclick="descargarProformaPDF()" class="bg-[#00a8e8] hover:bg-[#0092ca] text-[#002b49] font-black text-[11px] py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-file-pdf"></i> Descargar PDF (PC)
           </button>
-          <button type="button" onclick="enviarProformaWhatsApp()" class="bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-[11px] sm:text-xs py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <button type="button" onclick="enviarProformaWhatsApp()" class="bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-[11px] py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-brands fa-whatsapp"></i> Despachar WhatsApp
           </button>
-          <button type="button" onclick="enviarProformaCorreo()" class="col-span-2 sm:col-span-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] sm:text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <button type="button" onclick="enviarProformaCorreo()" class="col-span-2 sm:col-span-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-envelope"></i> Email
           </button>
         </div>
       </div>
 
-      <!-- Filtro de los 5 Servicios de INMUTEC -->
+      <!-- Filtro de Especialidad -->
       <div>
-        <label class="block text-[11px] font-bold text-slate-300 mb-1.5">Cargar Plantilla Base por Servicio:</label>
+        <label class="block text-[11px] font-bold text-slate-300 mb-1.5">Seleccionar Especialidad de Cotización:</label>
         <div class="flex sm:grid sm:grid-cols-5 gap-2 overflow-x-auto pb-1 no-scrollbar w-full">
-          <button type="button" onclick="aplicarPlantillaServicio('Internet Dedicado')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#00a8e8] text-center font-bold text-[10px] sm:text-xs transition" data-filter="Internet Dedicado">
+          <button type="button" onclick="aplicarPlantillaServicio('Internet Dedicado')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#00a8e8] text-center font-bold text-[10px] sm:text-xs transition cursor-pointer" data-filter="Internet Dedicado">
             <i class="fa-solid fa-wifi text-[#00a8e8] block mb-1"></i> Internet Dedicado
           </button>
-          <button type="button" onclick="aplicarPlantillaServicio('Fibra Óptica')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#10b981] text-center font-bold text-[10px] sm:text-xs transition" data-filter="Fibra Óptica">
+          <button type="button" onclick="aplicarPlantillaServicio('Fibra Óptica')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#10b981] text-center font-bold text-[10px] sm:text-xs transition cursor-pointer" data-filter="Fibra Óptica">
             <i class="fa-solid fa-network-wired text-[#10b981] block mb-1"></i> Fibra Óptica
           </button>
-          <button type="button" onclick="aplicarPlantillaServicio('Torres & STP')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#f59e0b] text-center font-bold text-[10px] sm:text-xs transition" data-filter="Torres & STP">
+          <button type="button" onclick="aplicarPlantillaServicio('Torres & STP')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#f59e0b] text-center font-bold text-[10px] sm:text-xs transition cursor-pointer" data-filter="Torres & STP">
             <i class="fa-solid fa-tower-broadcast text-[#f59e0b] block mb-1"></i> Torres & STP
           </button>
-          <button type="button" onclick="aplicarPlantillaServicio('Laboratorio RF')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#ef4444] text-center font-bold text-[10px] sm:text-xs transition" data-filter="Laboratorio RF">
+          <button type="button" onclick="aplicarPlantillaServicio('Laboratorio RF')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-[#ef4444] text-center font-bold text-[10px] sm:text-xs transition cursor-pointer" data-filter="Laboratorio RF">
             <i class="fa-solid fa-microchip text-[#ef4444] block mb-1"></i> Laboratorio RF
           </button>
-          <button type="button" onclick="aplicarPlantillaServicio('Domótica & Smart')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border-2 border-amber-400 bg-amber-400/10 hover:bg-amber-400/20 text-center font-black text-[10px] sm:text-xs text-amber-300 transition" data-filter="Domótica & Smart">
+          <button type="button" onclick="aplicarPlantillaServicio('Domótica & Smart')" class="srv-admin-filter shrink-0 sm:shrink p-2 rounded-xl border-2 border-amber-400 bg-amber-400/10 hover:bg-amber-400/20 text-center font-black text-[10px] sm:text-xs text-amber-300 transition cursor-pointer" data-filter="Domótica & Smart">
             <i class="fa-solid fa-house-signal text-amber-400 block mb-1"></i> Domótica & Smart
           </button>
         </div>
       </div>
 
-      <!-- Datos Operativos del Documento (Protegidos) -->
+      <!-- Datos Operativos del Documento -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
         <div>
           <label class="block text-slate-400 font-semibold mb-1 text-[11px] flex items-center gap-1">
-            <i class="fa-solid fa-lock text-[10px] text-amber-400"></i> Nº Proforma Correlativo (Automático)
+            <i class="fa-solid fa-lock text-[10px] text-amber-400"></i> Nº Proforma Correlativo
           </label>
-          <input type="text" id="admin_prof_numero" readonly class="w-full bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-1.5 font-mono text-amber-400 font-black text-xs sm:text-sm cursor-not-allowed select-none">
+          <input type="text" id="admin_prof_numero" readonly class="w-full bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-1.5 font-mono text-amber-400 font-black text-xs cursor-not-allowed select-none">
         </div>
         <div>
           <label class="block text-slate-400 font-semibold mb-1 text-[11px] flex items-center gap-1">
@@ -90,30 +90,38 @@
           <input type="text" id="admin_prof_fecha" readonly class="w-full bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300 text-xs cursor-not-allowed select-none">
         </div>
         <div class="flex items-end">
-          <button type="button" onclick="agregarFilaItem()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 font-bold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 text-xs">
+          <button type="button" onclick="agregarFilaItem()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 font-bold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 text-xs cursor-pointer">
             <i class="fa-solid fa-plus-circle"></i> Agregar Fila de Trabajo
           </button>
         </div>
       </div>
     </div>
 
-    <!-- CONTENEDOR CON SCROLL RESPONSIVO -->
-    <div class="w-full max-w-full overflow-x-auto bg-slate-300/80 p-3 sm:p-6 rounded-2xl border border-slate-400/60 shadow-inner flex justify-center">
+    <!-- CONTENEDOR CON SCROLL HORIZONTAL TÁCTIL (HABILITADO PARA SMARTPHONES) -->
+    <div class="w-full overflow-x-auto overflow-y-visible bg-slate-200/90 p-2 sm:p-6 rounded-2xl border border-slate-300 shadow-inner block" style="-webkit-overflow-scrolling: touch;">
 
-      <!-- HOJA OFICIAL A4 CORPORATIVA INMUTEC (ANCHO EXACTO 800px) -->
-      <div id="documento_proforma_imprimible" class="w-[800px] min-w-[800px] bg-white p-10 text-slate-800 font-sans text-xs shadow-2xl rounded-sm border border-slate-200 space-y-4">
+      <!-- AVISO VISUAL DE DESLIZAMIENTO EN TELÉFONOS -->
+      <div class="sm:hidden flex items-center justify-center gap-1.5 text-[11px] text-slate-600 font-bold bg-white/80 py-1.5 px-3 rounded-lg mb-2 shadow-sm border border-slate-300">
+        <i class="fa-solid fa-arrows-left-right text-[#00a8e8] animate-pulse"></i>
+        <span>Desliza con tu dedo hacia los lados para ver la proforma completa</span>
+      </div>
+
+      <!-- HOJA OFICIAL A4 CORPORATIVA (FONDO BLANCO PURO) -->
+      <div id="documento_proforma_imprimible" class="w-[790px] min-w-[790px] mx-auto bg-white p-8 text-slate-800 font-sans text-xs shadow-xl rounded-md border border-slate-300 space-y-4">
         
-        <!-- ENCABEZADO MEMBRETADO PREMIUM -->
-        <div class="flex items-start justify-between border-b-2 border-[#002b49] pb-4">
-          <div class="flex items-center space-x-4">
-            <img 
-              src="./public/assets/brand/logo-inmutec.png" 
-              alt="Logo INMUTEC E.I.R.L." 
-              class="h-16 w-auto object-contain"
-              onerror="this.onerror=null; this.src='https://inmutecproyectos.github.io/inmutec-web-system/public/assets/brand/logo-inmutec.png';"
-            >
+        <!-- ENCABEZADO MEMBRETADO CON LOGO NÍTIDO -->
+        <div class="flex items-start justify-between border-b-2 border-[#002b49] pb-3">
+          <div class="flex items-center space-x-3">
+            <div class="bg-white p-1 rounded-lg border border-slate-200 flex items-center justify-center">
+              <img 
+                src="./public/assets/brand/logo-inmutec.png" 
+                alt="Logo INMUTEC E.I.R.L." 
+                class="h-14 w-auto object-contain block"
+                onerror="this.onerror=null; this.src='https://inmutecproyectos.github.io/inmutec-web-system/public/assets/brand/logo-inmutec.png';"
+              >
+            </div>
             <div class="space-y-0.5">
-              <h2 class="text-sm font-black text-[#002b49] tracking-tight uppercase">MULTISERVICIOS GENERALES INMUTEC E.I.R.L.</h2>
+              <h2 class="text-sm font-black text-[#002b49] tracking-tight uppercase leading-tight">MULTISERVICIOS GENERALES INMUTEC E.I.R.L.</h2>
               <p class="text-[10px] text-slate-700 font-bold"><span class="text-[#00a8e8]">RUC:</span> 20568327692</p>
               <p class="text-[10px] text-slate-600">Central: 954 928 201 &bull; Fijo: (064) 595829</p>
               <p class="text-[10px] text-slate-600">Email: <strong class="text-[#002b49]">inmutecproyectos@gmail.com</strong></p>
@@ -121,51 +129,54 @@
           </div>
           
           <div class="text-right">
-            <div class="border-2 border-red-600 rounded-xl overflow-hidden shadow-sm bg-white min-w-[150px]">
-              <div class="bg-red-600 text-white font-black text-[10px] uppercase py-1 px-3 text-center tracking-wider">
+            <div class="border-2 border-red-600 rounded-xl overflow-hidden shadow-sm bg-white min-w-[145px]">
+              <div class="bg-red-600 text-white font-black text-[9px] uppercase py-1 px-2 text-center tracking-wider">
                 COTIZACIÓN / PROFORMA
               </div>
-              <div class="py-1.5 px-3 text-center bg-red-50/40">
+              <div class="py-1.5 px-2 text-center bg-red-50/30">
                 <span id="prof_vista_numero" class="text-lg font-black text-red-600 font-mono tracking-widest">001072</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- FECHA DE EMISIÓN -->
-        <div class="flex justify-end">
-          <span class="inline-block bg-slate-100 text-slate-700 px-3 py-1 rounded font-mono font-bold text-[10px] uppercase border border-slate-200" id="prof_vista_fecha">
-            HUANCAYO, 9 DE NOVIEMBRE 2026 - 11:36 AM
-          </span>
+        <!-- RÓTULO DINÁMICO DE ESPECIALIDAD SELECCIONADA -->
+        <div class="bg-slate-100 border-l-4 border-[#00a8e8] py-1.5 px-3 rounded-r-lg flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-[9px] font-black uppercase text-slate-500">OBJETO:</span>
+            <input 
+              type="text" 
+              id="prof_edit_asunto" 
+              value="PROPUESTA TÉCNICA ECONÓMICA: SERVICIO DE INTERNET DEDICADO" 
+              class="font-black text-xs uppercase text-[#002b49] bg-transparent outline-none w-[520px] focus:bg-white focus:px-2 rounded transition"
+            >
+            <div id="prof_print_asunto" class="hidden font-black text-xs uppercase text-[#002b49]"></div>
+          </div>
+          <span class="text-[10px] font-mono font-bold text-slate-600" id="prof_vista_fecha">HUANCAYO, 9 DE NOVIEMBRE 2026 - 2:30 PM</span>
         </div>
 
-        <!-- TARJETA DEL CLIENTE (EDITABLE EN PANTALLA, TEXTO PLANO EN IMPRESIÓN) -->
-        <div class="bg-slate-50/80 border border-slate-300 rounded-xl p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-black text-[#002b49] text-[10px] tracking-wider uppercase">DATOS DEL CLIENTE / REQUERIMIENTO:</span>
-            <!-- La clase proforma-ui-tool se oculta al exportar PDF -->
-            <span class="proforma-ui-tool text-[10px] text-[#00a8e8] font-bold">
-              <i class="fa-solid fa-pen-to-square"></i> Edición directa activada
-            </span>
+        <!-- BLOQUE DE DATOS DEL CLIENTE EDITABLE -->
+        <div class="bg-slate-50 border border-slate-300 rounded-lg p-3 space-y-2">
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="font-black text-[#002b49] uppercase">SEÑORES (CLIENTE O ENTIDAD):</span>
+            <span class="text-slate-400 font-medium proforma-ui-tool italic"><i class="fa-solid fa-pen text-[9px] text-[#00a8e8]"></i> Haz clic para editar cualquier dato</span>
           </div>
 
-          <!-- Nombre / Razón Social -->
           <div>
             <input 
               type="text" 
               id="prof_edit_cliente" 
               value="EMPRESA / CLIENTE REGISTRADO" 
               placeholder="Nombre o Razón Social del Cliente"
-              class="w-full font-black text-sm uppercase text-[#002b49] bg-white border border-slate-300 focus:border-[#00a8e8] rounded-lg px-2.5 py-1 outline-none transition"
+              class="w-full font-black text-sm uppercase text-[#002b49] bg-white border border-slate-300 focus:border-[#00a8e8] rounded px-2.5 py-1 outline-none"
               oninput="window.sincronizarCamposInversos('cliente')"
             >
             <div id="prof_print_cliente" class="hidden font-black text-sm uppercase text-[#002b49]"></div>
           </div>
 
-          <!-- RUC y Lugar -->
-          <div class="grid grid-cols-2 gap-3 text-xs">
-            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded-lg px-2.5 py-1">
-              <span class="font-bold text-slate-500 text-[10px] uppercase w-16">DOC / RUC:</span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded px-2 py-1">
+              <span class="font-bold text-slate-500 text-[10px] uppercase w-14">RUC / DNI:</span>
               <input 
                 type="text" 
                 id="prof_edit_doc" 
@@ -177,13 +188,13 @@
               <span id="prof_print_doc" class="hidden font-mono text-xs font-bold text-slate-800"></span>
             </div>
 
-            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded-lg px-2.5 py-1">
-              <span class="font-bold text-slate-500 text-[10px] uppercase w-16">UBICACIÓN:</span>
+            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded px-2 py-1">
+              <span class="font-bold text-slate-500 text-[10px] uppercase w-14">LUGAR:</span>
               <input 
                 type="text" 
                 id="prof_edit_lugar" 
                 value="Huancayo" 
-                placeholder="Lugar de Implementación"
+                placeholder="Lugar de la Obra"
                 class="flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none"
                 oninput="window.sincronizarCamposInversos('lugar')"
               >
@@ -191,24 +202,29 @@
             </div>
           </div>
 
-          <p class="font-black text-[#002b49] text-[11px] pt-0.5">PRESENTE.-</p>
+          <p class="font-bold text-slate-800 pt-0.5 text-[11px]">PRESENTE.-</p>
         </div>
 
-        <!-- TEXTO INTRODUCTORIO FORMAL -->
-        <p class="text-[10px] text-slate-600 leading-relaxed text-justify">
-          De nuestra mayor consideración: Por medio de la presente ponemos a su disposición nuestra propuesta técnica y económica para la ejecución de los servicios solicitados. Agradeciendo de antemano su confianza en nuestras soluciones de telecomunicaciones y obras electromecánicas.
-        </p>
+        <!-- TEXTO DE INTRODUCCIÓN EDITABLE -->
+        <div>
+          <textarea 
+            id="prof_edit_intro" 
+            rows="2" 
+            class="w-full text-[10px] text-slate-700 leading-relaxed bg-transparent border border-transparent hover:border-slate-300 focus:border-[#00a8e8] focus:bg-white rounded p-1 outline-none transition resize-none"
+          >ESTIMADOS SEÑORES: EN ATENCIÓN A SU SOLICITUD, PONEMOS A SU CONSIDERACIÓN NUESTRA MEJOR OFERTA TÉCNICA Y ECONÓMICA POR LOS SERVICIOS PROFESIONALES REQUERIDOS. QUEDAMOS A LA ESPERA DE SU AMABLE CONFORMIDAD.</textarea>
+          <div id="prof_print_intro" class="hidden text-[10px] text-slate-700 leading-relaxed text-justify"></div>
+        </div>
 
-        <!-- TABLA DE VALORIZACIÓN DE PARTIDAS -->
+        <!-- TABLA DINÁMICA DE ITEMS -->
         <table class="w-full border-collapse border border-slate-400 text-xs">
           <thead>
             <tr class="bg-[#002b49] text-white font-bold uppercase text-[9px] tracking-wider">
-              <th class="border border-[#002b49] px-2 py-2 text-center w-10">ITEM</th>
-              <th class="border border-[#002b49] px-3 py-2 text-left">DESCRIPCIÓN DEL SERVICIO / SUMINISTRO</th>
-              <th class="border border-[#002b49] px-2 py-2 text-center w-14">CANT.</th>
-              <th class="border border-[#002b49] px-2 py-2 text-center w-14">UNIDAD</th>
-              <th class="border border-[#002b49] px-3 py-2 text-right w-24">P. UNIT (S/)</th>
-              <th class="border border-[#002b49] px-3 py-2 text-right w-24">IMPORTE (S/)</th>
+              <th class="border border-[#002b49] px-2 py-1.5 text-center w-10">ITEM</th>
+              <th class="border border-[#002b49] px-3 py-1.5 text-left">DESCRIPCIÓN DE PARTIDA</th>
+              <th class="border border-[#002b49] px-2 py-1.5 text-center w-14">CANT.</th>
+              <th class="border border-[#002b49] px-2 py-1.5 text-center w-14">UNIDAD</th>
+              <th class="border border-[#002b49] px-3 py-1.5 text-right w-24">P. UNIT (S/)</th>
+              <th class="border border-[#002b49] px-3 py-1.5 text-right w-24">IMPORTE (S/)</th>
               <th class="border border-[#002b49] px-1 py-1 text-center w-6 proforma-ui-tool"></th>
             </tr>
           </thead>
@@ -217,36 +233,52 @@
           </tbody>
         </table>
 
-        <!-- DESGLOSE ECONÓMICO Y CONDICIONES COMERCIALES -->
-        <div class="grid grid-cols-12 gap-4 items-start pt-1">
+        <!-- DESGLOSE ECONÓMICO Y CUENTAS -->
+        <div class="grid grid-cols-12 gap-3 items-start pt-1">
           
-          <!-- Condiciones Comerciales y Cuentas -->
-          <div class="col-span-7 space-y-2 text-[9px] text-slate-700">
-            <div class="border border-slate-300 rounded-lg p-2.5 bg-slate-50/70 space-y-1">
-              <p class="font-bold text-[#002b49] uppercase">Cuentas Bancarias Autorizadas (INMUTEC E.I.R.L.):</p>
-              <div class="grid grid-cols-1 gap-1 text-[9px]">
-                <p><strong>BANCO DE LA NACIÓN:</strong> 00-421-038902 &nbsp;|&nbsp; <strong>CCI:</strong> 018-421-00421038902-81</p>
-                <p><strong>BANCO BBVA:</strong> 0011-0235-9302019300-55 &nbsp;|&nbsp; <strong>CCI:</strong> 011-235-000201930055-93</p>
-              </div>
+          <div class="col-span-7 space-y-1.5 text-[9px] text-slate-700">
+            <div class="flex items-center gap-1">
+              <span class="font-bold text-slate-800">Forma de pago:</span>
+              <input 
+                type="text" 
+                id="prof_edit_pago" 
+                value="50% INICIAL y 50% al entregar la conformidad del servicio." 
+                class="flex-1 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#00a8e8] outline-none text-[9px] text-slate-700"
+              >
+              <span id="prof_print_pago" class="hidden text-[9px] text-slate-700"></span>
+            </div>
+
+            <div class="border border-slate-300 rounded p-2 bg-slate-50 space-y-0.5">
+              <p class="font-bold text-[#002b49] uppercase">Cuentas Bancarias Autorizadas:</p>
+              <p><strong class="text-slate-800">BANCO DE LA NACIÓN:</strong> 00-421-038902 &nbsp;|&nbsp; <strong>CCI:</strong> 018-421-00421038902-81</p>
+              <p><strong class="text-slate-800">BANCO BBVA:</strong> 0011-0235-9302019300-55 &nbsp;|&nbsp; <strong>CCI:</strong> 011-235-000201930055-93</p>
             </div>
 
             <div class="space-y-0.5 text-[9px]">
-              <p><strong class="text-slate-900">Forma de Pago:</strong> 50% de adelanto y 50% al finalizar la entrega o conformidad del servicio.</p>
-              <p><strong class="text-slate-900">Validez de la Oferta:</strong> 15 días calendario a partir de la fecha de emisión.</p>
-              <p class="font-black text-red-600 uppercase pt-0.5">&bull; Todos los precios cotizados incluyen I.G.V. (100% Facturado).</p>
+              <div class="flex items-center gap-1">
+                <span class="font-bold text-slate-800">&bull; Validez de Oferta:</span>
+                <input 
+                  type="text" 
+                  id="prof_edit_validez" 
+                  value="15 días calendario a partir de su emisión." 
+                  class="flex-1 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#00a8e8] outline-none text-[9px] text-slate-700"
+                >
+                <span id="prof_print_validez" class="hidden text-[9px] text-slate-700"></span>
+              </div>
+              <p class="font-black text-red-600 uppercase">&bull; NOTA: TODOS LOS PRECIOS INCLUYEN I.G.V. (100% FACTURADO).</p>
             </div>
           </div>
 
           <!-- Cuadro de Totales -->
-          <div class="col-span-5 border border-slate-400 rounded-lg overflow-hidden text-xs shadow-sm">
+          <div class="col-span-5 border border-slate-400 rounded overflow-hidden text-xs shadow-sm">
             <table class="w-full">
               <tr class="border-b border-slate-300">
-                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">SUBTOTAL NETO</td>
-                <td class="px-3 py-1.5 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_neto_admin">S/ 0.00</td>
+                <td class="px-3 py-1 font-bold text-slate-600 bg-slate-50 text-[10px]">SUBTOTAL NETO</td>
+                <td class="px-3 py-1 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_neto_admin">S/ 0.00</td>
               </tr>
               <tr class="border-b border-slate-300">
-                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">DESCUENTO</td>
-                <td class="px-3 py-1.5 text-right">
+                <td class="px-3 py-1 font-bold text-slate-600 bg-slate-50 text-[10px]">DESCUENTO</td>
+                <td class="px-3 py-1 text-right">
                   <input type="number" id="input_descuento_admin" value="0.00" step="10" min="0" 
                          class="w-20 text-right border border-slate-300 rounded px-1.5 py-0.5 font-mono text-[11px] outline-none proforma-input-edit" 
                          oninput="calcularTotalesProformaAdmin()">
@@ -254,32 +286,32 @@
                 </td>
               </tr>
               <tr class="border-b border-slate-300">
-                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">BASE IMPONIBLE</td>
-                <td class="px-3 py-1.5 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_subtotal_admin">S/ 0.00</td>
+                <td class="px-3 py-1 font-bold text-slate-600 bg-slate-50 text-[10px]">BASE IMPONIBLE</td>
+                <td class="px-3 py-1 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_subtotal_admin">S/ 0.00</td>
               </tr>
               <tr class="border-b border-slate-300">
-                <td class="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 text-[10px]">I.G.V. (18%)</td>
-                <td class="px-3 py-1.5 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_igv_admin">S/ 0.00</td>
+                <td class="px-3 py-1 font-bold text-slate-600 bg-slate-50 text-[10px]">I.G.V. (18%)</td>
+                <td class="px-3 py-1 text-right font-bold text-slate-800 text-[11px] font-mono" id="calc_igv_admin">S/ 0.00</td>
               </tr>
               <tr class="bg-gradient-to-r from-[#002b49] to-[#00385e] text-white">
-                <td class="px-3 py-2 font-black text-xs uppercase tracking-wider">TOTAL A FACTURAR</td>
-                <td class="px-3 py-2 text-right text-sm font-black font-mono text-cyan-300" id="calc_total_admin">S/ 0.00</td>
+                <td class="px-3 py-1.5 font-black text-xs uppercase">TOTAL A FACTURAR</td>
+                <td class="px-3 py-1.5 text-right text-sm font-black font-mono text-cyan-300" id="calc_total_admin">S/ 0.00</td>
               </tr>
             </table>
           </div>
 
         </div>
 
-        <!-- PIE DE FIRMA INSTITUCIONAL -->
-        <div class="pt-6 flex justify-between items-end border-t border-slate-200">
+        <!-- FIRMA FORMAL -->
+        <div class="pt-4 flex justify-between items-end border-t border-slate-200">
           <div class="text-[9px] text-slate-500 space-y-0.5">
-            <p class="font-bold text-slate-700">INMUTEC E.I.R.L. &bull; Calidad y Garantía Certificada</p>
-            <p>Huancayo: Jr. Salcantay 148, El Tambo &bull; Huancavelica: Av. Avelino Cáceres 698</p>
+            <p class="font-bold text-slate-700">INMUTEC E.I.R.L. &bull; Ingeniería & Telecomunicaciones</p>
+            <p>Huancayo: Jr. Salcantay 148, El Tambo &bull; Cel: 954 928 201</p>
           </div>
-          <div class="text-center w-56">
+          <div class="text-center w-52">
             <div class="border-t border-slate-400 pt-1 text-[9px] text-slate-700 font-bold">
               ING. GUSTAVO MARMANILLO B.<br>
-              <span class="text-[8px] font-normal text-slate-500">Gerencia General &bull; CIP Colegiado</span>
+              <span class="text-[8px] font-normal text-slate-500">Gerente General &bull; CIP Colegiado</span>
             </div>
           </div>
         </div>

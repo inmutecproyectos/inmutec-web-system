@@ -1,8 +1,8 @@
 ﻿<!DOCTYPE html>
-<html lang="es" class="overflow-x-hidden w-full">
+<html lang="es" class="w-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema Web - INMUTEC E.I.R.L.</title>
   
   <link rel="icon" type="image/png" href="./public/assets/brand/logo-inmutec.png">
@@ -28,10 +28,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Bloqueo estricto contra desbordamiento horizontal en móviles */
+    /* Estructura base fluida sin bloqueos de desplazamiento horizontal */
     html, body {
-      max-width: 100vw !important;
-      overflow-x: hidden !important;
+      max-width: 100%;
       position: relative;
       margin: 0;
       padding: 0;
@@ -67,7 +66,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col w-full overflow-x-hidden">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col w-full">
 
   <!-- ==================== BARRA FLOTANTE DE ADMINISTRACIÓN ==================== -->
   <div id="adminTopBar" class="hidden bg-[#001d32] border-b border-[#00a8e8]/40 text-white px-3 py-2 sticky top-0 z-[60] flex flex-wrap items-center justify-between gap-2 text-xs w-full">
@@ -88,13 +87,13 @@
   <header class="bg-gradient-to-r from-[#002b49] via-[#003c66] to-[#002038] text-white shadow-xl sticky top-0 z-50 border-b-2 border-brand-cyan w-full">
     <div class="max-w-[1550px] mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
       
-      <!-- LOGO -->
+      <!-- LOGO LIMPIO Y NÍTIDO -->
       <div class="flex items-center space-x-2 sm:space-x-3 cursor-pointer select-none shrink-0" onclick="window.location.hash='inicio'">
-        <div class="bg-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl shadow-md flex items-center border border-brand-cyan/40">
+        <div class="bg-white px-2 py-1 sm:px-2.5 sm:py-1 rounded-xl flex items-center border border-white">
           <img 
             src="./public/assets/brand/logo-inmutec.png" 
             alt="INMUTEC Logo" 
-            class="h-7 sm:h-9 w-auto object-contain"
+            class="h-7 sm:h-9 w-auto object-contain block"
             onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
           />
           <div id="logo-fallback" class="hidden items-center space-x-0.5 font-black text-base sm:text-lg">
@@ -151,8 +150,8 @@
     </div>
   </header>
 
-  <!-- CONTENEDOR DE VISTAS DINÁMICAS -->
-  <main id="moduleContainer" class="max-w-[1550px] w-full mx-auto p-3 sm:p-4 lg:p-6 flex-1 overflow-x-hidden">
+  <!-- CONTENEDOR DE VISTAS DINÁMICAS (SCROLL HORIZONTAL PERMITIDO) -->
+  <main id="moduleContainer" class="max-w-[1550px] w-full mx-auto p-3 sm:p-4 lg:p-6 flex-1">
   </main>
 
   <!-- ==================== MODAL LOGIN ADMINISTRADOR ==================== -->
@@ -247,7 +246,6 @@
         }
       });
 
-      // Cerrar menú al hacer clic en cualquier opción
       document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           menuDropdown.classList.add('hidden');

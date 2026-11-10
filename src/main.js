@@ -5,21 +5,15 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // =============================================================================
-// MODULO 0: PARÁMETROS GLOBALES Y CONFIGURACIÓN EDITABLE
-// (Cambia aquí teléfonos, correos y claves fácilmente)
+// MODULO 0: CONFIGURACIÓN GLOBAL Y PARÁMETROS EDITABLES
 // =============================================================================
 export const CONFIG_INMUTEC = {
-  // Teléfonos oficiales
   whatsappGeneral: "51954928201",
   telefonoFijo: "(064) 595829",
   centralMovil: "+51 954 928 201",
-  
-  // Correos oficiales
   correoPrincipal: "inmutecproyectos@gmail.com",
   correoSecundario: "inmuteceirl@gmail.com",
   correoGerencia: "gusmarbal@hotmail.com",
-
-  // Datos legales de la empresa
   empresaNombre: "MULTISERVICIOS GENERALES INMUTEC E.I.R.L.",
   ruc: "20568327692",
   gerenteGeneral: "Ing. Gustavo Marmanillo Baldeón",
@@ -27,13 +21,11 @@ export const CONFIG_INMUTEC = {
   direccionHuancavelica: "Av. Andrés Avelino Cáceres # 698 – Huancavelica"
 };
 
-// Conexión a Base de Datos Supabase
 const SUPABASE_URL = "https://qcnsrlsolmhbsxlqpqpc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjbnNybHNvbG1oYnN4bHFwcXBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1ODA2NDcsImV4cCI6MjEwOTE1NjY0N30.Tsc8SkXyQiA0tl8P890yFpKw-2j1eMS1AHJxkfUzlRw";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variables de estado interno
 let isAdminLoggedIn = false;
 let currentEditingElement = null;
 let currentEditingKey = null;
@@ -41,10 +33,8 @@ let isEditingImage = false;
 let carouselTimer = null;
 let currentSlideIndex = 0;
 
-// Estado reactivo de ítems de la Proforma Administrativa
 window.itemsProformaAdmin = [];
 
-// Rutas de archivos por módulo
 const modulesConfig = {
   inicio: {
     html: "./modules/inicio/inicio.html",
@@ -68,9 +58,8 @@ const modulesConfig = {
   }
 };
 
-
 // =============================================================================
-// MODULO 1: ENRUTADOR DINÁMICO (SPA) Y MOTOR SUPABASE CMS
+// MODULO 1: ENRUTADOR DINÁMICO (SPA) Y MOTOR CMS
 // =============================================================================
 export async function loadModule(moduleName) {
   const container = document.getElementById("moduleContainer");
@@ -80,7 +69,6 @@ export async function loadModule(moduleName) {
   const config = modulesConfig[modKey];
   const timestamp = Date.now();
 
-  // 1. Resaltar pestaña activa en el Header
   document.querySelectorAll(".nav-tab").forEach(tab => {
     tab.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-md");
     tab.classList.add("text-slate-200");
@@ -91,7 +79,6 @@ export async function loadModule(moduleName) {
     activeTab.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-md");
   }
 
-  // 2. Cargar CSS dinámicamente
   let cssLink = document.getElementById("module-dynamic-css");
   if (!cssLink) {
     cssLink = document.createElement("link");
@@ -101,26 +88,22 @@ export async function loadModule(moduleName) {
   }
   cssLink.href = `${config.css}?v=${timestamp}`;
 
-  // 3. Inyectar HTML del módulo
   try {
     const res = await fetch(`${config.html}?v=${timestamp}`);
     if (!res.ok) throw new Error(`No se pudo cargar ${config.html}`);
     container.innerHTML = await res.text();
   } catch (err) {
     console.error("Error al cargar módulo HTML:", err);
-    container.innerHTML = `<div class="p-8 text-center text-rose-500 font-bold">Error cargando ${modKey}. Revisa la conexión.</div>`;
+    container.innerHTML = `<div class="p-8 text-center text-rose-500 font-bold">Error cargando ${modKey}.</div>`;
     return;
   }
 
-  // 4. Sincronizar textos e imágenes desde Supabase
   await applyCmsValuesToView();
 
-  // 5. Mantener bordes editables si el administrador está logueado
   if (isAdminLoggedIn) {
     enableAdminEditMode();
   }
 
-  // 6. Inicializar lógica interna según la vista
   if (modKey === "inicio") {
     initInicioModule();
   } else if (modKey === "cotizacion") {
@@ -178,9 +161,8 @@ async function uploadImageToSupabase(file, folder = "cms") {
   return publicUrlData.publicUrl;
 }
 
-
 // =============================================================================
-// MODULO 2: VISTA INICIO (CARRUSEL INTERACTIVO)
+// MODULO 2: VISTA INICIO (CARRUSEL)
 // =============================================================================
 function initInicioModule() {
   const box = document.getElementById("inmutecCarouselBox") || document.getElementById("mainCarousel");
@@ -234,10 +216,8 @@ function initInicioModule() {
   renderSlide(0);
 }
 
-
 // =============================================================================
-// MODULO 3: VISTA SERVICIOS Y PORTAFOLIO (MODALES Y DATOS TÉCNICOS)
-// (Edita aquí las especificaciones técnicas y proyectos de referencia)
+// MODULO 3: VISTA SERVICIOS Y PORTAFOLIO (MODALES)
 // =============================================================================
 const serviceDataMap = {
   datos: {
@@ -413,15 +393,13 @@ window.quoteSimilarProject = function() {
   window.location.hash = "cotizacion";
 };
 
-
 // =============================================================================
-// MODULO 4: VISTA COTIZACIÓN (FORMULARIO DINÁMICO & ASISTENTE VIRTUAL)
+// MODULO 4: VISTA COTIZACIÓN
 // =============================================================================
 async function initCotizacionModule() {
   const dynamicContainer = document.getElementById("dynamicServiceSection");
   const hiddenSvcInput = document.getElementById("selectedServiceInput");
 
-  // Si el administrador inició sesión, inyectar el módulo administrativo de proformas
   if (isAdminLoggedIn) {
     await verificarYMontarAdminProforma();
   }
@@ -551,7 +529,6 @@ async function initCotizacionModule() {
   initChatbot();
 }
 
-// Inyección dinámica del módulo administrativo de proformas
 export async function verificarYMontarAdminProforma() {
   const container = document.getElementById("contenedor_modulo_admin_proforma");
   if (!container) return;
@@ -562,7 +539,6 @@ export async function verificarYMontarAdminProforma() {
       if (resp.ok) {
         container.innerHTML = await resp.text();
 
-        // Cargar html2pdf para generación de PDF en PC si aún no existe
         if (!document.getElementById("html2pdf-script")) {
           const script = document.createElement("script");
           script.id = "html2pdf-script";
@@ -584,13 +560,9 @@ export async function verificarYMontarAdminProforma() {
   }
 }
 
-
 // =============================================================================
 // MODULO 5: EMISOR OFICIAL DE PROFORMAS TÉCNICAS (ADMIN CMS)
-// (Lógica de PDF de imprenta, WhatsApp a 9 dígitos y Despacho por Correo)
 // =============================================================================
-
-// 1. Contador correlativo automático (Protegido - Solo Lectura)
 window.obtenerSiguienteNumeroProforma = async function() {
   let siguiente = 1070;
   try {
@@ -605,7 +577,6 @@ window.obtenerSiguienteNumeroProforma = async function() {
   return String(siguiente).padStart(6, "0");
 };
 
-// 2. Fecha y hora automática de Huancayo (Protegido - Solo Lectura)
 window.generarFechaHoraHuancayo = function() {
   const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   const ahora = new Date();
@@ -622,7 +593,6 @@ window.generarFechaHoraHuancayo = function() {
   return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
 };
 
-// 3. Abrir / Cerrar Mesa de Proformas
 window.toggleProformaWorkspace = async function() {
   const box = document.getElementById("proformaWorkspaceContainer");
   const txt = document.getElementById("btnToggleProformaText");
@@ -652,12 +622,16 @@ window.toggleProformaWorkspace = async function() {
   }
 };
 
-// 4. Plantillas de conceptos técnicos por servicio
 window.aplicarPlantillaServicio = function(servicio) {
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
     b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
     if (b.dataset.filter === servicio) b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
   });
+
+  const inputAsunto = document.getElementById("prof_edit_asunto");
+  if (inputAsunto) {
+    inputAsunto.value = `PROPUESTA TÉCNICA ECONÓMICA: SERVICIO DE ${servicio.toUpperCase()}`;
+  }
 
   if (servicio === "Fibra Óptica") {
     window.itemsProformaAdmin = [
@@ -715,7 +689,6 @@ window.aplicarPlantillaServicio = function(servicio) {
   window.actualizarDocumentoEnVivo();
 };
 
-// 5. Renderizado dinámico de filas con soporte para vista limpia de impresión
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -792,7 +765,6 @@ window.calcularTotalesProformaAdmin = function() {
   }
 };
 
-// Sincronización en vivo
 window.actualizarDocumentoEnVivo = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
@@ -801,7 +773,6 @@ window.actualizarDocumentoEnVivo = function() {
   if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
 };
 
-// Sincronización formulario hacia la proforma
 window.sincronizarConProformaAdmin = function() {
   const cli = document.getElementById("qRazon")?.value.trim();
   const doc = document.getElementById("qDoc")?.value.trim();
@@ -820,7 +791,6 @@ window.sincronizarConProformaAdmin = function() {
   window.actualizarDocumentoEnVivo();
 };
 
-// Sincronización inversa (de la proforma hacia el formulario base)
 window.sincronizarCamposInversos = function(tipo) {
   if (tipo === 'cliente') {
     const val = document.getElementById("prof_edit_cliente")?.value;
@@ -837,7 +807,6 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 6. Generador de PDF que oculta controles interactivos para generar acabado de imprenta
 window.descargarProformaPDF = function() {
   const element = document.getElementById("documento_proforma_imprimible");
   if (!element || typeof html2pdf === "undefined") {
@@ -845,33 +814,50 @@ window.descargarProformaPDF = function() {
     return null;
   }
 
-  // 1. Pasar valores de inputs a texto plano para el PDF
   const valCliente = document.getElementById("prof_edit_cliente")?.value || "CLIENTE REGISTRADO";
   const valDoc = document.getElementById("prof_edit_doc")?.value || "-";
   const valLugar = document.getElementById("prof_edit_lugar")?.value || "Huancayo";
+  const valAsunto = document.getElementById("prof_edit_asunto")?.value || "PROPUESTA TÉCNICA ECONÓMICA";
+  const valIntro = document.getElementById("prof_edit_intro")?.value || "";
+  const valPago = document.getElementById("prof_edit_pago")?.value || "";
+  const valValidez = document.getElementById("prof_edit_validez")?.value || "";
   const valDcto = document.getElementById("input_descuento_admin")?.value || "0.00";
 
   const printCli = document.getElementById("prof_print_cliente");
   const printDoc = document.getElementById("prof_print_doc");
   const printLug = document.getElementById("prof_print_lugar");
+  const printAsu = document.getElementById("prof_print_asunto");
+  const printIntro = document.getElementById("prof_print_intro");
+  const printPago = document.getElementById("prof_print_pago");
+  const printVal = document.getElementById("prof_print_validez");
   const printDcto = document.getElementById("print_descuento_admin");
 
   if (printCli) printCli.textContent = valCliente;
   if (printDoc) printDoc.textContent = valDoc;
   if (printLug) printLug.textContent = valLugar;
+  if (printAsu) printAsu.textContent = valAsunto;
+  if (printIntro) printIntro.textContent = valIntro;
+  if (printPago) printPago.textContent = valPago;
+  if (printVal) printVal.textContent = valValidez;
   if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
 
-  // 2. Ocultar botones y controles interactivos en el PDF
   document.querySelectorAll(".proforma-ui-tool").forEach(el => el.classList.add("hidden"));
   document.querySelectorAll(".proforma-input-edit").forEach(el => el.classList.add("hidden"));
   document.getElementById("prof_edit_cliente")?.classList.add("hidden");
   document.getElementById("prof_edit_doc")?.classList.add("hidden");
   document.getElementById("prof_edit_lugar")?.classList.add("hidden");
+  document.getElementById("prof_edit_asunto")?.classList.add("hidden");
+  document.getElementById("prof_edit_intro")?.classList.add("hidden");
+  document.getElementById("prof_edit_pago")?.classList.add("hidden");
+  document.getElementById("prof_edit_validez")?.classList.add("hidden");
 
-  // 3. Mostrar vistas limpias de texto
   printCli?.classList.remove("hidden");
   printDoc?.classList.remove("hidden");
   printLug?.classList.remove("hidden");
+  printAsu?.classList.remove("hidden");
+  printIntro?.classList.remove("hidden");
+  printPago?.classList.remove("hidden");
+  printVal?.classList.remove("hidden");
   printDcto?.classList.remove("hidden");
   document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.remove("hidden"));
 
@@ -888,16 +874,23 @@ window.descargarProformaPDF = function() {
   };
 
   html2pdf().set(opt).from(element).save().then(() => {
-    // Restaurar los inputs de la vista web tras la descarga
     document.querySelectorAll(".proforma-ui-tool").forEach(el => el.classList.remove("hidden"));
     document.querySelectorAll(".proforma-input-edit").forEach(el => el.classList.remove("hidden"));
     document.getElementById("prof_edit_cliente")?.classList.remove("hidden");
     document.getElementById("prof_edit_doc")?.classList.remove("hidden");
     document.getElementById("prof_edit_lugar")?.classList.remove("hidden");
+    document.getElementById("prof_edit_asunto")?.classList.remove("hidden");
+    document.getElementById("prof_edit_intro")?.classList.remove("hidden");
+    document.getElementById("prof_edit_pago")?.classList.remove("hidden");
+    document.getElementById("prof_edit_validez")?.classList.remove("hidden");
 
     printCli?.classList.add("hidden");
     printDoc?.classList.add("hidden");
     printLug?.classList.add("hidden");
+    printAsu?.classList.add("hidden");
+    printIntro?.classList.add("hidden");
+    printPago?.classList.add("hidden");
+    printVal?.classList.add("hidden");
     printDcto?.classList.add("hidden");
     document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.add("hidden"));
   });
@@ -906,7 +899,6 @@ window.descargarProformaPDF = function() {
   return nombreArchivo;
 };
 
-// 7. Despacho por WhatsApp (Valida número de 9 dígitos y adjunta el PDF generado)
 window.enviarProformaWhatsApp = function() {
   const inputPhone = document.getElementById("qPhone")?.value.trim() || "";
   let destinatario = prompt("Ingresa el número celular de WhatsApp del destinatario (9 dígitos):", inputPhone);
@@ -919,7 +911,6 @@ window.enviarProformaWhatsApp = function() {
     return;
   }
 
-  // Genera y descarga el PDF inmediatamente en el dispositivo
   const nombrePDF = window.descargarProformaPDF();
 
   const cli = document.getElementById("prof_edit_cliente")?.value || "Cliente";
@@ -949,7 +940,6 @@ window.enviarProformaWhatsApp = function() {
   window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
-// 8. Despacho por Correo Electrónico
 window.enviarProformaCorreo = function() {
   const inputEmail = document.getElementById("qEmail")?.value.trim() || "";
   let emailDestino = prompt("Ingresa el correo electrónico del cliente para el envío:", inputEmail);
@@ -982,10 +972,8 @@ window.enviarProformaCorreo = function() {
   window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
 
-
 // =============================================================================
-// MODULO 6: CHATBOT ASISTENTE TÉCNICO (BASE DE CONOCIMIENTO EDITABLE)
-// (Agrega o modifica preguntas y respuestas frecuentes aquí)
+// MODULO 6: CHATBOT ASISTENTE TÉCNICO
 // =============================================================================
 const BOT_KNOWLEDGE = [
   {
@@ -1098,18 +1086,15 @@ function processBotQuery(userText) {
   }, 250);
 }
 
-
 // =============================================================================
-// MODULO 7: INICIALIZACIÓN GLOBAL DE EVENTOS (ROUTER, AUTENTICACIÓN Y CMS)
+// MODULO 7: INICIALIZACIÓN GLOBAL DE EVENTOS
 // =============================================================================
 async function inicializarSistemaCompleto() {
-  // 1. Manejo de Rutas por Hash
   window.addEventListener("hashchange", () => {
     const mod = window.location.hash.replace("#", "") || "inicio";
     loadModule(mod);
   });
 
-  // 2. Navegación por botones del Header
   document.querySelectorAll(".nav-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       const target = tab.getAttribute("data-module");
@@ -1117,7 +1102,6 @@ async function inicializarSistemaCompleto() {
     });
   });
 
-  // 3. Verificación de Sesión Supabase CMS
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -1130,11 +1114,9 @@ async function inicializarSistemaCompleto() {
     console.warn("Verificación de sesión omitida:", err);
   }
 
-  // 4. Cargar el módulo inicial
   const initialHash = window.location.hash.replace("#", "") || "inicio";
   await loadModule(initialHash);
 
-  // 5. Manejo de Login del Administrador
   const btnOpenLogin = document.getElementById("btnOpenLoginModal");
   const loginModal = document.getElementById("loginModal");
   const btnCloseLogin = document.getElementById("btnCloseLoginModal");
@@ -1184,7 +1166,6 @@ async function inicializarSistemaCompleto() {
     });
   }
 
-  // 6. Cerrar Sesión del Administrador
   const btnCerrarSesion = document.getElementById("btnAdminCerrarSesion");
   if (btnCerrarSesion) {
     btnCerrarSesion.addEventListener("click", async () => {
@@ -1198,7 +1179,6 @@ async function inicializarSistemaCompleto() {
     });
   }
 
-  // 7. Eventos del Chatbot
   document.addEventListener("submit", (e) => {
     if (e.target && e.target.id === "chatForm") {
       e.preventDefault();
@@ -1222,7 +1202,6 @@ async function inicializarSistemaCompleto() {
     }
   });
 
-  // 8. Editor Modal CMS en vivo para textos e imágenes
   document.addEventListener("click", (e) => {
     if (!isAdminLoggedIn) return;
     const editableTarget = e.target.closest("[data-cms-key]");
@@ -1258,7 +1237,6 @@ async function inicializarSistemaCompleto() {
     }
   });
 
-  // 9. Guardar cambios en Supabase CMS
   const btnSaveCms = document.getElementById("btnSaveCms");
   const btnCancelCms = document.getElementById("btnCancelCms");
   const btnCloseCmsModal = document.getElementById("btnCloseCmsModal");
@@ -1311,7 +1289,6 @@ async function inicializarSistemaCompleto() {
   }
 }
 
-// Inicialización segura contra estados de carga asíncrona
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", inicializarSistemaCompleto);
 } else {
