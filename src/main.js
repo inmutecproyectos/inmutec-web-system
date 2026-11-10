@@ -563,6 +563,8 @@ export async function verificarYMontarAdminProforma() {
 // =============================================================================
 // MODULO 5: EMISOR OFICIAL DE PROFORMAS TÉCNICAS (ADMIN CMS)
 // =============================================================================
+
+// 1. Contador correlativo automático (Protegido - Solo Lectura)
 window.obtenerSiguienteNumeroProforma = async function() {
   let siguiente = 1070;
   try {
@@ -577,6 +579,7 @@ window.obtenerSiguienteNumeroProforma = async function() {
   return String(siguiente).padStart(6, "0");
 };
 
+// 2. Fecha y hora automática de Huancayo (Protegido - Solo Lectura)
 window.generarFechaHoraHuancayo = function() {
   const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   const ahora = new Date();
@@ -593,6 +596,7 @@ window.generarFechaHoraHuancayo = function() {
   return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
 };
 
+// 3. Abrir / Cerrar Mesa de Proformas
 window.toggleProformaWorkspace = async function() {
   const box = document.getElementById("proformaWorkspaceContainer");
   const txt = document.getElementById("btnToggleProformaText");
@@ -622,17 +626,24 @@ window.toggleProformaWorkspace = async function() {
   }
 };
 
+// 4. Plantillas de partidas técnicas y actualización de OBJETO según el servicio elegido
 window.aplicarPlantillaServicio = function(servicio) {
+  // Resaltar botón activo
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
     b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
-    if (b.dataset.filter === servicio) b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+    if (b.dataset.filter === servicio) {
+      b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+    }
   });
 
+  // Actualizar objeto dinámico tanto en input como en vista imprimible
+  const textoAsunto = `PROPUESTA TÉCNICA ECONÓMICA: SERVICIO DE ${servicio.toUpperCase()}`;
   const inputAsunto = document.getElementById("prof_edit_asunto");
-  if (inputAsunto) {
-    inputAsunto.value = `PROPUESTA TÉCNICA ECONÓMICA: SERVICIO DE ${servicio.toUpperCase()}`;
-  }
+  const printAsunto = document.getElementById("prof_print_asunto");
+  if (inputAsunto) inputAsunto.value = textoAsunto;
+  if (printAsunto) printAsunto.textContent = textoAsunto;
 
+  // Asignar partidas predeterminadas
   if (servicio === "Fibra Óptica") {
     window.itemsProformaAdmin = [
       {
@@ -654,7 +665,7 @@ window.aplicarPlantillaServicio = function(servicio) {
   } else if (servicio === "Laboratorio RF" || servicio === "Laboratorio") {
     window.itemsProformaAdmin = [
       {
-        descripcion: "Diagnóstico en banco RF, calibración de potencias, alineamiento de frecuencia y mantenimiento electrónico.",
+        descripcion: "Diagnóstico en banco RF, calibración de potencias, alineamiento de frecuencia y mantenimiento electrónico de transceptores.",
         cant: 1,
         unidad: "UND",
         precio: 1400.00
@@ -663,7 +674,7 @@ window.aplicarPlantillaServicio = function(servicio) {
   } else if (servicio === "Domótica & Smart" || servicio === "Domótica") {
     const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => "• " + c.value);
     const detalleDomo = checks.length > 0 
-      ? `Implementación Smart de Domótica & Seguridad Corporativa:\n${checks.join("\n")}`
+      ? `Implementación integral de sistema smart residencial/corporativo:\n${checks.join("\n")}`
       : "Implementación integral de sistema smart residencial/corporativo (Iluminación, Accesos y Cámaras IP IA).";
 
     window.itemsProformaAdmin = [
@@ -689,6 +700,7 @@ window.aplicarPlantillaServicio = function(servicio) {
   window.actualizarDocumentoEnVivo();
 };
 
+// 5. Renderizado dinámico de filas con soporte para vista limpia de impresión
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -765,6 +777,7 @@ window.calcularTotalesProformaAdmin = function() {
   }
 };
 
+// Sincronización en vivo
 window.actualizarDocumentoEnVivo = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
@@ -773,6 +786,7 @@ window.actualizarDocumentoEnVivo = function() {
   if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
 };
 
+// Sincronización formulario hacia la proforma
 window.sincronizarConProformaAdmin = function() {
   const cli = document.getElementById("qRazon")?.value.trim();
   const doc = document.getElementById("qDoc")?.value.trim();
@@ -791,6 +805,7 @@ window.sincronizarConProformaAdmin = function() {
   window.actualizarDocumentoEnVivo();
 };
 
+// Sincronización inversa (de la proforma hacia el formulario base)
 window.sincronizarCamposInversos = function(tipo) {
   if (tipo === 'cliente') {
     const val = document.getElementById("prof_edit_cliente")?.value;
@@ -807,6 +822,7 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
+// 6. Generador de PDF con paso estricto a texto plano sin duplicidad
 window.descargarProformaPDF = function() {
   const element = document.getElementById("documento_proforma_imprimible");
   if (!element || typeof html2pdf === "undefined") {
@@ -814,6 +830,7 @@ window.descargarProformaPDF = function() {
     return null;
   }
 
+  // Capturar valores actuales
   const valCliente = document.getElementById("prof_edit_cliente")?.value || "CLIENTE REGISTRADO";
   const valDoc = document.getElementById("prof_edit_doc")?.value || "-";
   const valLugar = document.getElementById("prof_edit_lugar")?.value || "Huancayo";
@@ -823,6 +840,7 @@ window.descargarProformaPDF = function() {
   const valValidez = document.getElementById("prof_edit_validez")?.value || "";
   const valDcto = document.getElementById("input_descuento_admin")?.value || "0.00";
 
+  // Asignar a etiquetas de texto estáticas
   const printCli = document.getElementById("prof_print_cliente");
   const printDoc = document.getElementById("prof_print_doc");
   const printLug = document.getElementById("prof_print_lugar");
@@ -841,24 +859,19 @@ window.descargarProformaPDF = function() {
   if (printVal) printVal.textContent = valValidez;
   if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
 
-  document.querySelectorAll(".proforma-ui-tool").forEach(el => el.classList.add("hidden"));
-  document.querySelectorAll(".proforma-input-edit").forEach(el => el.classList.add("hidden"));
-  document.getElementById("prof_edit_cliente")?.classList.add("hidden");
-  document.getElementById("prof_edit_doc")?.classList.add("hidden");
-  document.getElementById("prof_edit_lugar")?.classList.add("hidden");
-  document.getElementById("prof_edit_asunto")?.classList.add("hidden");
-  document.getElementById("prof_edit_intro")?.classList.add("hidden");
-  document.getElementById("prof_edit_pago")?.classList.add("hidden");
-  document.getElementById("prof_edit_validez")?.classList.add("hidden");
+  // Ocultar de manera estricta TODOS los inputs editables y controles
+  document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.setProperty("display", "none", "important"));
+  document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.setProperty("display", "none", "important"));
 
-  printCli?.classList.remove("hidden");
-  printDoc?.classList.remove("hidden");
-  printLug?.classList.remove("hidden");
-  printAsu?.classList.remove("hidden");
-  printIntro?.classList.remove("hidden");
-  printPago?.classList.remove("hidden");
-  printVal?.classList.remove("hidden");
-  printDcto?.classList.remove("hidden");
+  // Mostrar vistas de texto plano
+  if (printCli) printCli.classList.remove("hidden");
+  if (printDoc) printDoc.classList.remove("hidden");
+  if (printLug) printLug.classList.remove("hidden");
+  if (printAsu) printAsu.classList.remove("hidden");
+  if (printIntro) printIntro.classList.remove("hidden");
+  if (printPago) printPago.classList.remove("hidden");
+  if (printVal) printVal.classList.remove("hidden");
+  if (printDcto) printDcto.classList.remove("hidden");
   document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.remove("hidden"));
 
   const clienteLimpio = valCliente.trim().replace(/[^a-zA-Z0-9]/g, '_');
@@ -866,7 +879,7 @@ window.descargarProformaPDF = function() {
   const nombreArchivo = `PROFORMA_${num}_INMUTEC_${clienteLimpio}.pdf`;
 
   const opt = {
-    margin: [6, 6, 6, 6],
+    margin: [5, 5, 5, 5],
     filename: nombreArchivo,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true, logging: false },
@@ -874,24 +887,18 @@ window.descargarProformaPDF = function() {
   };
 
   html2pdf().set(opt).from(element).save().then(() => {
-    document.querySelectorAll(".proforma-ui-tool").forEach(el => el.classList.remove("hidden"));
-    document.querySelectorAll(".proforma-input-edit").forEach(el => el.classList.remove("hidden"));
-    document.getElementById("prof_edit_cliente")?.classList.remove("hidden");
-    document.getElementById("prof_edit_doc")?.classList.remove("hidden");
-    document.getElementById("prof_edit_lugar")?.classList.remove("hidden");
-    document.getElementById("prof_edit_asunto")?.classList.remove("hidden");
-    document.getElementById("prof_edit_intro")?.classList.remove("hidden");
-    document.getElementById("prof_edit_pago")?.classList.remove("hidden");
-    document.getElementById("prof_edit_validez")?.classList.remove("hidden");
+    // Restaurar estado web visual tras generar el PDF
+    document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.removeProperty("display"));
+    document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.removeProperty("display"));
 
-    printCli?.classList.add("hidden");
-    printDoc?.classList.add("hidden");
-    printLug?.classList.add("hidden");
-    printAsu?.classList.add("hidden");
-    printIntro?.classList.add("hidden");
-    printPago?.classList.add("hidden");
-    printVal?.classList.add("hidden");
-    printDcto?.classList.add("hidden");
+    if (printCli) printCli.classList.add("hidden");
+    if (printDoc) printDoc.classList.add("hidden");
+    if (printLug) printLug.classList.add("hidden");
+    if (printAsu) printAsu.classList.add("hidden");
+    if (printIntro) printIntro.classList.add("hidden");
+    if (printPago) printPago.classList.add("hidden");
+    if (printVal) printVal.classList.add("hidden");
+    if (printDcto) printDcto.classList.add("hidden");
     document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.add("hidden"));
   });
 
@@ -899,6 +906,7 @@ window.descargarProformaPDF = function() {
   return nombreArchivo;
 };
 
+// 7. Despacho por WhatsApp (Valida número de 9 dígitos y adjunta texto formal con PDF descargado)
 window.enviarProformaWhatsApp = function() {
   const inputPhone = document.getElementById("qPhone")?.value.trim() || "";
   let destinatario = prompt("Ingresa el número celular de WhatsApp del destinatario (9 dígitos):", inputPhone);
@@ -940,6 +948,7 @@ window.enviarProformaWhatsApp = function() {
   window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
+// 8. Despacho por Correo Electrónico
 window.enviarProformaCorreo = function() {
   const inputEmail = document.getElementById("qEmail")?.value.trim() || "";
   let emailDestino = prompt("Ingresa el correo electrónico del cliente para el envío:", inputEmail);
@@ -971,7 +980,6 @@ window.enviarProformaCorreo = function() {
 
   window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
-
 // =============================================================================
 // MODULO 6: CHATBOT ASISTENTE TÉCNICO
 // =============================================================================

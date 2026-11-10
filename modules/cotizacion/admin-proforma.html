@@ -75,7 +75,7 @@
         </div>
       </div>
 
-      <!-- Datos Operativos del Documento -->
+      <!-- Parámetros del Documento -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
         <div>
           <label class="block text-slate-400 font-semibold mb-1 text-[11px] flex items-center gap-1">
@@ -97,16 +97,16 @@
       </div>
     </div>
 
-    <!-- CONTENEDOR CON SCROLL HORIZONTAL TÁCTIL (HABILITADO PARA SMARTPHONES) -->
-    <div class="w-full overflow-x-auto overflow-y-visible bg-slate-200/90 p-2 sm:p-6 rounded-2xl border border-slate-300 shadow-inner block" style="-webkit-overflow-scrolling: touch;">
+    <!-- CONTENEDOR CON SCROLL HORIZONTAL TÁCTIL -->
+    <div class="w-full overflow-x-auto bg-slate-200/90 p-2 sm:p-6 rounded-2xl border border-slate-300 shadow-inner block" style="-webkit-overflow-scrolling: touch;">
 
       <!-- AVISO VISUAL DE DESLIZAMIENTO EN TELÉFONOS -->
-      <div class="sm:hidden flex items-center justify-center gap-1.5 text-[11px] text-slate-600 font-bold bg-white/80 py-1.5 px-3 rounded-lg mb-2 shadow-sm border border-slate-300">
+      <div class="sm:hidden flex items-center justify-center gap-1.5 text-[11px] text-slate-600 font-bold bg-white/90 py-1.5 px-3 rounded-lg mb-2 shadow-sm border border-slate-300">
         <i class="fa-solid fa-arrows-left-right text-[#00a8e8] animate-pulse"></i>
         <span>Desliza con tu dedo hacia los lados para ver la proforma completa</span>
       </div>
 
-      <!-- HOJA OFICIAL A4 CORPORATIVA (FONDO BLANCO PURO) -->
+      <!-- HOJA OFICIAL A4 CORPORATIVA -->
       <div id="documento_proforma_imprimible" class="w-[790px] min-w-[790px] mx-auto bg-white p-8 text-slate-800 font-sans text-xs shadow-xl rounded-md border border-slate-300 space-y-4">
         
         <!-- ENCABEZADO MEMBRETADO CON LOGO NÍTIDO -->
@@ -140,26 +140,26 @@
           </div>
         </div>
 
-        <!-- RÓTULO DINÁMICO DE ESPECIALIDAD SELECCIONADA -->
-        <div class="bg-slate-100 border-l-4 border-[#00a8e8] py-1.5 px-3 rounded-r-lg flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="text-[9px] font-black uppercase text-slate-500">OBJETO:</span>
+        <!-- OBJETO / ASUNTO DINÁMICO SEGÚN SERVICIO SELECCIONADO -->
+        <div class="bg-slate-100 border-l-4 border-[#00a8e8] py-2 px-3 rounded-r-lg flex items-center justify-between">
+          <div class="flex items-center space-x-2 flex-1 mr-2">
+            <span class="text-[9px] font-black uppercase text-slate-500 shrink-0">OBJETO:</span>
             <input 
               type="text" 
               id="prof_edit_asunto" 
               value="PROPUESTA TÉCNICA ECONÓMICA: SERVICIO DE INTERNET DEDICADO" 
-              class="font-black text-xs uppercase text-[#002b49] bg-transparent outline-none w-[520px] focus:bg-white focus:px-2 rounded transition"
+              class="font-black text-xs uppercase text-[#002b49] bg-transparent outline-none w-full focus:bg-white focus:px-2 rounded transition proforma-input-edit"
             >
             <div id="prof_print_asunto" class="hidden font-black text-xs uppercase text-[#002b49]"></div>
           </div>
-          <span class="text-[10px] font-mono font-bold text-slate-600" id="prof_vista_fecha">HUANCAYO, 9 DE NOVIEMBRE 2026 - 2:30 PM</span>
+          <span class="text-[10px] font-mono font-bold text-slate-600 shrink-0" id="prof_vista_fecha">HUANCAYO, 10 DE NOVIEMBRE 2026 - 12:30 AM</span>
         </div>
 
         <!-- BLOQUE DE DATOS DEL CLIENTE EDITABLE -->
         <div class="bg-slate-50 border border-slate-300 rounded-lg p-3 space-y-2">
           <div class="flex items-center justify-between text-[10px]">
             <span class="font-black text-[#002b49] uppercase">SEÑORES (CLIENTE O ENTIDAD):</span>
-            <span class="text-slate-400 font-medium proforma-ui-tool italic"><i class="fa-solid fa-pen text-[9px] text-[#00a8e8]"></i> Haz clic para editar cualquier dato</span>
+            <span class="text-slate-400 font-medium proforma-ui-tool italic"><i class="fa-solid fa-pen text-[9px] text-[#00a8e8]"></i> Edición activada</span>
           </div>
 
           <div>
@@ -168,7 +168,7 @@
               id="prof_edit_cliente" 
               value="EMPRESA / CLIENTE REGISTRADO" 
               placeholder="Nombre o Razón Social del Cliente"
-              class="w-full font-black text-sm uppercase text-[#002b49] bg-white border border-slate-300 focus:border-[#00a8e8] rounded px-2.5 py-1 outline-none"
+              class="w-full font-black text-sm uppercase text-[#002b49] bg-white border border-slate-300 focus:border-[#00a8e8] rounded px-2.5 py-1 outline-none proforma-input-edit"
               oninput="window.sincronizarCamposInversos('cliente')"
             >
             <div id="prof_print_cliente" class="hidden font-black text-sm uppercase text-[#002b49]"></div>
@@ -176,26 +176,26 @@
 
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded px-2 py-1">
-              <span class="font-bold text-slate-500 text-[10px] uppercase w-14">RUC / DNI:</span>
+              <span class="font-bold text-slate-500 text-[10px] uppercase w-16 shrink-0">RUC / DNI:</span>
               <input 
                 type="text" 
                 id="prof_edit_doc" 
                 value="-" 
                 placeholder="Ej. 20568327692"
-                class="flex-1 bg-transparent font-mono text-xs font-bold text-slate-800 outline-none"
+                class="flex-1 bg-transparent font-mono text-xs font-bold text-slate-800 outline-none proforma-input-edit"
                 oninput="window.sincronizarCamposInversos('doc')"
               >
               <span id="prof_print_doc" class="hidden font-mono text-xs font-bold text-slate-800"></span>
             </div>
 
             <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded px-2 py-1">
-              <span class="font-bold text-slate-500 text-[10px] uppercase w-14">LUGAR:</span>
+              <span class="font-bold text-slate-500 text-[10px] uppercase w-16 shrink-0">LUGAR:</span>
               <input 
                 type="text" 
                 id="prof_edit_lugar" 
                 value="Huancayo" 
                 placeholder="Lugar de la Obra"
-                class="flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none"
+                class="flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none proforma-input-edit"
                 oninput="window.sincronizarCamposInversos('lugar')"
               >
               <span id="prof_print_lugar" class="hidden text-xs font-semibold text-slate-800"></span>
@@ -210,7 +210,7 @@
           <textarea 
             id="prof_edit_intro" 
             rows="2" 
-            class="w-full text-[10px] text-slate-700 leading-relaxed bg-transparent border border-transparent hover:border-slate-300 focus:border-[#00a8e8] focus:bg-white rounded p-1 outline-none transition resize-none"
+            class="w-full text-[10px] text-slate-700 leading-relaxed bg-transparent border border-transparent hover:border-slate-300 focus:border-[#00a8e8] focus:bg-white rounded p-1 outline-none transition resize-none proforma-input-edit"
           >ESTIMADOS SEÑORES: EN ATENCIÓN A SU SOLICITUD, PONEMOS A SU CONSIDERACIÓN NUESTRA MEJOR OFERTA TÉCNICA Y ECONÓMICA POR LOS SERVICIOS PROFESIONALES REQUERIDOS. QUEDAMOS A LA ESPERA DE SU AMABLE CONFORMIDAD.</textarea>
           <div id="prof_print_intro" class="hidden text-[10px] text-slate-700 leading-relaxed text-justify"></div>
         </div>
@@ -238,12 +238,12 @@
           
           <div class="col-span-7 space-y-1.5 text-[9px] text-slate-700">
             <div class="flex items-center gap-1">
-              <span class="font-bold text-slate-800">Forma de pago:</span>
+              <span class="font-bold text-slate-800 shrink-0">Forma de pago:</span>
               <input 
                 type="text" 
                 id="prof_edit_pago" 
                 value="50% INICIAL y 50% al entregar la conformidad del servicio." 
-                class="flex-1 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#00a8e8] outline-none text-[9px] text-slate-700"
+                class="flex-1 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#00a8e8] outline-none text-[9px] text-slate-700 proforma-input-edit"
               >
               <span id="prof_print_pago" class="hidden text-[9px] text-slate-700"></span>
             </div>
@@ -256,12 +256,12 @@
 
             <div class="space-y-0.5 text-[9px]">
               <div class="flex items-center gap-1">
-                <span class="font-bold text-slate-800">&bull; Validez de Oferta:</span>
+                <span class="font-bold text-slate-800 shrink-0">&bull; Validez de Oferta:</span>
                 <input 
                   type="text" 
                   id="prof_edit_validez" 
                   value="15 días calendario a partir de su emisión." 
-                  class="flex-1 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#00a8e8] outline-none text-[9px] text-slate-700"
+                  class="flex-1 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#00a8e8] outline-none text-[9px] text-slate-700 proforma-input-edit"
                 >
                 <span id="prof_print_validez" class="hidden text-[9px] text-slate-700"></span>
               </div>
