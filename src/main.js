@@ -976,7 +976,7 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 10. Descargar PDF con calibración A4 milimétrica sin cortes laterales
+// 10. Descargar PDF con calibración A4 perfecta (Sin cortes laterales ni verticales)
 window.descargarProformaPDF = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de poder descargar el PDF oficial.");
@@ -1016,11 +1016,11 @@ window.descargarProformaPDF = function() {
   if (printVal) printVal.textContent = valValidez;
   if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
 
-  // Ocultar inputs editables y controles de UI
+  // Ocultar inputs editables y herramientas interactivas
   document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.setProperty("display", "none", "important"));
   document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.setProperty("display", "none", "important"));
 
-  // Mostrar vistas limpias de texto plano
+  // Mostrar textos limpios
   if (printCli) printCli.classList.remove("hidden");
   if (printDoc) printDoc.classList.remove("hidden");
   if (printLug) printLug.classList.remove("hidden");
@@ -1035,18 +1035,17 @@ window.descargarProformaPDF = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const nombreArchivo = `PROFORMA_${num}_INMUTEC_${clienteLimpio}.pdf`;
 
-  // Configuración con ajuste estricto a página única A4 portrait
+  // Configuración estándar A4 sin restricciones forzadas de ventana
   const opt = {
-    margin: [4, 4, 4, 4],
+    margin: [5, 5, 5, 5],
     filename: nombreArchivo,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
       scale: 2,
       useCORS: true,
       logging: false,
-      scrollX: 0,
       scrollY: 0,
-      windowWidth: 740
+      scrollX: 0
     },
     jsPDF: {
       unit: 'mm',
@@ -1056,7 +1055,7 @@ window.descargarProformaPDF = function() {
   };
 
   html2pdf().set(opt).from(element).save().then(() => {
-    // Restaurar vistas
+    // Restaurar vistas para edición web
     document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.removeProperty("display"));
     document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.removeProperty("display"));
 
@@ -1073,7 +1072,6 @@ window.descargarProformaPDF = function() {
 
   return nombreArchivo;
 };
-
 // 11. Despacho por WhatsApp (Solo tras guardar)
 window.enviarProformaWhatsApp = function() {
   if (!window.proformaActualGuardada) {
