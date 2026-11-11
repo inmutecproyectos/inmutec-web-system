@@ -1363,7 +1363,7 @@ async function inicializarSistemaCompleto() {
     });
   }
 
- // ===========================================================================
+// ===========================================================================
   // CONTROLADOR GLOBAL DE EVENTOS (FLECHAS, FILTROS, SERVICIOS, BOT Y CMS)
   // ===========================================================================
   document.addEventListener("click", (e) => {
@@ -1382,53 +1382,53 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // 2. Clic en botones de filtro de especialidad / envergadura (Portafolio y Servicios)
+    // 2. Clic en botones de filtro de Portafolio y Servicios (Detección directa por contenido)
     const filterBtn = e.target.closest("button");
     if (filterBtn && filterBtn.closest("#moduleContainer")) {
-      const texto = filterBtn.textContent.trim();
-      const esBotonFiltro = 
-        texto.includes("Todos") ||
-        texto.includes("Internet") ||
-        texto.includes("Fibra") ||
-        texto.includes("Torres") ||
-        texto.includes("Laboratorio") ||
-        texto.includes("Domótica") ||
-        texto.includes("Envergadura") ||
-        texto.includes("Satelitales") ||
-        texto.includes("Supervisión");
+      const texto = (filterBtn.textContent || "").trim();
+      const esFiltro = 
+        texto.includes("Todos los") ||
+        texto.includes("Gran Envergadura") ||
+        texto.includes("Enlaces Satelitales") ||
+        texto.includes("Supervisión & Entidades") ||
+        texto.includes("Internet & Conectividad") ||
+        texto.includes("Fibra Óptica") ||
+        texto.includes("Torres & STP") ||
+        texto.includes("Laboratorio RF") ||
+        texto.includes("Domótica & Smart");
 
-      // Validar si estamos en portafolio o servicios y es un botón de filtro
-      if (esBotonFiltro && (window.location.hash.includes("portafolio") || window.location.hash.includes("servicios"))) {
+      if (esFiltro) {
         e.preventDefault();
-        const cat = filterBtn.getAttribute("data-filter") || texto;
-        window.filtrarEspecialidad?.(cat, filterBtn);
+        e.stopPropagation();
+        window.filtrarEspecialidad(texto, filterBtn);
         return;
       }
     }
 
     // 3. Clic en selectores de servicio de Cotización (5 tarjetas superiores)
-    if (window.location.hash.includes("cotizacion")) {
-      const svcCardBtn = e.target.closest("button, .cursor-pointer");
-      if (svcCardBtn && !svcCardBtn.closest("#dynamicServiceSection") && !svcCardBtn.closest("#proformaWorkspaceContainer") && !svcCardBtn.closest("#chatForm")) {
-        const txt = svcCardBtn.textContent.trim();
+    const svcCardBtn = e.target.closest("button, .cursor-pointer");
+    if (svcCardBtn && svcCardBtn.closest("#moduleContainer")) {
+      // Ignorar si el clic ocurrió dentro de la proforma, del chatbot o del formulario dinámico
+      if (!svcCardBtn.closest("#dynamicServiceSection") && !svcCardBtn.closest("#proformaWorkspaceContainer") && !svcCardBtn.closest("#chatForm")) {
+        const txt = (svcCardBtn.textContent || "").trim();
         let svcName = null;
 
-        if (txt.includes("Internet")) svcName = "Internet Dedicado";
-        else if (txt.includes("Fibra")) svcName = "Fibra Óptica";
-        else if (txt.includes("Torres") || txt.includes("STP")) svcName = "Torres & STP";
-        else if (txt.includes("Laboratorio")) svcName = "Laboratorio";
-        else if (txt.includes("Domótica") || txt.includes("Smart")) svcName = "Domótica";
+        if (txt.includes("Internet Dedicado")) svcName = "Internet Dedicado";
+        else if (txt.includes("Fibra Óptica")) svcName = "Fibra Óptica";
+        else if (txt.includes("Torres & STP")) svcName = "Torres & STP";
+        else if (txt.includes("Laboratorio RF")) svcName = "Laboratorio";
+        else if (txt.includes("Domótica & Smart")) svcName = "Domótica";
 
         if (svcName) {
           e.preventDefault();
-          
-          // Estilo activo al botón pulsado
+          e.stopPropagation();
+
+          // Resaltar tarjeta seleccionada
           svcCardBtn.parentElement?.querySelectorAll("button, div").forEach(el => {
             el.classList.remove("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
           });
           svcCardBtn.classList.add("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
 
-          // Ejecutar renderizado
           window.renderCotizacionCampos?.(svcName);
           window.aplicarPlantillaServicio?.(svcName);
           return;
