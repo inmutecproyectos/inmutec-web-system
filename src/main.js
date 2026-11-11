@@ -802,22 +802,22 @@ window.guardarProformaOficial = async function() {
     const doc = document.getElementById("prof_edit_doc")?.value.trim() || "-";
     const lugar = document.getElementById("prof_edit_lugar")?.value.trim() || "Huancayo";
     const asunto = document.getElementById("prof_edit_asunto")?.value.trim() || "PROPUESTA TÉCNICA";
-    const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
 
-    const { error } = await supabase
-      .from("proformas")
-      .insert([
-        {
-          numero_proforma: numero,
-          numero_correlativo: correlativo,
-          cliente: cliente,
-          ruc_dni: doc,
-          lugar: lugar,
-          total: total,
-          items: JSON.parse(JSON.stringify(window.itemsProformaAdmin)),
-          creado_el: new Date().toISOString()
-        }
-      ]);
+const { error } = await supabase
+  .from("proformas")
+  .insert([
+    {
+      numero_proforma: numero,
+      numero_correlativo: correlativo,
+      cliente: cliente,
+      ruc_dni: doc,
+      lugar: lugar,
+      total: total, // Se guarda directamente como texto
+      items: JSON.parse(JSON.stringify(window.itemsProformaAdmin)),
+      creado_el: new Date().toISOString()
+    }
+  ]);
 
     if (error) throw error;
 
