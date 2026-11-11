@@ -1363,44 +1363,80 @@ async function inicializarSistemaCompleto() {
     });
   }
 
-  // ===========================================================================
+ // ===========================================================================
   // CONTROLADOR GLOBAL DE EVENTOS (FLECHAS, FILTROS, SERVICIOS, BOT Y CMS)
   // ===========================================================================
   document.addEventListener("click", (e) => {
-    // 1. Clic en flecha izquierda del carrusel
-    const prevBtn = e.target.closest("#btnCarouselPrev, .carousel-prev, .carousel-btn-prev, [data-carousel='prev']");
+    // 1. Clic en flechas del carrusel
+    const prevBtn = e.target.closest("#btnCarouselPrev, #inmutecBtnPrev, .carousel-prev, .carousel-btn-prev, [data-carousel='prev']");
     if (prevBtn) {
       e.preventDefault();
       window.inmutecPrevSlide?.();
       return;
     }
 
-    // 2. Clic en flecha derecha del carrusel
-    const nextBtn = e.target.closest("#btnCarouselNext, .carousel-next, .carousel-btn-next, [data-carousel='next']");
+    const nextBtn = e.target.closest("#btnCarouselNext, #inmutecBtnNext, .carousel-next, .carousel-btn-next, [data-carousel='next']");
     if (nextBtn) {
       e.preventDefault();
       window.inmutecNextSlide?.();
       return;
     }
 
-    // 3. Clic en botones de filtro de especialidad (Portafolio / Servicios)
-    const filterBtn = e.target.closest("[data-filter], .btn-filtro");
-    if (filterBtn) {
-      const cat = filterBtn.getAttribute("data-filter") || filterBtn.textContent.trim();
-      window.filtrarEspecialidad?.(cat, filterBtn);
-      return;
+    // 2. Clic en botones de filtro de especialidad / envergadura (Portafolio y Servicios)
+    const filterBtn = e.target.closest("button");
+    if (filterBtn && filterBtn.closest("#moduleContainer")) {
+      const texto = filterBtn.textContent.trim();
+      const esBotonFiltro = 
+        texto.includes("Todos") ||
+        texto.includes("Internet") ||
+        texto.includes("Fibra") ||
+        texto.includes("Torres") ||
+        texto.includes("Laboratorio") ||
+        texto.includes("Domótica") ||
+        texto.includes("Envergadura") ||
+        texto.includes("Satelitales") ||
+        texto.includes("Supervisión");
+
+      // Validar si estamos en portafolio o servicios y es un botón de filtro
+      if (esBotonFiltro && (window.location.hash.includes("portafolio") || window.location.hash.includes("servicios"))) {
+        e.preventDefault();
+        const cat = filterBtn.getAttribute("data-filter") || texto;
+        window.filtrarEspecialidad?.(cat, filterBtn);
+        return;
+      }
     }
 
-    // 4. Clic en selectores de servicio de Cotización
-    const svcBtn = e.target.closest(".svc-selector-btn, [data-svc]");
-    if (svcBtn) {
-      const svcName = svcBtn.getAttribute("data-svc") || svcBtn.textContent.trim();
-      window.renderCotizacionCampos?.(svcName);
-      window.aplicarPlantillaServicio?.(svcName);
-      return;
+    // 3. Clic en selectores de servicio de Cotización (5 tarjetas superiores)
+    if (window.location.hash.includes("cotizacion")) {
+      const svcCardBtn = e.target.closest("button, .cursor-pointer");
+      if (svcCardBtn && !svcCardBtn.closest("#dynamicServiceSection") && !svcCardBtn.closest("#proformaWorkspaceContainer") && !svcCardBtn.closest("#chatForm")) {
+        const txt = svcCardBtn.textContent.trim();
+        let svcName = null;
+
+        if (txt.includes("Internet")) svcName = "Internet Dedicado";
+        else if (txt.includes("Fibra")) svcName = "Fibra Óptica";
+        else if (txt.includes("Torres") || txt.includes("STP")) svcName = "Torres & STP";
+        else if (txt.includes("Laboratorio")) svcName = "Laboratorio";
+        else if (txt.includes("Domótica") || txt.includes("Smart")) svcName = "Domótica";
+
+        if (svcName) {
+          e.preventDefault();
+          
+          // Estilo activo al botón pulsado
+          svcCardBtn.parentElement?.querySelectorAll("button, div").forEach(el => {
+            el.classList.remove("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
+          });
+          svcCardBtn.classList.add("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
+
+          // Ejecutar renderizado
+          window.renderCotizacionCampos?.(svcName);
+          window.aplicarPlantillaServicio?.(svcName);
+          return;
+        }
+      }
     }
 
-    // 5. Clics en botones rápidos del Chatbot
+    // 4. Clics en botones rápidos del Chatbot
     if (e.target.classList.contains("quick-btn")) {
       const q = e.target.textContent.trim();
       appendBotMessage(q, "user");
@@ -1412,7 +1448,7 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // 6. Clics de Edición CMS (Solo para administradores)
+    // 5. Clics de Edición CMS (Solo Administrador)
     if (isAdminLoggedIn) {
       const editableTarget = e.target.closest("[data-cms-key]");
       if (!editableTarget) return;
