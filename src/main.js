@@ -976,7 +976,7 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 10. Descargar PDF con renderizado ultra limpio (Sin bordes en RUC/Lugar ni dobles textos)
+// 10. Descargar PDF con calibración A4 milimétrica sin cortes laterales
 window.descargarProformaPDF = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de poder descargar el PDF oficial.");
@@ -1016,7 +1016,7 @@ window.descargarProformaPDF = function() {
   if (printVal) printVal.textContent = valValidez;
   if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
 
-  // Ocultar estrictamente todos los inputs y herramientas de interfaz
+  // Ocultar inputs editables y controles de UI
   document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.setProperty("display", "none", "important"));
   document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.setProperty("display", "none", "important"));
 
@@ -1035,16 +1035,28 @@ window.descargarProformaPDF = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const nombreArchivo = `PROFORMA_${num}_INMUTEC_${clienteLimpio}.pdf`;
 
+  // Configuración con ajuste estricto a página única A4 portrait
   const opt = {
-    margin: [6, 6, 6, 6],
+    margin: [4, 4, 4, 4],
     filename: nombreArchivo,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: 740
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    }
   };
 
   html2pdf().set(opt).from(element).save().then(() => {
-    // Restaurar estado web
+    // Restaurar vistas
     document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.removeProperty("display"));
     document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.removeProperty("display"));
 
