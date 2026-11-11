@@ -883,32 +883,43 @@ window.cargarHistorialProformas = async function() {
   }
 };
 
-// 7. Eliminar proforma de Supabase
+// =============================================================================
+// ELIMINAR PROFORMA DIRECTAMENTE EN SUPABASE
+// =============================================================================
 window.eliminarProformaHistorial = async function(identificador) {
-  if (!confirm("¿Estás seguro de que deseas eliminar esta proforma de la base de datos?")) return;
+  if (!identificador) {
+    alert("Error: Identificador de proforma no encontrado.");
+    return;
+  }
+
+  const confirmar = confirm(`¿Estás seguro de que deseas eliminar la proforma ${identificador} de la base de datos?`);
+  if (!confirmar) return;
 
   try {
+    // Si viene como ID numérico (ej: 1, 2) o como número de proforma (ej: "001072")
     let query = supabase.from("proformas").delete();
 
-    // Evalúa si el identificador es numérico (id) o de texto (numero_proforma)
-    if (!isNaN(identificador) && Number(identificador) > 100000) {
-      query = query.eq("id", identificador);
+    if (!isNaN(identificador) && Number(identificador) > 0 && !String(identificador).startsWith("00")) {
+      query = query.eq("id", Number(identificador));
     } else {
       query = query.eq("numero_proforma", String(identificador));
     }
 
-    const { error } = await query;
+    const { error, count } = await query;
     if (error) throw error;
 
-    // Recargar la tabla inmediatamente tras eliminar
+    alert(`¡Proforma ${identificador} eliminada con éxito!`);
+
+    // Recargar el listado en pantalla
     await window.cargarHistorialProformas();
-    
-    // Actualizar el número sugerido para la siguiente proforma
+
+    // Actualizar el correlativo sugerido
     if (typeof window.obtenerSiguienteNumeroProforma === "function") {
       await window.obtenerSiguienteNumeroProforma();
     }
   } catch (err) {
-    alert("Error al eliminar de Supabase: " + err.message);
+    console.error("Error al eliminar en Supabase:", err);
+    alert("Error de base de datos: " + (err.message || err));
   }
 };
 
