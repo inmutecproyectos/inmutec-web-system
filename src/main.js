@@ -160,16 +160,15 @@ async function uploadImageToSupabase(file, folder = "cms") {
 
   return publicUrlData.publicUrl;
 }
-
 // =============================================================================
-// MODULO 2: VISTA INICIO (CARRUSEL)
+// MODULO 2: VISTA INICIO (CARRUSEL AUTOMÁTICO Y FLECHAS)
 // =============================================================================
 function initInicioModule() {
-  const box = document.getElementById("inmutecCarouselBox") || document.getElementById("mainCarousel");
+  const box = document.getElementById("inmutecCarouselBox");
   if (!box) return;
 
-  const slides = box.querySelectorAll(".inmutec-slide, .carousel-slide-item");
-  const dots = box.querySelectorAll(".inmutec-dot, .carousel-dot");
+  const slides = box.querySelectorAll(".inmutec-slide");
+  const dots = box.querySelectorAll(".inmutec-dot");
   if (!slides.length) return;
 
   currentSlideIndex = 0;
@@ -192,10 +191,10 @@ function initInicioModule() {
     dots.forEach((d, i) => {
       if (i === currentSlideIndex) {
         d.classList.add("bg-[#00a8e8]", "w-6");
-        d.classList.remove("bg-white/40", "w-3");
+        d.classList.remove("bg-white/40", "w-2", "sm:w-3");
       } else {
         d.classList.remove("bg-[#00a8e8]", "w-6");
-        d.classList.add("bg-white/40", "w-3");
+        d.classList.add("bg-white/40", "w-2", "sm:w-3");
       }
     });
   }
@@ -203,6 +202,19 @@ function initInicioModule() {
   window.inmutecNextSlide = () => renderSlide(currentSlideIndex + 1);
   window.inmutecPrevSlide = () => renderSlide(currentSlideIndex - 1);
   window.inmutecGoToSlide = (i) => renderSlide(i);
+
+  const btnPrev = document.getElementById("inmutecBtnPrev");
+  const btnNext = document.getElementById("inmutecBtnNext");
+
+  if (btnPrev) btnPrev.onclick = (e) => { e.preventDefault(); window.inmutecPrevSlide(); };
+  if (btnNext) btnNext.onclick = (e) => { e.preventDefault(); window.inmutecNextSlide(); };
+
+  dots.forEach(dot => {
+    dot.onclick = () => {
+      const idx = parseInt(dot.getAttribute("data-idx"), 10) || 0;
+      window.inmutecGoToSlide(idx);
+    };
+  });
 
   if (carouselTimer) clearInterval(carouselTimer);
   carouselTimer = setInterval(() => renderSlide(currentSlideIndex + 1), 4500);
@@ -391,6 +403,34 @@ window.closeProjectModal = () => document.getElementById("projectDetailModal")?.
 window.quoteSimilarProject = function() {
   window.closeProjectModal();
   window.location.hash = "cotizacion";
+};
+// =============================================================================
+// CONTROLADOR DE FILTROS (SERVICIOS Y PORTAFOLIO)
+// =============================================================================
+window.filtrarEspecialidad = function(categoria, btnElement) {
+  // 1. Resaltar botón activo
+  const contenedorBotones = btnElement?.parentElement || document;
+  contenedorBotones.querySelectorAll("button").forEach(b => {
+    b.classList.remove("bg-[#00a8e8]", "text-white", "shadow-md");
+    b.classList.add("bg-white", "text-slate-700");
+  });
+  if (btnElement) {
+    btnElement.classList.remove("bg-white", "text-slate-700");
+    btnElement.classList.add("bg-[#00a8e8]", "text-white", "shadow-md");
+  }
+
+  // 2. Filtrar tarjetas
+  const tarjetas = document.querySelectorAll(".tarjeta-proyecto, .tarjeta-servicio, [data-categoria]");
+  tarjetas.forEach(tarjeta => {
+    const catTarjeta = tarjeta.getAttribute("data-categoria") || "";
+    if (categoria === "todos" || categoria === "Todos los Servicios" || catTarjeta.toLowerCase().includes(categoria.toLowerCase())) {
+      tarjeta.classList.remove("hidden");
+      tarjeta.style.display = "";
+    } else {
+      tarjeta.classList.add("hidden");
+      tarjeta.style.display = "none";
+    }
+  });
 };
 
 // =============================================================================
@@ -1313,6 +1353,91 @@ async function inicializarSistemaCompleto() {
     });
   }
 
+  // ===========================================================================
+  // CONTROLADOR GLOBAL DE EVENTOS (FLECHAS, FILTROS, SERVICIOS, BOT Y CMS)
+  // ===========================================================================
+  document.addEventListener("click", (e) => {
+    // 1. Clic en flecha izquierda del carrusel
+    const prevBtn = e.target.closest("#btnCarouselPrev, .carousel-prev, .carousel-btn-prev, [data-carousel='prev']");
+    if (prevBtn) {
+      e.preventDefault();
+      window.inmutecPrevSlide?.();
+      return;
+    }
+
+    // 2. Clic en flecha derecha del carrusel
+    const nextBtn = e.target.closest("#btnCarouselNext, .carousel-next, .carousel-btn-next, [data-carousel='next']");
+    if (nextBtn) {
+      e.preventDefault();
+      window.inmutecNextSlide?.();
+      return;
+    }
+
+    // 3. Clic en botones de filtro de especialidad (Portafolio / Servicios)
+    const filterBtn = e.target.closest("[data-filter], .btn-filtro");
+    if (filterBtn) {
+      const cat = filterBtn.getAttribute("data-filter") || filterBtn.textContent.trim();
+      window.filtrarEspecialidad?.(cat, filterBtn);
+      return;
+    }
+
+    // 4. Clic en selectores de servicio de Cotización
+    const svcBtn = e.target.closest(".svc-selector-btn, [data-svc]");
+    if (svcBtn) {
+      const svcName = svcBtn.getAttribute("data-svc") || svcBtn.textContent.trim();
+      window.renderCotizacionCampos?.(svcName);
+      window.aplicarPlantillaServicio?.(svcName);
+      return;
+    }
+
+    // 5. Clics en botones rápidos del Chatbot
+    if (e.target.classList.contains("quick-btn")) {
+      const q = e.target.textContent.trim();
+      appendBotMessage(q, "user");
+      processBotQuery(q);
+      return;
+    }
+    if (e.target.id === "btnResetChat" || e.target.closest("#btnResetChat")) {
+      initChatbot();
+      return;
+    }
+
+    // 6. Clics de Edición CMS (Solo para administradores)
+    if (isAdminLoggedIn) {
+      const editableTarget = e.target.closest("[data-cms-key]");
+      if (!editableTarget) return;
+
+      e.preventDefault();
+      currentEditingElement = editableTarget;
+      currentEditingKey = editableTarget.getAttribute("data-cms-key");
+      isEditingImage = editableTarget.tagName === "IMG";
+
+      const modal = document.getElementById("cmsEditorModal");
+      const title = document.getElementById("cmsModalFieldTitle");
+      const textBlock = document.getElementById("cmsTextEditorBlock");
+      const imageBlock = document.getElementById("cmsImageEditorBlock");
+      const textInput = document.getElementById("cmsTextInput");
+      const imgPreview = document.getElementById("cmsImagePreview");
+      const imgPlaceholder = document.getElementById("cmsImagePlaceholder");
+
+      if (modal && title) {
+        title.textContent = `Editando: ${currentEditingKey}`;
+        if (isEditingImage) {
+          textBlock.classList.add("hidden");
+          imageBlock.classList.remove("hidden");
+          imgPreview.src = editableTarget.src;
+          imgPreview.classList.remove("hidden");
+          imgPlaceholder.classList.add("hidden");
+        } else {
+          imageBlock.classList.add("hidden");
+          textBlock.classList.remove("hidden");
+          textInput.value = editableTarget.innerHTML.trim();
+        }
+        modal.classList.remove("hidden");
+      }
+    }
+  });
+
   document.addEventListener("submit", (e) => {
     if (e.target && e.target.id === "chatForm") {
       e.preventDefault();
@@ -1322,52 +1447,6 @@ async function inicializarSistemaCompleto() {
       appendBotMessage(msg, "user");
       input.value = "";
       processBotQuery(msg);
-    }
-  });
-
-  document.addEventListener("click", (e) => {
-    if (e.target && e.target.classList.contains("quick-btn")) {
-      const q = e.target.textContent.trim();
-      appendBotMessage(q, "user");
-      processBotQuery(q);
-    }
-    if (e.target && (e.target.id === "btnResetChat" || e.target.closest("#btnResetChat"))) {
-      initChatbot();
-    }
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!isAdminLoggedIn) return;
-    const editableTarget = e.target.closest("[data-cms-key]");
-    if (!editableTarget) return;
-
-    e.preventDefault();
-    currentEditingElement = editableTarget;
-    currentEditingKey = editableTarget.getAttribute("data-cms-key");
-    isEditingImage = editableTarget.tagName === "IMG";
-
-    const modal = document.getElementById("cmsEditorModal");
-    const title = document.getElementById("cmsModalFieldTitle");
-    const textBlock = document.getElementById("cmsTextEditorBlock");
-    const imageBlock = document.getElementById("cmsImageEditorBlock");
-    const textInput = document.getElementById("cmsTextInput");
-    const imgPreview = document.getElementById("cmsImagePreview");
-    const imgPlaceholder = document.getElementById("cmsImagePlaceholder");
-
-    if (modal && title) {
-      title.textContent = `Editando: ${currentEditingKey}`;
-      if (isEditingImage) {
-        textBlock.classList.add("hidden");
-        imageBlock.classList.remove("hidden");
-        imgPreview.src = editableTarget.src;
-        imgPreview.classList.remove("hidden");
-        imgPlaceholder.classList.add("hidden");
-      } else {
-        imageBlock.classList.add("hidden");
-        textBlock.classList.remove("hidden");
-        textInput.value = editableTarget.innerHTML.trim();
-      }
-      modal.classList.remove("hidden");
     }
   });
 
