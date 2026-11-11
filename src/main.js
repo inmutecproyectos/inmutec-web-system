@@ -848,7 +848,7 @@ window.cargarHistorialProformas = async function() {
     const { data: historial, error } = await supabase
       .from("proformas")
       .select("*")
-      .order("numero_correlativo", { ascending: false })
+      .order("creado_el", { ascending: false })
       .limit(20);
 
     if (error) throw error;
@@ -862,15 +862,16 @@ window.cargarHistorialProformas = async function() {
 
     tbody.innerHTML = "";
     historial.forEach(item => {
+      const identificador = item.id || item.numero_proforma;
       const tr = document.createElement("tr");
       tr.className = "hover:bg-slate-800/50 transition";
       tr.innerHTML = `
         <td class="py-2.5 px-2 font-mono font-bold text-amber-400">${item.numero_proforma}</td>
-        <td class="py-2.5 px-2 text-slate-400 text-[10px]">${new Date(item.creado_el).toLocaleDateString()}</td>
+        <td class="py-2.5 px-2 text-slate-400 text-[10px]">${item.creado_el ? new Date(item.creado_el).toLocaleDateString() : '-'}</td>
         <td class="py-2.5 px-3 font-semibold text-white max-w-[200px] truncate">${item.cliente || '-'}</td>
         <td class="py-2.5 px-2 text-right font-mono font-bold text-cyan-300">${item.total || '-'}</td>
         <td class="py-2.5 px-3 text-center space-x-1.5 whitespace-nowrap">
-          <button onclick="window.eliminarProformaHistorial(${item.id})" class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar de Supabase">
+          <button onclick="window.eliminarProformaHistorial('${identificador}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar de la base de datos">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </td>
@@ -883,15 +884,31 @@ window.cargarHistorialProformas = async function() {
 };
 
 // 7. Eliminar proforma de Supabase
-window.eliminarProformaHistorial = async function(id) {
+window.eliminarProformaHistorial = async function(identificador) {
   if (!confirm("¿Estás seguro de que deseas eliminar esta proforma de la base de datos?")) return;
 
   try {
-    const { error } = await supabase.from("proformas").delete().eq("id", id);
+    let query = supabase.from("proformas").delete();
+
+    // Evalúa si el identificador es numérico (id) o de texto (numero_proforma)
+    if (!isNaN(identificador) && Number(identificador) > 100000) {
+      query = query.eq("id", identificador);
+    } else {
+      query = query.eq("numero_proforma", String(identificador));
+    }
+
+    const { error } = await query;
     if (error) throw error;
+
+    // Recargar la tabla inmediatamente tras eliminar
     await window.cargarHistorialProformas();
+    
+    // Actualizar el número sugerido para la siguiente proforma
+    if (typeof window.obtenerSiguienteNumeroProforma === "function") {
+      await window.obtenerSiguienteNumeroProforma();
+    }
   } catch (err) {
-    alert("Error al eliminar: " + err.message);
+    alert("Error al eliminar de Supabase: " + err.message);
   }
 };
 
