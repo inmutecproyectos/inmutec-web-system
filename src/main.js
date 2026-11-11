@@ -405,69 +405,90 @@ window.quoteSimilarProject = function() {
   window.location.hash = "cotizacion";
 };
 // =============================================================================
-// CONTROLADOR UNIVERSAL DE FILTROS (SERVICIOS Y PORTAFOLIO)
+// FILTRO 1: PORTAFOLIO (data-filter -> data-cat)
 // =============================================================================
-window.filtrarEspecialidad = function(categoria, btnElement) {
-  if (!categoria) return;
-
-  // 1. Resaltar visualmente el botón activo
-  const parent = btnElement?.parentElement;
-  if (parent) {
-    parent.querySelectorAll("button").forEach(b => {
-      b.classList.remove("bg-[#00a8e8]", "text-white", "shadow-md");
-      b.classList.add("bg-white", "text-slate-700");
-    });
-    btnElement.classList.remove("bg-white", "text-slate-700");
-    btnElement.classList.add("bg-[#00a8e8]", "text-white", "shadow-md");
-  }
-
-  const cat = categoria.toLowerCase().trim();
-
-  // 2. Obtener todas las tarjetas de la vista activa (Servicios o Portafolio)
-  const contenedor = document.getElementById("moduleContainer");
+window.filtrarPortafolio = function(filtro, btnElement) {
+  const contenedor = document.getElementById("portfolioList") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  // Localiza los artículos / cards ignorando headers y carrusel
-  const tarjetas = Array.from(contenedor.querySelectorAll("article, .tarjeta-proyecto, .tarjeta-servicio, .group.bg-white, .grid > div"));
-
-  tarjetas.forEach(card => {
-    // Evitar ocultar el contenedor de botones, el hero o el carrusel
-    if (card.contains(btnElement) || card.closest("#inmutecCarouselBox") || card.querySelector("button[data-filter]")) {
-      return;
+  const contenedorBotones = btnElement?.parentElement || document.getElementById("portfolioFilterContainer");
+  if (contenedorBotones) {
+    contenedorBotones.querySelectorAll("button").forEach(b => {
+      b.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+      b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
+    });
+    if (btnElement) {
+      btnElement.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
+      btnElement.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
     }
+  }
 
-    const texto = (card.innerText || card.textContent || "").toLowerCase();
+  const articulos = contenedor.querySelectorAll(".project-card, article[data-cat]");
+  let visibles = 0;
 
-    let mostrar = false;
-
-    if (cat.includes("todos") || cat === "") {
-      mostrar = true;
-    } else if (cat.includes("envergadura") || cat.includes("troncal") || cat.includes("dorsal")) {
-      mostrar = texto.includes("troncal") || texto.includes("dorsal") || texto.includes("wow") || texto.includes("telrad") || texto.includes("fibra");
-    } else if (cat.includes("satelital") || cat.includes("gasoducto")) {
-      mostrar = texto.includes("satelital") || texto.includes("gasoducto") || texto.includes("tgp") || texto.includes("vsat") || texto.includes("telsat");
-    } else if (cat.includes("supervisi") || cat.includes("entidad") || cat.includes("públic") || cat.includes("public")) {
-      mostrar = texto.includes("supervisión") || texto.includes("supervision") || texto.includes("drtc") || texto.includes("tambo") || texto.includes("municipalidad") || texto.includes("estado");
-    } else if (cat.includes("internet") || cat.includes("conectividad")) {
-      mostrar = texto.includes("internet") || texto.includes("dedicado") || texto.includes("simétrico") || texto.includes("enlace");
-    } else if (cat.includes("fibra")) {
-      mostrar = texto.includes("fibra") || texto.includes("óptica") || texto.includes("optica") || texto.includes("otdr") || texto.includes("mufa");
-    } else if (cat.includes("torre") || cat.includes("stp")) {
-      mostrar = texto.includes("torre") || texto.includes("puesta a tierra") || texto.includes("stp") || texto.includes("pozo") || texto.includes("telurómetro");
-    } else if (cat.includes("laboratorio") || cat.includes("rf")) {
-      mostrar = texto.includes("laboratorio") || texto.includes("radio") || texto.includes("transceptor") || texto.includes("frecuencia") || texto.includes("motorola");
-    } else if (cat.includes("domótica") || cat.includes("domotica") || cat.includes("smart")) {
-      mostrar = texto.includes("domótica") || texto.includes("domotica") || texto.includes("smart") || texto.includes("cerradura") || texto.includes("iot") || texto.includes("automatización");
-    }
-
-    if (mostrar) {
-      card.style.display = "";
-      card.classList.remove("hidden");
+  articulos.forEach(art => {
+    const cat = art.getAttribute("data-cat");
+    if (filtro === "all" || filtro === "todos" || cat === filtro) {
+      art.style.setProperty("display", "", "");
+      art.classList.remove("hidden");
+      visibles++;
     } else {
-      card.style.display = "none";
-      card.classList.add("hidden");
+      art.style.setProperty("display", "none", "important");
+      art.classList.add("hidden");
     }
   });
+
+  const counterText = document.getElementById("portCounterText");
+  if (counterText) {
+    counterText.textContent = `Mostrando ${visibles} obra${visibles !== 1 ? 's' : ''} ${filtro === 'all' ? 'principales' : 'filtradas'}`;
+  }
+};
+
+// =============================================================================
+// FILTRO 2: SERVICIOS (data-category -> data-cat)
+// =============================================================================
+window.filtrarServicios = function(categoria, btnElement) {
+  const contenedor = document.getElementById("servicesGrid") || document.getElementById("moduleContainer");
+  if (!contenedor) return;
+
+  const contenedorBotones = btnElement?.parentElement || document.getElementById("servicesFilterGroup");
+  if (contenedorBotones) {
+    contenedorBotones.querySelectorAll("button").forEach(b => {
+      b.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+      b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
+    });
+    if (btnElement) {
+      btnElement.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
+      btnElement.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+    }
+  }
+
+  const articulos = contenedor.querySelectorAll(".svc-card, article[data-cat]");
+  let visibles = 0;
+
+  articulos.forEach(art => {
+    const cat = art.getAttribute("data-cat");
+    if (categoria === "all" || categoria === "todos" || cat === categoria) {
+      art.style.setProperty("display", "", "");
+      art.classList.remove("hidden");
+      visibles++;
+    } else {
+      art.style.setProperty("display", "none", "important");
+      art.classList.add("hidden");
+    }
+  });
+
+  const counterText = document.getElementById("svcCounterText");
+  if (counterText) {
+    counterText.textContent = `Mostrando ${visibles} especialidad${visibles !== 1 ? 'es' : ''}`;
+  }
+};
+
+  // 3. Actualizar el contador dinámico "Mostrando X obras principales"
+  const counterText = document.getElementById("portCounterText");
+  if (counterText) {
+    counterText.textContent = `Mostrando ${visibles} obra${visibles !== 1 ? 's' : ''} ${filtro === 'all' ? 'principales' : 'filtradas'}`;
+  }
 };
 
 // =============================================================================
@@ -1400,6 +1421,198 @@ async function inicializarSistemaCompleto() {
     });
   }
 
+  // ===========================================================================
+  // CONTROLADOR GLOBAL DE EVENTOS (CARRUSEL, FILTROS, SELECTOR, BOT Y CMS)
+  // ===========================================================================
+  document.addEventListener("click", (e) => {
+    // 1. Flechas del carrusel (Inicio)
+    const prevBtn = e.target.closest("#btnCarouselPrev, #inmutecBtnPrev, .carousel-prev, [data-carousel='prev']");
+    if (prevBtn) {
+      e.preventDefault();
+      window.inmutecPrevSlide?.();
+      return;
+    }
+
+    const nextBtn = e.target.closest("#btnCarouselNext, #inmutecBtnNext, .carousel-next, [data-carousel='next']");
+    if (nextBtn) {
+      e.preventDefault();
+      window.inmutecNextSlide?.();
+      return;
+    }
+
+    // 2. Filtro de Portafolio (data-filter a data-cat)
+    const portBtn = e.target.closest("#portfolioFilterContainer button, .port-tab-btn, [data-filter]");
+    if (portBtn && portBtn.closest("#moduleContainer")) {
+      e.preventDefault();
+      e.stopPropagation();
+      const filtro = portBtn.getAttribute("data-filter") || "all";
+      window.filtrarPortafolio?.(filtro, portBtn);
+      return;
+    }
+
+    // 3. Filtro de Servicios (data-category a data-cat)
+    const svcTabBtn = e.target.closest("#servicesFilterGroup button, .svc-tab-btn, [data-category]");
+    if (svcTabBtn && svcTabBtn.closest("#moduleContainer")) {
+      e.preventDefault();
+      e.stopPropagation();
+      const cat = svcTabBtn.getAttribute("data-category") || "all";
+      window.filtrarServicios?.(cat, svcTabBtn);
+      return;
+    }
+
+    // 4. Selector de Servicios en Cotización (5 tarjetas superiores)
+    if (window.location.hash.includes("cotizacion")) {
+      const svcCardBtn = e.target.closest("button, .cursor-pointer");
+      if (
+        svcCardBtn &&
+        !svcCardBtn.closest("#dynamicServiceSection") &&
+        !svcCardBtn.closest("#proformaWorkspaceContainer") &&
+        !svcCardBtn.closest("#chatForm") &&
+        svcCardBtn.closest("#moduleContainer")
+      ) {
+        const txt = (svcCardBtn.textContent || "").trim();
+        let svcName = null;
+
+        if (txt.includes("Internet Dedicado")) svcName = "Internet Dedicado";
+        else if (txt.includes("Fibra Óptica")) svcName = "Fibra Óptica";
+        else if (txt.includes("Torres & STP")) svcName = "Torres & STP";
+        else if (txt.includes("Laboratorio RF")) svcName = "Laboratorio";
+        else if (txt.includes("Domótica & Smart")) svcName = "Domótica";
+
+        if (svcName) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          svcCardBtn.parentElement?.querySelectorAll("button, div").forEach(el => {
+            el.classList.remove("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
+          });
+          svcCardBtn.classList.add("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
+
+          window.renderCotizacionCampos?.(svcName);
+          window.aplicarPlantillaServicio?.(svcName);
+          return;
+        }
+      }
+    }
+
+    // 5. Botones rápidos del Chatbot
+    if (e.target.classList.contains("quick-btn")) {
+      const q = e.target.textContent.trim();
+      appendBotMessage(q, "user");
+      processBotQuery(q);
+      return;
+    }
+    if (e.target.id === "btnResetChat" || e.target.closest("#btnResetChat")) {
+      initChatbot();
+      return;
+    }
+
+    // 6. Clics de Edición CMS (Solo Administrador)
+    if (isAdminLoggedIn) {
+      const editableTarget = e.target.closest("[data-cms-key]");
+      if (!editableTarget) return;
+
+      e.preventDefault();
+      currentEditingElement = editableTarget;
+      currentEditingKey = editableTarget.getAttribute("data-cms-key");
+      isEditingImage = editableTarget.tagName === "IMG";
+
+      const modal = document.getElementById("cmsEditorModal");
+      const title = document.getElementById("cmsModalFieldTitle");
+      const textBlock = document.getElementById("cmsTextEditorBlock");
+      const imageBlock = document.getElementById("cmsImageEditorBlock");
+      const textInput = document.getElementById("cmsTextInput");
+      const imgPreview = document.getElementById("cmsImagePreview");
+      const imgPlaceholder = document.getElementById("cmsImagePlaceholder");
+
+      if (modal && title) {
+        title.textContent = `Editando: ${currentEditingKey}`;
+        if (isEditingImage) {
+          textBlock.classList.add("hidden");
+          imageBlock.classList.remove("hidden");
+          imgPreview.src = editableTarget.src;
+          imgPreview.classList.remove("hidden");
+          imgPlaceholder.classList.add("hidden");
+        } else {
+          imageBlock.classList.add("hidden");
+          textBlock.classList.remove("hidden");
+          textInput.value = editableTarget.innerHTML.trim();
+        }
+        modal.classList.remove("hidden");
+      }
+    }
+  });
+
+  document.addEventListener("submit", (e) => {
+    if (e.target && e.target.id === "chatForm") {
+      e.preventDefault();
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendBotMessage(msg, "user");
+      input.value = "";
+      processBotQuery(msg);
+    }
+  });
+
+  const btnSaveCms = document.getElementById("btnSaveCms");
+  const btnCancelCms = document.getElementById("btnCancelCms");
+  const btnCloseCmsModal = document.getElementById("btnCloseCmsModal");
+  const cmsModal = document.getElementById("cmsEditorModal");
+
+  const closeCmsModal = () => {
+    if (cmsModal) cmsModal.classList.add("hidden");
+    currentEditingElement = null;
+    currentEditingKey = null;
+  };
+
+  if (btnCancelCms) btnCancelCms.onclick = closeCmsModal;
+  if (btnCloseCmsModal) btnCloseCmsModal.onclick = closeCmsModal;
+
+  if (btnSaveCms) {
+    btnSaveCms.onclick = async () => {
+      if (!currentEditingElement || !currentEditingKey) return;
+      btnSaveCms.disabled = true;
+      btnSaveCms.textContent = "Guardando...";
+
+      try {
+        let nuevoValor = "";
+        if (isEditingImage) {
+          const fileInput = document.getElementById("cmsFileInput");
+          if (fileInput.files.length > 0) {
+            nuevoValor = await uploadImageToSupabase(fileInput.files[0]);
+            currentEditingElement.src = nuevoValor;
+          } else {
+            nuevoValor = currentEditingElement.src;
+          }
+        } else {
+          nuevoValor = document.getElementById("cmsTextInput").value;
+          currentEditingElement.innerHTML = nuevoValor;
+        }
+
+        await supabase.from("cms_content").upsert({
+          clave: currentEditingKey,
+          valor: nuevoValor,
+          actualizado_el: new Date().toISOString()
+        });
+
+        closeCmsModal();
+      } catch (err) {
+        alert("Error al guardar en base de datos: " + err.message);
+      } finally {
+        btnSaveCms.disabled = false;
+        btnSaveCms.textContent = "Guardar Cambios en Base de Datos";
+      }
+    };
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", inicializarSistemaCompleto);
+} else {
+  inicializarSistemaCompleto();
+}
+
 // ===========================================================================
   // CONTROLADOR GLOBAL DE EVENTOS (FLECHAS, FILTROS, SERVICIOS, BOT Y CMS)
   // ===========================================================================
@@ -1419,25 +1632,33 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // 2. Clic en botones de filtro de Portafolio y Servicios (Detección directa por contenido)
-    const filterBtn = e.target.closest("button");
-    if (filterBtn && filterBtn.closest("#moduleContainer")) {
-      const texto = (filterBtn.textContent || "").trim();
-      const esFiltro = 
-        texto.includes("Todos los") ||
-        texto.includes("Gran Envergadura") ||
-        texto.includes("Enlaces Satelitales") ||
-        texto.includes("Supervisión & Entidades") ||
+// 2. Clic en botones de filtro de Portafolio y Servicios
+    // A) Portafolio (Detección por contenedor o atributo data-filter)
+    const portBtn = e.target.closest("#portfolioFilterContainer button, .port-tab-btn, [data-filter]");
+    if (portBtn && portBtn.closest("#moduleContainer")) {
+      e.preventDefault();
+      e.stopPropagation();
+      const filtro = portBtn.getAttribute("data-filter") || "all";
+      window.filtrarPortafolio?.(filtro, portBtn);
+      return;
+    }
+
+    // B) Servicios (Detección por contenido del botón)
+    const serviceFilterBtn = e.target.closest("button");
+    if (serviceFilterBtn && serviceFilterBtn.closest("#moduleContainer")) {
+      const texto = (serviceFilterBtn.textContent || "").trim();
+      const esFiltroServicio = 
+        texto.includes("Todos los Servicios") ||
         texto.includes("Internet & Conectividad") ||
         texto.includes("Fibra Óptica") ||
         texto.includes("Torres & STP") ||
         texto.includes("Laboratorio RF") ||
         texto.includes("Domótica & Smart");
 
-      if (esFiltro) {
+      if (esFiltroServicio) {
         e.preventDefault();
         e.stopPropagation();
-        window.filtrarEspecialidad(texto, filterBtn);
+        window.filtrarEspecialidad?.(texto, serviceFilterBtn);
         return;
       }
     }
