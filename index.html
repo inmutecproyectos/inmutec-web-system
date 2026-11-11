@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Estructura base fluida sin bloqueos de desplazamiento horizontal */
+    /* Estructura fluida sin bloqueos de desplazamiento horizontal */
     html, body {
       max-width: 100%;
       position: relative;
@@ -83,40 +83,41 @@
     </div>
   </div>
 
-  <!-- ==================== HEADER RESPONSIVO ==================== -->
+  <!-- ==================== HEADER RESPONSIVO (UNA SOLA FILA ALINEADA) ==================== -->
   <header class="bg-gradient-to-r from-[#002b49] via-[#003c66] to-[#002038] text-white shadow-xl z-40 border-b-2 border-brand-cyan w-full">
+    <div class="max-w-[1550px] mx-auto px-3 sm:px-4 min-h-[64px] flex items-center justify-between gap-2 sm:gap-4 py-2">
       
       <!-- LOGO LIMPIO Y NÍTIDO -->
       <div class="flex items-center space-x-2 sm:space-x-3 cursor-pointer select-none shrink-0" onclick="window.location.hash='inicio'">
-        <div class="bg-white px-2 py-1 sm:px-2.5 sm:py-1 rounded-xl flex items-center border border-white">
+        <div class="bg-white px-2 py-1 sm:px-2.5 sm:py-1 rounded-xl flex items-center border border-white shadow-sm">
           <img 
             src="./public/assets/brand/logo-inmutec.png" 
             alt="INMUTEC Logo" 
-            class="h-7 sm:h-9 w-auto object-contain block"
+            class="h-7 sm:h-8 md:h-9 w-auto object-contain block"
             onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
           />
           <div id="logo-fallback" class="hidden items-center space-x-0.5 font-black text-base sm:text-lg">
             <span class="text-[#002b49]">INMU</span><span class="text-[#00a8e8]">TEC</span>
           </div>
         </div>
-        <div class="hidden sm:block leading-tight">
+        <div class="hidden xl:block leading-tight">
           <p class="text-[11px] font-black tracking-wider text-white uppercase drop-shadow">TELECOMUNICACIONES E INTERNET</p>
           <span class="text-[9px] text-cyan-200 font-semibold tracking-wide">Multiservicios Generales E.I.R.L.</span>
         </div>
       </div>
 
-      <!-- NAVEGACIÓN EN ESCRITORIO (PC / LAPTOP) -->
-      <nav class="hidden lg:flex items-center space-x-1 font-bold uppercase tracking-wide text-xs xl:text-sm">
-        <button id="btn-inicio" data-module="inicio" class="nav-tab px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Inicio</button>
-        <button id="btn-quienes-somos" data-module="quienes-somos" class="nav-tab px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Quiénes Somos</button>
-        <button id="btn-servicios" data-module="servicios" class="nav-tab px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Servicios</button>
-        <button id="btn-portafolio" data-module="portafolio" class="nav-tab px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Portafolio</button>
-        <button id="btn-cotizacion" data-module="cotizacion" class="nav-tab px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10">Cotización</button>
+      <!-- NAVEGACIÓN EN ESCRITORIO (SIN SALTO DE LÍNEA) -->
+      <nav class="hidden lg:flex items-center space-x-1 xl:space-x-2 font-bold uppercase tracking-wide text-xs shrink-0">
+        <button id="btn-inicio" data-module="inicio" class="nav-tab px-2.5 xl:px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10 whitespace-nowrap">Inicio</button>
+        <button id="btn-quienes-somos" data-module="quienes-somos" class="nav-tab px-2.5 xl:px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10 whitespace-nowrap">Quiénes Somos</button>
+        <button id="btn-servicios" data-module="servicios" class="nav-tab px-2.5 xl:px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10 whitespace-nowrap">Servicios</button>
+        <button id="btn-portafolio" data-module="portafolio" class="nav-tab px-2.5 xl:px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10 whitespace-nowrap">Portafolio</button>
+        <button id="btn-cotizacion" data-module="cotizacion" class="nav-tab px-2.5 xl:px-3 py-1.5 rounded-xl transition text-slate-200 hover:text-white hover:bg-white/10 whitespace-nowrap">Cotización</button>
       </nav>
 
-      <!-- BOTONES DE LA DERECHA: LOGIN Y BOTÓN HAMBURGUESA PARA CELULAR -->
+      <!-- BOTONES DE LA DERECHA: LOGIN Y HAMBURGUESA MÓVIL -->
       <div class="flex items-center space-x-2 shrink-0">
-        <button id="btnOpenLoginModal" class="bg-[#00a8e8] hover:bg-[#0092ca] text-white text-[11px] sm:text-xs font-black uppercase px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow border border-cyan-300 transition flex items-center space-x-1 cursor-pointer">
+        <button id="btnOpenLoginModal" class="bg-[#00a8e8] hover:bg-[#0092ca] text-white text-[11px] sm:text-xs font-black uppercase px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl shadow border border-cyan-300 transition flex items-center space-x-1 cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-lock text-[10px]"></i>
           <span id="txtLoginBtn">Login</span>
         </button>
