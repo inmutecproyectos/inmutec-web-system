@@ -405,30 +405,67 @@ window.quoteSimilarProject = function() {
   window.location.hash = "cotizacion";
 };
 // =============================================================================
-// CONTROLADOR DE FILTROS (SERVICIOS Y PORTAFOLIO)
+// CONTROLADOR UNIVERSAL DE FILTROS (SERVICIOS Y PORTAFOLIO)
 // =============================================================================
 window.filtrarEspecialidad = function(categoria, btnElement) {
-  // 1. Resaltar botón activo
-  const contenedorBotones = btnElement?.parentElement || document;
-  contenedorBotones.querySelectorAll("button").forEach(b => {
-    b.classList.remove("bg-[#00a8e8]", "text-white", "shadow-md");
-    b.classList.add("bg-white", "text-slate-700");
-  });
-  if (btnElement) {
+  if (!categoria) return;
+
+  // 1. Resaltar visualmente el botón activo
+  const parent = btnElement?.parentElement;
+  if (parent) {
+    parent.querySelectorAll("button").forEach(b => {
+      b.classList.remove("bg-[#00a8e8]", "text-white", "shadow-md");
+      b.classList.add("bg-white", "text-slate-700");
+    });
     btnElement.classList.remove("bg-white", "text-slate-700");
     btnElement.classList.add("bg-[#00a8e8]", "text-white", "shadow-md");
   }
 
-  // 2. Filtrar tarjetas
-  const tarjetas = document.querySelectorAll(".tarjeta-proyecto, .tarjeta-servicio, [data-categoria]");
-  tarjetas.forEach(tarjeta => {
-    const catTarjeta = tarjeta.getAttribute("data-categoria") || "";
-    if (categoria === "todos" || categoria === "Todos los Servicios" || catTarjeta.toLowerCase().includes(categoria.toLowerCase())) {
-      tarjeta.classList.remove("hidden");
-      tarjeta.style.display = "";
+  const cat = categoria.toLowerCase().trim();
+
+  // 2. Obtener todas las tarjetas de la vista activa (Servicios o Portafolio)
+  const contenedor = document.getElementById("moduleContainer");
+  if (!contenedor) return;
+
+  // Localiza los artículos / cards ignorando headers y carrusel
+  const tarjetas = Array.from(contenedor.querySelectorAll("article, .tarjeta-proyecto, .tarjeta-servicio, .group.bg-white, .grid > div"));
+
+  tarjetas.forEach(card => {
+    // Evitar ocultar el contenedor de botones, el hero o el carrusel
+    if (card.contains(btnElement) || card.closest("#inmutecCarouselBox") || card.querySelector("button[data-filter]")) {
+      return;
+    }
+
+    const texto = (card.innerText || card.textContent || "").toLowerCase();
+
+    let mostrar = false;
+
+    if (cat.includes("todos") || cat === "") {
+      mostrar = true;
+    } else if (cat.includes("envergadura") || cat.includes("troncal") || cat.includes("dorsal")) {
+      mostrar = texto.includes("troncal") || texto.includes("dorsal") || texto.includes("wow") || texto.includes("telrad") || texto.includes("fibra");
+    } else if (cat.includes("satelital") || cat.includes("gasoducto")) {
+      mostrar = texto.includes("satelital") || texto.includes("gasoducto") || texto.includes("tgp") || texto.includes("vsat") || texto.includes("telsat");
+    } else if (cat.includes("supervisi") || cat.includes("entidad") || cat.includes("públic") || cat.includes("public")) {
+      mostrar = texto.includes("supervisión") || texto.includes("supervision") || texto.includes("drtc") || texto.includes("tambo") || texto.includes("municipalidad") || texto.includes("estado");
+    } else if (cat.includes("internet") || cat.includes("conectividad")) {
+      mostrar = texto.includes("internet") || texto.includes("dedicado") || texto.includes("simétrico") || texto.includes("enlace");
+    } else if (cat.includes("fibra")) {
+      mostrar = texto.includes("fibra") || texto.includes("óptica") || texto.includes("optica") || texto.includes("otdr") || texto.includes("mufa");
+    } else if (cat.includes("torre") || cat.includes("stp")) {
+      mostrar = texto.includes("torre") || texto.includes("puesta a tierra") || texto.includes("stp") || texto.includes("pozo") || texto.includes("telurómetro");
+    } else if (cat.includes("laboratorio") || cat.includes("rf")) {
+      mostrar = texto.includes("laboratorio") || texto.includes("radio") || texto.includes("transceptor") || texto.includes("frecuencia") || texto.includes("motorola");
+    } else if (cat.includes("domótica") || cat.includes("domotica") || cat.includes("smart")) {
+      mostrar = texto.includes("domótica") || texto.includes("domotica") || texto.includes("smart") || texto.includes("cerradura") || texto.includes("iot") || texto.includes("automatización");
+    }
+
+    if (mostrar) {
+      card.style.display = "";
+      card.classList.remove("hidden");
     } else {
-      tarjeta.classList.add("hidden");
-      tarjeta.style.display = "none";
+      card.style.display = "none";
+      card.classList.add("hidden");
     }
   });
 };
