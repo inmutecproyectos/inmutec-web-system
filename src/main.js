@@ -405,35 +405,36 @@ window.quoteSimilarProject = function() {
   window.location.hash = "cotizacion";
 };
 // =============================================================================
-// FILTRO 1: PORTAFOLIO (data-filter -> data-cat)
+// FILTRO 1: PORTAFOLIO (Limpieza infalible de estilos)
 // =============================================================================
 window.filtrarPortafolio = function(filtro, btnElement) {
   const contenedor = document.getElementById("portfolioList") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  // 1. Limpieza total de estilos en todos los botones del portafolio
-  const contenedorBotones = document.getElementById("portfolioFilterContainer") || btnElement?.parentElement;
+  // 1. Resetear el aspecto de TODOS los botones del contenedor
+  const contenedorBotones = document.getElementById("portfolioFilterContainer") || btnElement?.closest("#portfolioFilterContainer") || btnElement?.parentElement;
   if (contenedorBotones) {
     const todosBotones = contenedorBotones.querySelectorAll("button, .port-tab-btn");
     todosBotones.forEach(b => {
-      b.classList.remove("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm", "text-white");
-      b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
+      // Estilo estándar inactivo (Blanco con texto gris)
+      b.className = "port-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer";
     });
 
-    // 2. Activar exclusivamente el botón pulsado
+    // 2. Aplicar estilo activo ÚNICAMENTE al botón clickeado
     if (btnElement) {
-      btnElement.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
-      btnElement.classList.add("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+      btnElement.className = "port-tab-btn active-tab shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer";
     }
   }
 
-  // 3. Filtrar artículos
+  // 3. Filtrar tarjetas
   const articulos = contenedor.querySelectorAll(".project-card, article[data-cat]");
   let visibles = 0;
 
   articulos.forEach(art => {
-    const cat = art.getAttribute("data-cat");
-    if (filtro === "all" || filtro === "todos" || cat === filtro) {
+    const cat = (art.getAttribute("data-cat") || "").trim().toLowerCase();
+    const f = (filtro || "all").trim().toLowerCase();
+
+    if (f === "all" || f === "todos" || cat === f) {
       art.style.setProperty("display", "", "");
       art.classList.remove("hidden");
       visibles++;
@@ -450,25 +451,24 @@ window.filtrarPortafolio = function(filtro, btnElement) {
 };
 
 // =============================================================================
-// FILTRO 2: SERVICIOS (data-category -> data-cat)
+// FILTRO 2: SERVICIOS (Limpieza infalible de estilos)
 // =============================================================================
 window.filtrarServicios = function(categoria, btnElement) {
   const contenedor = document.getElementById("servicesGrid") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  // 1. Limpieza total de estilos en todos los botones de servicios
-  const contenedorBotones = document.getElementById("servicesFilterGroup") || btnElement?.parentElement;
+  // 1. Resetear el aspecto de TODOS los botones del contenedor
+  const contenedorBotones = document.getElementById("servicesFilterGroup") || btnElement?.closest("#servicesFilterGroup") || btnElement?.parentElement;
   if (contenedorBotones) {
     const todosBotones = contenedorBotones.querySelectorAll("button, .svc-tab-btn");
     todosBotones.forEach(b => {
-      b.classList.remove("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm", "text-white");
-      b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
+      // Estilo estándar inactivo (Blanco con texto gris)
+      b.className = "svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer";
     });
 
-    // 2. Activar exclusivamente el botón pulsado
+    // 2. Aplicar estilo activo ÚNICAMENTE al botón clickeado
     if (btnElement) {
-      btnElement.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
-      btnElement.classList.add("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+      btnElement.className = "svc-tab-btn active-tab shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer";
     }
   }
 
@@ -477,8 +477,10 @@ window.filtrarServicios = function(categoria, btnElement) {
   let visibles = 0;
 
   articulos.forEach(art => {
-    const cat = art.getAttribute("data-cat");
-    if (categoria === "all" || categoria === "todos" || cat === categoria) {
+    const cat = (art.getAttribute("data-cat") || "").trim().toLowerCase();
+    const c = (categoria || "all").trim().toLowerCase();
+
+    if (c === "all" || c === "todos" || cat === c) {
       art.style.setProperty("display", "", "");
       art.classList.remove("hidden");
       visibles++;
@@ -493,7 +495,6 @@ window.filtrarServicios = function(categoria, btnElement) {
     counterText.textContent = `Mostrando ${visibles} especialidad${visibles !== 1 ? 'es' : ''}`;
   }
 };
-
 // =============================================================================
 // MODULO 4: VISTA COTIZACIÓN
 // =============================================================================
