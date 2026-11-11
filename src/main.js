@@ -489,7 +489,7 @@ window.filtrarServicios = function(categoria, btnElement) {
   if (counterText) {
     counterText.textContent = `Mostrando ${visibles} obra${visibles !== 1 ? 's' : ''} ${filtro === 'all' ? 'principales' : 'filtradas'}`;
   }
-};
+;
 
 // =============================================================================
 // MODULO 4: VISTA COTIZACIÓN
@@ -1804,7 +1804,7 @@ if (document.readyState === "loading") {
       }
     };
   }
-}
+
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", inicializarSistemaCompleto);
