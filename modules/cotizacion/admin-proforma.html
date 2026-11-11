@@ -1,7 +1,7 @@
 <!-- MÓDULO ADMINISTRATIVO EXCLUSIVO: GENERADOR Y EMISOR DE PROFORMAS TÉCNICAS -->
 <div class="w-full max-w-full space-y-4">
 
-  <!-- BARRA DE ACTIVACIÓN (DESPLEGABLE BAJO DEMANDA) -->
+  <!-- BARRA DE ACTIVACIÓN -->
   <div class="bg-gradient-to-r from-slate-900 via-[#002b49] to-slate-900 border-2 border-amber-400/80 p-3.5 sm:p-4 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-3">
     <div class="flex items-center space-x-3 w-full md:w-auto">
       <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center text-lg font-black shrink-0 shadow-md">
@@ -37,17 +37,25 @@
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl p-4 sm:p-5 text-white space-y-4 shadow-2xl">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div>
-          <span class="text-[10px] font-mono text-cyan-300 uppercase tracking-widest block">Configuración de Emisión</span>
-          <h4 class="text-xs sm:text-sm font-black text-white">Parámetros del Documento & Selección de Especialidad</h4>
+          <span class="text-[10px] font-mono text-cyan-300 uppercase tracking-widest block">Control Operativo</span>
+          <h4 class="text-xs sm:text-sm font-black text-white">Parámetros, Guardado & Despacho</h4>
         </div>
+        
+        <!-- BOTONES DE ACCIÓN: Guardar activa las opciones de exportación -->
         <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
-          <button type="button" onclick="descargarProformaPDF()" class="bg-[#00a8e8] hover:bg-[#0092ca] text-[#002b49] font-black text-[11px] py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-file-pdf"></i> Descargar PDF (PC)
+          <button type="button" id="btnGuardarProforma" onclick="guardarProformaOficial()" class="col-span-2 sm:col-span-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-2 px-3 rounded-xl shadow-lg transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-floppy-disk text-sm"></i> Guardar Proforma
           </button>
-          <button type="button" onclick="enviarProformaWhatsApp()" class="bg-[#25D366] hover:bg-[#20ba5a] text-white font-black text-[11px] py-2 px-3 rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
-            <i class="fa-brands fa-whatsapp"></i> Despachar WhatsApp
+          
+          <button type="button" id="btnDescargarPDF" onclick="descargarProformaPDF()" disabled class="bg-slate-700 text-slate-400 font-black text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60">
+            <i class="fa-solid fa-file-pdf"></i> Descargar PDF
           </button>
-          <button type="button" onclick="enviarProformaCorreo()" class="col-span-2 sm:col-span-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+          
+          <button type="button" id="btnEnviarWhatsApp" onclick="enviarProformaWhatsApp()" disabled class="bg-slate-700 text-slate-400 font-black text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          </button>
+          
+          <button type="button" id="btnEnviarCorreo" onclick="enviarProformaCorreo()" disabled class="bg-slate-700 text-slate-400 font-bold text-[11px] py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60">
             <i class="fa-solid fa-envelope"></i> Email
           </button>
         </div>
@@ -75,17 +83,17 @@
         </div>
       </div>
 
-      <!-- Parámetros del Documento -->
+      <!-- Datos Operativos del Documento -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
         <div>
           <label class="block text-slate-400 font-semibold mb-1 text-[11px] flex items-center gap-1">
-            <i class="fa-solid fa-lock text-[10px] text-amber-400"></i> Nº Proforma Correlativo
+            <i class="fa-solid fa-lock text-[10px] text-amber-400"></i> Nº Proforma Activa
           </label>
           <input type="text" id="admin_prof_numero" readonly class="w-full bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-1.5 font-mono text-amber-400 font-black text-xs cursor-not-allowed select-none">
         </div>
         <div>
           <label class="block text-slate-400 font-semibold mb-1 text-[11px] flex items-center gap-1">
-            <i class="fa-solid fa-lock text-[10px] text-amber-400"></i> Fecha & Hora Automática (Huancayo)
+            <i class="fa-solid fa-lock text-[10px] text-amber-400"></i> Fecha de Registro
           </label>
           <input type="text" id="admin_prof_fecha" readonly class="w-full bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-300 text-xs cursor-not-allowed select-none">
         </div>
@@ -100,14 +108,13 @@
     <!-- CONTENEDOR CON SCROLL HORIZONTAL TÁCTIL -->
     <div class="w-full overflow-x-auto bg-slate-200/90 p-2 sm:p-6 rounded-2xl border border-slate-300 shadow-inner block" style="-webkit-overflow-scrolling: touch;">
 
-      <!-- AVISO VISUAL DE DESLIZAMIENTO EN TELÉFONOS -->
       <div class="sm:hidden flex items-center justify-center gap-1.5 text-[11px] text-slate-600 font-bold bg-white/90 py-1.5 px-3 rounded-lg mb-2 shadow-sm border border-slate-300">
         <i class="fa-solid fa-arrows-left-right text-[#00a8e8] animate-pulse"></i>
-        <span>Desliza con tu dedo hacia los lados para ver la proforma completa</span>
+        <span>Desliza con tu dedo para ver la proforma completa</span>
       </div>
 
-      <!-- HOJA OFICIAL A4 CORPORATIVA -->
-      <div id="documento_proforma_imprimible" class="w-[790px] min-w-[790px] mx-auto bg-white p-8 text-slate-800 font-sans text-xs shadow-xl rounded-md border border-slate-300 space-y-4">
+      <!-- HOJA OFICIAL A4 CORPORATIVA (800px EXACTOS) -->
+      <div id="documento_proforma_imprimible" class="w-[800px] min-w-[800px] mx-auto bg-white p-8 text-slate-800 font-sans text-xs shadow-xl rounded-md border border-slate-300 space-y-4">
         
         <!-- ENCABEZADO MEMBRETADO CON LOGO NÍTIDO -->
         <div class="flex items-start justify-between border-b-2 border-[#002b49] pb-3">
@@ -140,7 +147,7 @@
           </div>
         </div>
 
-        <!-- OBJETO / ASUNTO DINÁMICO SEGÚN SERVICIO SELECCIONADO -->
+        <!-- OBJETO / ASUNTO DINÁMICO -->
         <div class="bg-slate-100 border-l-4 border-[#00a8e8] py-2 px-3 rounded-r-lg flex items-center justify-between">
           <div class="flex items-center space-x-2 flex-1 mr-2">
             <span class="text-[9px] font-black uppercase text-slate-500 shrink-0">OBJETO:</span>
@@ -152,14 +159,14 @@
             >
             <div id="prof_print_asunto" class="hidden font-black text-xs uppercase text-[#002b49]"></div>
           </div>
-          <span class="text-[10px] font-mono font-bold text-slate-600 shrink-0" id="prof_vista_fecha">HUANCAYO, 10 DE NOVIEMBRE 2026 - 12:30 AM</span>
+          <span class="text-[10px] font-mono font-bold text-slate-600 shrink-0" id="prof_vista_fecha">HUANCAYO, 10 DE NOVIEMBRE 2026 - 1:17 AM</span>
         </div>
 
         <!-- BLOQUE DE DATOS DEL CLIENTE EDITABLE -->
         <div class="bg-slate-50 border border-slate-300 rounded-lg p-3 space-y-2">
           <div class="flex items-center justify-between text-[10px]">
             <span class="font-black text-[#002b49] uppercase">SEÑORES (CLIENTE O ENTIDAD):</span>
-            <span class="text-slate-400 font-medium proforma-ui-tool italic"><i class="fa-solid fa-pen text-[9px] text-[#00a8e8]"></i> Edición activada</span>
+            <span class="text-slate-400 font-medium proforma-ui-tool italic"><i class="fa-solid fa-pen text-[9px] text-[#00a8e8]"></i> Haz clic para editar</span>
           </div>
 
           <div>
@@ -174,28 +181,29 @@
             <div id="prof_print_cliente" class="hidden font-black text-sm uppercase text-[#002b49]"></div>
           </div>
 
+          <!-- RUC y LUGAR SIN BORDES VISIBLES EN PDF -->
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded px-2 py-1">
+            <div class="flex items-center gap-1.5 p-1 rounded" id="box_ruc_container">
               <span class="font-bold text-slate-500 text-[10px] uppercase w-16 shrink-0">RUC / DNI:</span>
               <input 
                 type="text" 
                 id="prof_edit_doc" 
                 value="-" 
                 placeholder="Ej. 20568327692"
-                class="flex-1 bg-transparent font-mono text-xs font-bold text-slate-800 outline-none proforma-input-edit"
+                class="flex-1 bg-white border border-slate-300 rounded px-2 py-0.5 font-mono text-xs font-bold text-slate-800 outline-none proforma-input-edit"
                 oninput="window.sincronizarCamposInversos('doc')"
               >
               <span id="prof_print_doc" class="hidden font-mono text-xs font-bold text-slate-800"></span>
             </div>
 
-            <div class="flex items-center gap-1.5 bg-white border border-slate-300 rounded px-2 py-1">
+            <div class="flex items-center gap-1.5 p-1 rounded" id="box_lugar_container">
               <span class="font-bold text-slate-500 text-[10px] uppercase w-16 shrink-0">LUGAR:</span>
               <input 
                 type="text" 
                 id="prof_edit_lugar" 
                 value="Huancayo" 
                 placeholder="Lugar de la Obra"
-                class="flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none proforma-input-edit"
+                class="flex-1 bg-white border border-slate-300 rounded px-2 py-0.5 text-xs font-semibold text-slate-800 outline-none proforma-input-edit"
                 oninput="window.sincronizarCamposInversos('lugar')"
               >
               <span id="prof_print_lugar" class="hidden text-xs font-semibold text-slate-800"></span>
@@ -316,6 +324,34 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE PROFORMAS EMITIDAS (CON ACCIÓN DE ELIMINAR) -->
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl p-4 sm:p-5 text-white space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-[#00a8e8]"></i>
+          <h4 class="text-xs sm:text-sm font-black uppercase text-white">Historial de Proformas Emitidas</h4>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400" id="historial_count_badge">0 registros</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 text-[10px] uppercase font-mono">
+              <th class="py-2 px-2">Nº</th>
+              <th class="py-2 px-2">Fecha</th>
+              <th class="py-2 px-3">Cliente</th>
+              <th class="py-2 px-2 text-right">Total</th>
+              <th class="py-2 px-3 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="historial_proformas_body" class="divide-y divide-slate-800 text-[11px]">
+            <!-- Inyectado dinámicamente -->
+          </tbody>
+        </table>
       </div>
     </div>
 

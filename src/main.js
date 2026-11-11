@@ -564,22 +564,17 @@ export async function verificarYMontarAdminProforma() {
 // MODULO 5: EMISOR OFICIAL DE PROFORMAS TÉCNICAS (ADMIN CMS)
 // =============================================================================
 
-// 1. Contador correlativo automático (Protegido - Solo Lectura)
-window.obtenerSiguienteNumeroProforma = async function() {
-  let siguiente = 1070;
-  try {
-    const { count, error } = await supabase.from("cotizaciones").select("*", { count: "exact", head: true });
-    if (!error && typeof count === "number") {
-      siguiente = 1070 + count;
-    }
-  } catch (e) {
-    const guardado = localStorage.getItem("inmutec_ultimo_correlativo");
-    if (guardado) siguiente = parseInt(guardado, 10) + 1;
-  }
-  return String(siguiente).padStart(6, "0");
+// Variable de estado: true solo cuando la proforma actual ha sido guardada
+window.proformaActualGuardada = false;
+
+// 1. Obtener correlativo actual activo sin saltarlo
+window.obtenerNumeroProformaActual = function() {
+  const guardado = localStorage.getItem("inmutec_ultimo_correlativo");
+  const base = guardado ? parseInt(guardado, 10) : 1072;
+  return String(base).padStart(6, "0");
 };
 
-// 2. Fecha y hora automática de Huancayo (Protegido - Solo Lectura)
+// 2. Fecha y hora automática de Huancayo
 window.generarFechaHoraHuancayo = function() {
   const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   const ahora = new Date();
@@ -597,7 +592,7 @@ window.generarFechaHoraHuancayo = function() {
 };
 
 // 3. Abrir / Cerrar Mesa de Proformas
-window.toggleProformaWorkspace = async function() {
+window.toggleProformaWorkspace = function() {
   const box = document.getElementById("proformaWorkspaceContainer");
   const txt = document.getElementById("btnToggleProformaText");
   const icon = document.getElementById("btnToggleIcon");
@@ -608,7 +603,7 @@ window.toggleProformaWorkspace = async function() {
     if (txt) txt.textContent = "Ocultar Mesa de Proforma";
     if (icon) icon.classList.add("rotate-180");
 
-    const num = await window.obtenerSiguienteNumeroProforma();
+    const num = window.obtenerNumeroProformaActual();
     const fechaHora = window.generarFechaHoraHuancayo();
 
     const inputNum = document.getElementById("admin_prof_numero");
@@ -619,6 +614,8 @@ window.toggleProformaWorkspace = async function() {
     const servicioActual = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
     window.aplicarPlantillaServicio(servicioActual);
     window.sincronizarConProformaAdmin();
+    window.bloquearAccionesDespacho();
+    window.cargarHistorialProformas();
   } else {
     box.classList.add("hidden");
     if (txt) txt.textContent = "Realizar Nueva Proforma";
@@ -626,24 +623,140 @@ window.toggleProformaWorkspace = async function() {
   }
 };
 
-// 4. Plantillas de partidas técnicas y actualización de OBJETO según el servicio elegido
-window.aplicarPlantillaServicio = function(servicio) {
-  // Resaltar botón activo
-  document.querySelectorAll(".srv-admin-filter").forEach(b => {
-    b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
-    if (b.dataset.filter === servicio) {
-      b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+// 4. Bloquear y desbloquear botones de exportación
+window.bloquearAccionesDespacho = function() {
+  window.proformaActualGuardada = false;
+  const btns = ["btnDescargarPDF", "btnEnviarWhatsApp", "btnEnviarCorreo"];
+  btns.forEach(id => {
+    const b = document.getElementById(id);
+    if (b) {
+      b.disabled = true;
+      b.classList.add("cursor-not-allowed", "opacity-60", "bg-slate-700", "text-slate-400");
+      b.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "bg-[#25D366]", "text-white", "hover:bg-[#0092ca]", "hover:bg-[#20ba5a]");
     }
   });
+};
 
-  // Actualizar objeto dinámico tanto en input como en vista imprimible
+window.desbloquearAccionesDespacho = function() {
+  window.proformaActualGuardada = true;
+  
+  const bPdf = document.getElementById("btnDescargarPDF");
+  if (bPdf) {
+    bPdf.disabled = false;
+    bPdf.classList.remove("cursor-not-allowed", "opacity-60", "bg-slate-700", "text-slate-400");
+    bPdf.classList.add("bg-[#00a8e8]", "hover:bg-[#0092ca]", "text-[#002b49]", "cursor-pointer");
+  }
+
+  const bWa = document.getElementById("btnEnviarWhatsApp");
+  if (bWa) {
+    bWa.disabled = false;
+    bWa.classList.remove("cursor-not-allowed", "opacity-60", "bg-slate-700", "text-slate-400");
+    bWa.classList.add("bg-[#25D366]", "hover:bg-[#20ba5a]", "text-white", "cursor-pointer");
+  }
+
+  const bMail = document.getElementById("btnEnviarCorreo");
+  if (bMail) {
+    bMail.disabled = false;
+    bMail.classList.remove("cursor-not-allowed", "opacity-60", "bg-slate-700", "text-slate-400");
+    bMail.classList.add("bg-slate-800", "hover:bg-slate-700", "text-slate-200", "cursor-pointer");
+  }
+};
+
+// 5. Guardar Proforma: guarda en historial, desbloquea acciones y avanza el correlativo
+window.guardarProformaOficial = function() {
+  const num = document.getElementById("admin_prof_numero")?.value || "001072";
+  const fecha = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
+  const cliente = document.getElementById("prof_edit_cliente")?.value.trim() || "EMPRESA REGISTRADA";
+  const doc = document.getElementById("prof_edit_doc")?.value.trim() || "-";
+  const lugar = document.getElementById("prof_edit_lugar")?.value.trim() || "Huancayo";
+  const asunto = document.getElementById("prof_edit_asunto")?.value.trim() || "PROPUESTA TÉCNICA";
+  const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+
+  const nuevaProforma = {
+    id: Date.now(),
+    numero: num,
+    fecha: fecha,
+    cliente: cliente,
+    doc: doc,
+    lugar: lugar,
+    asunto: asunto,
+    total: total,
+    items: JSON.parse(JSON.stringify(window.itemsProformaAdmin))
+  };
+
+  // Guardar en array local de proformas
+  const historial = JSON.parse(localStorage.getItem("inmutec_historial_proformas") || "[]");
+  historial.unshift(nuevaProforma);
+  localStorage.setItem("inmutec_historial_proformas", JSON.stringify(historial));
+
+  // Avanzar correlativo oficial para la SIGUIENTE emisión
+  const nuevoCorrelativo = parseInt(num, 10) + 1;
+  localStorage.setItem("inmutec_ultimo_correlativo", nuevoCorrelativo);
+
+  // Desbloquear botones de descarga y envío
+  window.desbloquearAccionesDespacho();
+  window.cargarHistorialProformas();
+
+  alert(`¡Proforma Nº ${num} guardada con éxito!\n\nSe han activado las opciones para Descargar PDF, Despachar por WhatsApp y Enviar por Correo.\nEl siguiente número correlativo será: #${String(nuevoCorrelativo).padStart(6, '0')}.`);
+};
+
+// 6. Cargar y renderizar Historial de Proformas
+window.cargarHistorialProformas = function() {
+  const tbody = document.getElementById("historial_proformas_body");
+  const badge = document.getElementById("historial_count_badge");
+  if (!tbody) return;
+
+  const historial = JSON.parse(localStorage.getItem("inmutec_historial_proformas") || "[]");
+  if (badge) badge.textContent = `${historial.length} registrada(s)`;
+
+  if (historial.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 italic">No hay proformas emitidas aún. Presiona "Guardar Proforma" para registrar la primera.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  historial.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-slate-800/50 transition";
+    tr.innerHTML = `
+      <td class="py-2.5 px-2 font-mono font-bold text-amber-400">${item.numero}</td>
+      <td class="py-2.5 px-2 text-slate-400 text-[10px]">${item.fecha}</td>
+      <td class="py-2.5 px-3 font-semibold text-white max-w-[200px] truncate">${item.cliente}</td>
+      <td class="py-2.5 px-2 text-right font-mono font-bold text-cyan-300">${item.total}</td>
+      <td class="py-2.5 px-3 text-center space-x-1.5 whitespace-nowrap">
+        <button onclick="window.eliminarProformaHistorial(${item.id})" class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar del historial">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+};
+
+// 7. Eliminar proforma del historial
+window.eliminarProformaHistorial = function(id) {
+  if (!confirm("¿Estás seguro de que deseas eliminar esta proforma del historial?")) return;
+
+  let historial = JSON.parse(localStorage.getItem("inmutec_historial_proformas") || "[]");
+  historial = historial.filter(item => item.id !== id);
+  localStorage.setItem("inmutec_historial_proformas", JSON.stringify(historial));
+
+  window.cargarHistorialProformas();
+};
+
+// 8. Plantillas de partidas técnicas y actualización de OBJETO
+window.aplicarPlantillaServicio = function(servicio) {
+  document.querySelectorAll(".srv-admin-filter").forEach(b => {
+    b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+    if (b.dataset.filter === servicio) b.classList.add("ring-2", "ring-[#00a8e8]", "bg-slate-700");
+  });
+
   const textoAsunto = `PROPUESTA TÉCNICA ECONÓMICA: SERVICIO DE ${servicio.toUpperCase()}`;
   const inputAsunto = document.getElementById("prof_edit_asunto");
   const printAsunto = document.getElementById("prof_print_asunto");
   if (inputAsunto) inputAsunto.value = textoAsunto;
   if (printAsunto) printAsunto.textContent = textoAsunto;
 
-  // Asignar partidas predeterminadas
   if (servicio === "Fibra Óptica") {
     window.itemsProformaAdmin = [
       {
@@ -698,9 +811,10 @@ window.aplicarPlantillaServicio = function(servicio) {
 
   window.renderizarItemsAdmin();
   window.actualizarDocumentoEnVivo();
+  window.bloquearAccionesDespacho(); // Todo cambio requiere volver a guardar
 };
 
-// 5. Renderizado dinámico de filas con soporte para vista limpia de impresión
+// 9. Renderizado dinámico de filas
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -713,19 +827,19 @@ window.renderizarItemsAdmin = function() {
     tr.innerHTML = `
       <td class="border border-slate-400 px-2 py-2 text-center font-bold text-slate-800">${String(index + 1).padStart(2, '0')}</td>
       <td class="border border-slate-400 px-3 py-1.5">
-        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none proforma-input-edit" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value">${item.descripcion}</textarea>
+        <textarea class="w-full text-xs p-1 border border-transparent hover:border-slate-300 rounded focus:border-[#00a8e8] outline-none proforma-input-edit" rows="2" onchange="window.itemsProformaAdmin[${index}].descripcion = this.value; window.bloquearAccionesDespacho();">${item.descripcion}</textarea>
         <div class="hidden proforma-print-view text-xs leading-relaxed text-slate-800 font-medium whitespace-pre-line">${item.descripcion}</div>
       </td>
       <td class="border border-slate-400 px-2 py-1.5 text-center">
-        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5 font-bold proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin();">
+        <input type="number" min="1" value="${item.cant}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5 font-bold proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].cant = parseFloat(this.value)||1; window.renderizarItemsAdmin(); window.bloquearAccionesDespacho();">
         <span class="hidden proforma-print-view font-bold text-xs">${item.cant}</span>
       </td>
       <td class="border border-slate-400 px-2 py-1.5 text-center font-semibold">
-        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5 proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].unidad = this.value">
+        <input type="text" value="${item.unidad}" class="w-12 text-center border border-slate-300 rounded text-xs py-0.5 proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].unidad = this.value; window.bloquearAccionesDespacho();">
         <span class="hidden proforma-print-view text-xs font-semibold">${item.unidad}</span>
       </td>
       <td class="border border-slate-400 px-3 py-1.5 text-right font-mono">
-        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5 proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin();">
+        <input type="number" step="50" min="0" value="${item.precio.toFixed(2)}" class="w-20 text-right border border-slate-300 rounded text-xs py-0.5 proforma-input-edit" oninput="window.itemsProformaAdmin[${index}].precio = parseFloat(this.value)||0; window.renderizarItemsAdmin(); window.bloquearAccionesDespacho();">
         <span class="hidden proforma-print-view text-xs font-mono font-medium">${parseFloat(item.precio).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
       </td>
       <td class="border border-slate-400 px-3 py-1.5 text-right font-bold text-slate-900 font-mono">
@@ -745,6 +859,7 @@ window.eliminarFilaItem = function(idx) {
   if (window.itemsProformaAdmin.length > 1) {
     window.itemsProformaAdmin.splice(idx, 1);
     window.renderizarItemsAdmin();
+    window.bloquearAccionesDespacho();
   } else {
     alert("La proforma debe contener al menos un ítem cotizado.");
   }
@@ -758,6 +873,7 @@ window.agregarFilaItem = function() {
     precio: 350.00
   });
   window.renderizarItemsAdmin();
+  window.bloquearAccionesDespacho();
 };
 
 window.calcularTotalesProformaAdmin = function() {
@@ -777,16 +893,14 @@ window.calcularTotalesProformaAdmin = function() {
   }
 };
 
-// Sincronización en vivo
 window.actualizarDocumentoEnVivo = function() {
-  const num = document.getElementById("admin_prof_numero")?.value || "001072";
+  const num = document.getElementById("admin_prof_numero")?.value || window.obtenerNumeroProformaActual();
   const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
 
   if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num;
   if (document.getElementById("prof_vista_fecha")) document.getElementById("prof_vista_fecha").textContent = fec;
 };
 
-// Sincronización formulario hacia la proforma
 window.sincronizarConProformaAdmin = function() {
   const cli = document.getElementById("qRazon")?.value.trim();
   const doc = document.getElementById("qDoc")?.value.trim();
@@ -805,8 +919,8 @@ window.sincronizarConProformaAdmin = function() {
   window.actualizarDocumentoEnVivo();
 };
 
-// Sincronización inversa (de la proforma hacia el formulario base)
 window.sincronizarCamposInversos = function(tipo) {
+  window.bloquearAccionesDespacho();
   if (tipo === 'cliente') {
     const val = document.getElementById("prof_edit_cliente")?.value;
     const inputRazon = document.getElementById("qRazon");
@@ -822,15 +936,19 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 6. Generador de PDF con paso estricto a texto plano sin duplicidad
+// 10. Descargar PDF con renderizado ultra limpio (Sin bordes en RUC/Lugar ni dobles textos)
 window.descargarProformaPDF = function() {
+  if (!window.proformaActualGuardada) {
+    alert("Debes presionar 'Guardar Proforma' antes de poder descargar el PDF oficial.");
+    return null;
+  }
+
   const element = document.getElementById("documento_proforma_imprimible");
   if (!element || typeof html2pdf === "undefined") {
     alert("Cargando motor de PDF. Intente nuevamente en 2 segundos.");
     return null;
   }
 
-  // Capturar valores actuales
   const valCliente = document.getElementById("prof_edit_cliente")?.value || "CLIENTE REGISTRADO";
   const valDoc = document.getElementById("prof_edit_doc")?.value || "-";
   const valLugar = document.getElementById("prof_edit_lugar")?.value || "Huancayo";
@@ -840,7 +958,6 @@ window.descargarProformaPDF = function() {
   const valValidez = document.getElementById("prof_edit_validez")?.value || "";
   const valDcto = document.getElementById("input_descuento_admin")?.value || "0.00";
 
-  // Asignar a etiquetas de texto estáticas
   const printCli = document.getElementById("prof_print_cliente");
   const printDoc = document.getElementById("prof_print_doc");
   const printLug = document.getElementById("prof_print_lugar");
@@ -859,11 +976,11 @@ window.descargarProformaPDF = function() {
   if (printVal) printVal.textContent = valValidez;
   if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
 
-  // Ocultar de manera estricta TODOS los inputs editables y controles
+  // Ocultar estrictamente todos los inputs y herramientas de interfaz
   document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.setProperty("display", "none", "important"));
   document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.setProperty("display", "none", "important"));
 
-  // Mostrar vistas de texto plano
+  // Mostrar vistas limpias de texto plano
   if (printCli) printCli.classList.remove("hidden");
   if (printDoc) printDoc.classList.remove("hidden");
   if (printLug) printLug.classList.remove("hidden");
@@ -879,7 +996,7 @@ window.descargarProformaPDF = function() {
   const nombreArchivo = `PROFORMA_${num}_INMUTEC_${clienteLimpio}.pdf`;
 
   const opt = {
-    margin: [5, 5, 5, 5],
+    margin: [6, 6, 6, 6],
     filename: nombreArchivo,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true, logging: false },
@@ -887,7 +1004,7 @@ window.descargarProformaPDF = function() {
   };
 
   html2pdf().set(opt).from(element).save().then(() => {
-    // Restaurar estado web visual tras generar el PDF
+    // Restaurar estado web
     document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.removeProperty("display"));
     document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.removeProperty("display"));
 
@@ -902,12 +1019,16 @@ window.descargarProformaPDF = function() {
     document.querySelectorAll(".proforma-print-view").forEach(el => el.classList.add("hidden"));
   });
 
-  localStorage.setItem("inmutec_ultimo_correlativo", num);
   return nombreArchivo;
 };
 
-// 7. Despacho por WhatsApp (Valida número de 9 dígitos y adjunta texto formal con PDF descargado)
+// 11. Despacho por WhatsApp (Solo tras guardar)
 window.enviarProformaWhatsApp = function() {
+  if (!window.proformaActualGuardada) {
+    alert("Debes presionar 'Guardar Proforma' antes de despachar por WhatsApp.");
+    return;
+  }
+
   const inputPhone = document.getElementById("qPhone")?.value.trim() || "";
   let destinatario = prompt("Ingresa el número celular de WhatsApp del destinatario (9 dígitos):", inputPhone);
 
@@ -943,13 +1064,18 @@ window.enviarProformaWhatsApp = function() {
   txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
   txt += `• BANCO BBVA: 0011-0235-9302019300-55 (CCI: 011-235-000201930055-93)\n\n`;
   txt += `📧 Correo Oficial: ${CONFIG_INMUTEC.correoPrincipal}\n`;
-  txt += `📎 Acabamos de generar el documento formal *${nombrePDF}*. Se adjunta en este chat para su revisión técnica.`;
+  txt += `📎 Se adjunta la propuesta técnica formal emitida.`;
 
   window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
-// 8. Despacho por Correo Electrónico
+// 12. Despacho por Correo (Solo tras guardar)
 window.enviarProformaCorreo = function() {
+  if (!window.proformaActualGuardada) {
+    alert("Debes presionar 'Guardar Proforma' antes de despachar por Correo.");
+    return;
+  }
+
   const inputEmail = document.getElementById("qEmail")?.value.trim() || "";
   let emailDestino = prompt("Ingresa el correo electrónico del cliente para el envío:", inputEmail);
 
@@ -970,7 +1096,7 @@ window.enviarProformaCorreo = function() {
   const body = `Estimados Señores (${cli}):\n\n` +
     `Por medio de la presente, remitimos la propuesta técnica económica formal correspondiente a la Proforma Nº ${num}.\n\n` +
     `Importe Total Facturado (Inc. IGV): ${tot}\n\n` +
-    `El archivo en formato PDF (${nombrePDF}) ha sido generado y descargado en su dispositivo para adjuntarlo en este mensaje.\n\n` +
+    `El documento formal ha sido emitido con validez oficial.\n\n` +
     `Atentamente,\n` +
     `${CONFIG_INMUTEC.gerenteGeneral}\n` +
     `Gerencia General - ${CONFIG_INMUTEC.empresaNombre}\n` +
