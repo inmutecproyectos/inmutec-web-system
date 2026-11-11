@@ -160,6 +160,7 @@ async function uploadImageToSupabase(file, folder = "cms") {
 
   return publicUrlData.publicUrl;
 }
+
 // =============================================================================
 // MODULO 2: VISTA INICIO (CARRUSEL AUTOMÁTICO Y FLECHAS)
 // =============================================================================
@@ -229,7 +230,7 @@ function initInicioModule() {
 }
 
 // =============================================================================
-// MODULO 3: VISTA SERVICIOS Y PORTAFOLIO (MODALES)
+// MODULO 3: VISTA SERVICIOS Y PORTAFOLIO (MODALES Y FILTROS)
 // =============================================================================
 const serviceDataMap = {
   datos: {
@@ -404,29 +405,26 @@ window.quoteSimilarProject = function() {
   window.closeProjectModal();
   window.location.hash = "cotizacion";
 };
+
 // =============================================================================
-// FILTRO 1: PORTAFOLIO (Limpieza infalible de estilos)
+// FILTRO 1: PORTAFOLIO (Reset infalible de className)
 // =============================================================================
 window.filtrarPortafolio = function(filtro, btnElement) {
   const contenedor = document.getElementById("portfolioList") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  // 1. Resetear el aspecto de TODOS los botones del contenedor
   const contenedorBotones = document.getElementById("portfolioFilterContainer") || btnElement?.closest("#portfolioFilterContainer") || btnElement?.parentElement;
   if (contenedorBotones) {
     const todosBotones = contenedorBotones.querySelectorAll("button, .port-tab-btn");
     todosBotones.forEach(b => {
-      // Estilo estándar inactivo (Blanco con texto gris)
       b.className = "port-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer";
     });
 
-    // 2. Aplicar estilo activo ÚNICAMENTE al botón clickeado
     if (btnElement) {
       btnElement.className = "port-tab-btn active-tab shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer";
     }
   }
 
-  // 3. Filtrar tarjetas
   const articulos = contenedor.querySelectorAll(".project-card, article[data-cat]");
   let visibles = 0;
 
@@ -451,28 +449,24 @@ window.filtrarPortafolio = function(filtro, btnElement) {
 };
 
 // =============================================================================
-// FILTRO 2: SERVICIOS (Limpieza infalible de estilos)
+// FILTRO 2: SERVICIOS (Reset infalible de className)
 // =============================================================================
 window.filtrarServicios = function(categoria, btnElement) {
   const contenedor = document.getElementById("servicesGrid") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  // 1. Resetear el aspecto de TODOS los botones del contenedor
   const contenedorBotones = document.getElementById("servicesFilterGroup") || btnElement?.closest("#servicesFilterGroup") || btnElement?.parentElement;
   if (contenedorBotones) {
     const todosBotones = contenedorBotones.querySelectorAll("button, .svc-tab-btn");
     todosBotones.forEach(b => {
-      // Estilo estándar inactivo (Blanco con texto gris)
       b.className = "svc-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:border-[#00a8e8] cursor-pointer";
     });
 
-    // 2. Aplicar estilo activo ÚNICAMENTE al botón clickeado
     if (btnElement) {
       btnElement.className = "svc-tab-btn active-tab shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm bg-[#00a8e8] text-[#002b49] cursor-pointer";
     }
   }
 
-  // 3. Filtrar tarjetas
   const articulos = contenedor.querySelectorAll(".svc-card, article[data-cat]");
   let visibles = 0;
 
@@ -495,6 +489,7 @@ window.filtrarServicios = function(categoria, btnElement) {
     counterText.textContent = `Mostrando ${visibles} especialidad${visibles !== 1 ? 'es' : ''}`;
   }
 };
+
 // =============================================================================
 // MODULO 4: VISTA COTIZACIÓN
 // =============================================================================
@@ -648,10 +643,11 @@ export async function verificarYMontarAdminProforma() {
           document.head.appendChild(script);
         }
 
+        // Consultar a Supabase el correlativo real
+        const { numero } = await window.obtenerSiguienteNumeroProforma();
         const badge = document.getElementById("admin_proforma_counter_badge");
         if (badge) {
-          const num = await window.obtenerSiguienteNumeroProforma();
-          badge.textContent = `Siguiente: #${num}`;
+          badge.textContent = `Siguiente: #${numero}`;
         }
       }
     } catch (e) {
@@ -663,17 +659,43 @@ export async function verificarYMontarAdminProforma() {
 }
 
 // =============================================================================
-// MODULO 5: EMISOR OFICIAL DE PROFORMAS TÉCNICAS (ADMIN CMS)
+// MODULO 5: EMISOR OFICIAL DE PROFORMAS TÉCNICAS (CONECTADO A SUPABASE)
 // =============================================================================
 
-// Variable de estado: true solo cuando la proforma actual ha sido guardada
 window.proformaActualGuardada = false;
 
-// 1. Obtener correlativo actual activo sin saltarlo
-window.obtenerNumeroProformaActual = function() {
-  const guardado = localStorage.getItem("inmutec_ultimo_correlativo");
-  const base = guardado ? parseInt(guardado, 10) : 1072;
-  return String(base).padStart(6, "0");
+// 1. Obtener correlativo consultando la base de datos de Supabase
+window.obtenerSiguienteNumeroProforma = async function() {
+  const NUMERO_BASE = 1072;
+
+  try {
+    const { data, error } = await supabase
+      .from("proformas")
+      .select("numero_correlativo")
+      .order("numero_correlativo", { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    let siguienteNumero = NUMERO_BASE;
+    if (data && data.length > 0 && data[0].numero_correlativo) {
+      siguienteNumero = parseInt(data[0].numero_correlativo, 10) + 1;
+    }
+
+    const formateado = String(siguienteNumero).padStart(6, "0");
+
+    const inputNum = document.getElementById("admin_prof_numero");
+    const vistaNum = document.getElementById("prof_vista_numero");
+    if (inputNum) inputNum.value = formateado;
+    if (vistaNum) vistaNum.textContent = formateado;
+
+    return { numero: formateado, correlativo: siguienteNumero };
+  } catch (err) {
+    console.warn("No se pudo obtener correlativo de Supabase, usando respaldo:", err);
+    const guardado = localStorage.getItem("inmutec_ultimo_correlativo") || "1072";
+    const fallback = String(parseInt(guardado, 10)).padStart(6, "0");
+    return { numero: fallback, correlativo: parseInt(fallback, 10) };
+  }
 };
 
 // 2. Fecha y hora automática de Huancayo
@@ -694,7 +716,7 @@ window.generarFechaHoraHuancayo = function() {
 };
 
 // 3. Abrir / Cerrar Mesa de Proformas
-window.toggleProformaWorkspace = function() {
+window.toggleProformaWorkspace = async function() {
   const box = document.getElementById("proformaWorkspaceContainer");
   const txt = document.getElementById("btnToggleProformaText");
   const icon = document.getElementById("btnToggleIcon");
@@ -705,19 +727,19 @@ window.toggleProformaWorkspace = function() {
     if (txt) txt.textContent = "Ocultar Mesa de Proforma";
     if (icon) icon.classList.add("rotate-180");
 
-    const num = window.obtenerNumeroProformaActual();
+    const { numero } = await window.obtenerSiguienteNumeroProforma();
     const fechaHora = window.generarFechaHoraHuancayo();
 
     const inputNum = document.getElementById("admin_prof_numero");
     const inputFecha = document.getElementById("admin_prof_fecha");
-    if (inputNum) inputNum.value = num;
+    if (inputNum) inputNum.value = numero;
     if (inputFecha) inputFecha.value = fechaHora;
 
     const servicioActual = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
     window.aplicarPlantillaServicio(servicioActual);
     window.sincronizarConProformaAdmin();
     window.bloquearAccionesDespacho();
-    window.cargarHistorialProformas();
+    await window.cargarHistorialProformas();
   } else {
     box.classList.add("hidden");
     if (txt) txt.textContent = "Realizar Nueva Proforma";
@@ -764,89 +786,116 @@ window.desbloquearAccionesDespacho = function() {
   }
 };
 
-// 5. Guardar Proforma: guarda en historial, desbloquea acciones y avanza el correlativo
-window.guardarProformaOficial = function() {
-  const num = document.getElementById("admin_prof_numero")?.value || "001072";
-  const fecha = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
-  const cliente = document.getElementById("prof_edit_cliente")?.value.trim() || "EMPRESA REGISTRADA";
-  const doc = document.getElementById("prof_edit_doc")?.value.trim() || "-";
-  const lugar = document.getElementById("prof_edit_lugar")?.value.trim() || "Huancayo";
-  const asunto = document.getElementById("prof_edit_asunto")?.value.trim() || "PROPUESTA TÉCNICA";
-  const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+// 5. Guardar Proforma oficial directamente en Supabase
+window.guardarProformaOficial = async function() {
+  const btnGuardar = document.getElementById("btnGuardarProforma");
+  if (btnGuardar) {
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = "Guardando...";
+  }
 
-  const nuevaProforma = {
-    id: Date.now(),
-    numero: num,
-    fecha: fecha,
-    cliente: cliente,
-    doc: doc,
-    lugar: lugar,
-    asunto: asunto,
-    total: total,
-    items: JSON.parse(JSON.stringify(window.itemsProformaAdmin))
-  };
+  try {
+    const { numero, correlativo } = await window.obtenerSiguienteNumeroProforma();
 
-  // Guardar en array local de proformas
-  const historial = JSON.parse(localStorage.getItem("inmutec_historial_proformas") || "[]");
-  historial.unshift(nuevaProforma);
-  localStorage.setItem("inmutec_historial_proformas", JSON.stringify(historial));
+    const fecha = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
+    const cliente = document.getElementById("prof_edit_cliente")?.value.trim() || "EMPRESA REGISTRADA";
+    const doc = document.getElementById("prof_edit_doc")?.value.trim() || "-";
+    const lugar = document.getElementById("prof_edit_lugar")?.value.trim() || "Huancayo";
+    const asunto = document.getElementById("prof_edit_asunto")?.value.trim() || "PROPUESTA TÉCNICA";
+    const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
 
-  // Avanzar correlativo oficial para la SIGUIENTE emisión
-  const nuevoCorrelativo = parseInt(num, 10) + 1;
-  localStorage.setItem("inmutec_ultimo_correlativo", nuevoCorrelativo);
+    const { error } = await supabase
+      .from("proformas")
+      .insert([
+        {
+          numero_proforma: numero,
+          numero_correlativo: correlativo,
+          cliente: cliente,
+          ruc_dni: doc,
+          lugar: lugar,
+          total: total,
+          items: JSON.parse(JSON.stringify(window.itemsProformaAdmin)),
+          creado_el: new Date().toISOString()
+        }
+      ]);
 
-  // Desbloquear botones de descarga y envío
-  window.desbloquearAccionesDespacho();
-  window.cargarHistorialProformas();
+    if (error) throw error;
 
-  alert(`¡Proforma Nº ${num} guardada con éxito!\n\nSe han activado las opciones para Descargar PDF, Despachar por WhatsApp y Enviar por Correo.\nEl siguiente número correlativo será: #${String(nuevoCorrelativo).padStart(6, '0')}.`);
+    localStorage.setItem("inmutec_ultimo_correlativo", correlativo);
+
+    window.desbloquearAccionesDespacho();
+    await window.cargarHistorialProformas();
+
+    alert(`¡Proforma Nº ${numero} guardada con éxito en la base de datos!\n\nSe han activado las opciones para Descargar PDF y enviar.`);
+  } catch (err) {
+    console.error("Error al guardar proforma en Supabase:", err);
+    alert("Error al guardar en base de datos: " + err.message);
+  } finally {
+    if (btnGuardar) {
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = "Guardar Proforma";
+    }
+  }
 };
 
-// 6. Cargar y renderizar Historial de Proformas
-window.cargarHistorialProformas = function() {
+// 6. Cargar y renderizar Historial de Proformas desde Supabase
+window.cargarHistorialProformas = async function() {
   const tbody = document.getElementById("historial_proformas_body");
   const badge = document.getElementById("historial_count_badge");
   if (!tbody) return;
 
-  const historial = JSON.parse(localStorage.getItem("inmutec_historial_proformas") || "[]");
-  if (badge) badge.textContent = `${historial.length} registrada(s)`;
+  try {
+    const { data: historial, error } = await supabase
+      .from("proformas")
+      .select("*")
+      .order("numero_correlativo", { ascending: false })
+      .limit(20);
 
-  if (historial.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 italic">No hay proformas emitidas aún. Presiona "Guardar Proforma" para registrar la primera.</td></tr>`;
-    return;
+    if (error) throw error;
+
+    if (badge) badge.textContent = `${historial ? historial.length : 0} registrada(s)`;
+
+    if (!historial || historial.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 italic">No hay proformas emitidas en la base de datos.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = "";
+    historial.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-slate-800/50 transition";
+      tr.innerHTML = `
+        <td class="py-2.5 px-2 font-mono font-bold text-amber-400">${item.numero_proforma}</td>
+        <td class="py-2.5 px-2 text-slate-400 text-[10px]">${new Date(item.creado_el).toLocaleDateString()}</td>
+        <td class="py-2.5 px-3 font-semibold text-white max-w-[200px] truncate">${item.cliente || '-'}</td>
+        <td class="py-2.5 px-2 text-right font-mono font-bold text-cyan-300">${item.total || '-'}</td>
+        <td class="py-2.5 px-3 text-center space-x-1.5 whitespace-nowrap">
+          <button onclick="window.eliminarProformaHistorial(${item.id})" class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar de Supabase">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error al cargar historial desde Supabase:", err);
   }
-
-  tbody.innerHTML = "";
-  historial.forEach(item => {
-    const tr = document.createElement("tr");
-    tr.className = "hover:bg-slate-800/50 transition";
-    tr.innerHTML = `
-      <td class="py-2.5 px-2 font-mono font-bold text-amber-400">${item.numero}</td>
-      <td class="py-2.5 px-2 text-slate-400 text-[10px]">${item.fecha}</td>
-      <td class="py-2.5 px-3 font-semibold text-white max-w-[200px] truncate">${item.cliente}</td>
-      <td class="py-2.5 px-2 text-right font-mono font-bold text-cyan-300">${item.total}</td>
-      <td class="py-2.5 px-3 text-center space-x-1.5 whitespace-nowrap">
-        <button onclick="window.eliminarProformaHistorial(${item.id})" class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar del historial">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
 };
 
-// 7. Eliminar proforma del historial
-window.eliminarProformaHistorial = function(id) {
-  if (!confirm("¿Estás seguro de que deseas eliminar esta proforma del historial?")) return;
+// 7. Eliminar proforma de Supabase
+window.eliminarProformaHistorial = async function(id) {
+  if (!confirm("¿Estás seguro de que deseas eliminar esta proforma de la base de datos?")) return;
 
-  let historial = JSON.parse(localStorage.getItem("inmutec_historial_proformas") || "[]");
-  historial = historial.filter(item => item.id !== id);
-  localStorage.setItem("inmutec_historial_proformas", JSON.stringify(historial));
-
-  window.cargarHistorialProformas();
+  try {
+    const { error } = await supabase.from("proformas").delete().eq("id", id);
+    if (error) throw error;
+    await window.cargarHistorialProformas();
+  } catch (err) {
+    alert("Error al eliminar: " + err.message);
+  }
 };
 
-// 8. Plantillas de partidas técnicas y actualización de OBJETO
+// 8. Plantillas de partidas técnicas
 window.aplicarPlantillaServicio = function(servicio) {
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
     b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
@@ -913,7 +962,7 @@ window.aplicarPlantillaServicio = function(servicio) {
 
   window.renderizarItemsAdmin();
   window.actualizarDocumentoEnVivo();
-  window.bloquearAccionesDespacho(); // Todo cambio requiere volver a guardar
+  window.bloquearAccionesDespacho();
 };
 
 // 9. Renderizado dinámico de filas
@@ -996,7 +1045,7 @@ window.calcularTotalesProformaAdmin = function() {
 };
 
 window.actualizarDocumentoEnVivo = function() {
-  const num = document.getElementById("admin_prof_numero")?.value || window.obtenerNumeroProformaActual();
+  const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const fec = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
 
   if (document.getElementById("prof_vista_numero")) document.getElementById("prof_vista_numero").textContent = num;
@@ -1038,7 +1087,7 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 10. Descargar PDF con calibración A4 perfecta (Sin cortes laterales ni verticales)
+// 10. Descargar PDF con calibración A4 perfecta
 window.descargarProformaPDF = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de poder descargar el PDF oficial.");
@@ -1078,11 +1127,9 @@ window.descargarProformaPDF = function() {
   if (printVal) printVal.textContent = valValidez;
   if (printDcto) printDcto.textContent = `S/ ${parseFloat(valDcto).toFixed(2)}`;
 
-  // Ocultar inputs editables y herramientas interactivas
   document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.setProperty("display", "none", "important"));
   document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.setProperty("display", "none", "important"));
 
-  // Mostrar textos limpios
   if (printCli) printCli.classList.remove("hidden");
   if (printDoc) printDoc.classList.remove("hidden");
   if (printLug) printLug.classList.remove("hidden");
@@ -1097,7 +1144,6 @@ window.descargarProformaPDF = function() {
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
   const nombreArchivo = `PROFORMA_${num}_INMUTEC_${clienteLimpio}.pdf`;
 
-  // Configuración estándar A4 sin restricciones forzadas de ventana
   const opt = {
     margin: [5, 5, 5, 5],
     filename: nombreArchivo,
@@ -1117,7 +1163,6 @@ window.descargarProformaPDF = function() {
   };
 
   html2pdf().set(opt).from(element).save().then(() => {
-    // Restaurar vistas para edición web
     document.querySelectorAll(".proforma-ui-tool").forEach(el => el.style.removeProperty("display"));
     document.querySelectorAll(".proforma-input-edit").forEach(el => el.style.removeProperty("display"));
 
@@ -1134,7 +1179,8 @@ window.descargarProformaPDF = function() {
 
   return nombreArchivo;
 };
-// 11. Despacho por WhatsApp (Solo tras guardar)
+
+// 11. Despacho por WhatsApp
 window.enviarProformaWhatsApp = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de despachar por WhatsApp.");
@@ -1152,7 +1198,7 @@ window.enviarProformaWhatsApp = function() {
     return;
   }
 
-  const nombrePDF = window.descargarProformaPDF();
+  window.descargarProformaPDF();
 
   const cli = document.getElementById("prof_edit_cliente")?.value || "Cliente";
   const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
@@ -1181,7 +1227,7 @@ window.enviarProformaWhatsApp = function() {
   window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
-// 12. Despacho por Correo (Solo tras guardar)
+// 12. Despacho por Correo
 window.enviarProformaCorreo = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de despachar por Correo.");
@@ -1198,7 +1244,7 @@ window.enviarProformaCorreo = function() {
     return;
   }
 
-  const nombrePDF = window.descargarProformaPDF();
+  window.descargarProformaPDF();
 
   const cli = document.getElementById("prof_edit_cliente")?.value || "Estimados Señores";
   const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
@@ -1218,6 +1264,7 @@ window.enviarProformaCorreo = function() {
 
   window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
+
 // =============================================================================
 // MODULO 6: CHATBOT ASISTENTE TÉCNICO
 // =============================================================================
@@ -1333,7 +1380,7 @@ function processBotQuery(userText) {
 }
 
 // =============================================================================
-// MODULO 7: INICIALIZACIÓN GLOBAL DE EVENTOS
+// MODULO 7: INICIALIZACIÓN GLOBAL DE EVENTOS (UNIFICADO)
 // =============================================================================
 async function inicializarSistemaCompleto() {
   window.addEventListener("hashchange", () => {
@@ -1426,10 +1473,10 @@ async function inicializarSistemaCompleto() {
   }
 
   // ===========================================================================
-  // CONTROLADOR GLOBAL DE EVENTOS (CARRUSEL, FILTROS, SELECTOR, BOT Y CMS)
+  // CONTROLADOR ÚNICO DE EVENTOS CLICK (SIN DUPLICADOS)
   // ===========================================================================
   document.addEventListener("click", (e) => {
-    // 1. Flechas del carrusel (Inicio)
+    // 1. Carrusel
     const prevBtn = e.target.closest("#btnCarouselPrev, #inmutecBtnPrev, .carousel-prev, [data-carousel='prev']");
     if (prevBtn) {
       e.preventDefault();
@@ -1444,7 +1491,7 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // 2. Filtro de Portafolio (data-filter a data-cat)
+    // 2. Filtro de Portafolio
     const portBtn = e.target.closest("#portfolioFilterContainer button, .port-tab-btn, [data-filter]");
     if (portBtn && portBtn.closest("#moduleContainer")) {
       e.preventDefault();
@@ -1454,7 +1501,7 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // 3. Filtro de Servicios (data-category a data-cat)
+    // 3. Filtro de Servicios
     const svcTabBtn = e.target.closest("#servicesFilterGroup button, .svc-tab-btn, [data-category]");
     if (svcTabBtn && svcTabBtn.closest("#moduleContainer")) {
       e.preventDefault();
@@ -1610,205 +1657,6 @@ async function inicializarSistemaCompleto() {
     };
   }
 }
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", inicializarSistemaCompleto);
-} else {
-  inicializarSistemaCompleto();
-}
-
-// ===========================================================================
-  // CONTROLADOR GLOBAL DE EVENTOS (FLECHAS, FILTROS, SERVICIOS, BOT Y CMS)
-  // ===========================================================================
-  document.addEventListener("click", (e) => {
-    // 1. Clic en flechas del carrusel
-    const prevBtn = e.target.closest("#btnCarouselPrev, #inmutecBtnPrev, .carousel-prev, .carousel-btn-prev, [data-carousel='prev']");
-    if (prevBtn) {
-      e.preventDefault();
-      window.inmutecPrevSlide?.();
-      return;
-    }
-
-    const nextBtn = e.target.closest("#btnCarouselNext, #inmutecBtnNext, .carousel-next, .carousel-btn-next, [data-carousel='next']");
-    if (nextBtn) {
-      e.preventDefault();
-      window.inmutecNextSlide?.();
-      return;
-    }
-
-// 2. Clic en botones de filtro de Portafolio y Servicios
-    // A) Portafolio (Detección por contenedor o atributo data-filter)
-    const portBtn = e.target.closest("#portfolioFilterContainer button, .port-tab-btn, [data-filter]");
-    if (portBtn && portBtn.closest("#moduleContainer")) {
-      e.preventDefault();
-      e.stopPropagation();
-      const filtro = portBtn.getAttribute("data-filter") || "all";
-      window.filtrarPortafolio?.(filtro, portBtn);
-      return;
-    }
-
-    // B) Servicios (Detección por contenido del botón)
-    const serviceFilterBtn = e.target.closest("button");
-    if (serviceFilterBtn && serviceFilterBtn.closest("#moduleContainer")) {
-      const texto = (serviceFilterBtn.textContent || "").trim();
-      const esFiltroServicio = 
-        texto.includes("Todos los Servicios") ||
-        texto.includes("Internet & Conectividad") ||
-        texto.includes("Fibra Óptica") ||
-        texto.includes("Torres & STP") ||
-        texto.includes("Laboratorio RF") ||
-        texto.includes("Domótica & Smart");
-
-      if (esFiltroServicio) {
-        e.preventDefault();
-        e.stopPropagation();
-        window.filtrarEspecialidad?.(texto, serviceFilterBtn);
-        return;
-      }
-    }
-
-    // 3. Clic en selectores de servicio de Cotización (5 tarjetas superiores)
-    const svcCardBtn = e.target.closest("button, .cursor-pointer");
-    if (svcCardBtn && svcCardBtn.closest("#moduleContainer")) {
-      // Ignorar si el clic ocurrió dentro de la proforma, del chatbot o del formulario dinámico
-      if (!svcCardBtn.closest("#dynamicServiceSection") && !svcCardBtn.closest("#proformaWorkspaceContainer") && !svcCardBtn.closest("#chatForm")) {
-        const txt = (svcCardBtn.textContent || "").trim();
-        let svcName = null;
-
-        if (txt.includes("Internet Dedicado")) svcName = "Internet Dedicado";
-        else if (txt.includes("Fibra Óptica")) svcName = "Fibra Óptica";
-        else if (txt.includes("Torres & STP")) svcName = "Torres & STP";
-        else if (txt.includes("Laboratorio RF")) svcName = "Laboratorio";
-        else if (txt.includes("Domótica & Smart")) svcName = "Domótica";
-
-        if (svcName) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          // Resaltar tarjeta seleccionada
-          svcCardBtn.parentElement?.querySelectorAll("button, div").forEach(el => {
-            el.classList.remove("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
-          });
-          svcCardBtn.classList.add("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
-
-          window.renderCotizacionCampos?.(svcName);
-          window.aplicarPlantillaServicio?.(svcName);
-          return;
-        }
-      }
-    }
-
-    // 4. Clics en botones rápidos del Chatbot
-    if (e.target.classList.contains("quick-btn")) {
-      const q = e.target.textContent.trim();
-      appendBotMessage(q, "user");
-      processBotQuery(q);
-      return;
-    }
-    if (e.target.id === "btnResetChat" || e.target.closest("#btnResetChat")) {
-      initChatbot();
-      return;
-    }
-
-    // 5. Clics de Edición CMS (Solo Administrador)
-    if (isAdminLoggedIn) {
-      const editableTarget = e.target.closest("[data-cms-key]");
-      if (!editableTarget) return;
-
-      e.preventDefault();
-      currentEditingElement = editableTarget;
-      currentEditingKey = editableTarget.getAttribute("data-cms-key");
-      isEditingImage = editableTarget.tagName === "IMG";
-
-      const modal = document.getElementById("cmsEditorModal");
-      const title = document.getElementById("cmsModalFieldTitle");
-      const textBlock = document.getElementById("cmsTextEditorBlock");
-      const imageBlock = document.getElementById("cmsImageEditorBlock");
-      const textInput = document.getElementById("cmsTextInput");
-      const imgPreview = document.getElementById("cmsImagePreview");
-      const imgPlaceholder = document.getElementById("cmsImagePlaceholder");
-
-      if (modal && title) {
-        title.textContent = `Editando: ${currentEditingKey}`;
-        if (isEditingImage) {
-          textBlock.classList.add("hidden");
-          imageBlock.classList.remove("hidden");
-          imgPreview.src = editableTarget.src;
-          imgPreview.classList.remove("hidden");
-          imgPlaceholder.classList.add("hidden");
-        } else {
-          imageBlock.classList.add("hidden");
-          textBlock.classList.remove("hidden");
-          textInput.value = editableTarget.innerHTML.trim();
-        }
-        modal.classList.remove("hidden");
-      }
-    }
-  });
-
-  document.addEventListener("submit", (e) => {
-    if (e.target && e.target.id === "chatForm") {
-      e.preventDefault();
-      const input = document.getElementById("chatInput");
-      const msg = input.value.trim();
-      if (!msg) return;
-      appendBotMessage(msg, "user");
-      input.value = "";
-      processBotQuery(msg);
-    }
-  });
-
-  const btnSaveCms = document.getElementById("btnSaveCms");
-  const btnCancelCms = document.getElementById("btnCancelCms");
-  const btnCloseCmsModal = document.getElementById("btnCloseCmsModal");
-  const cmsModal = document.getElementById("cmsEditorModal");
-
-  const closeCmsModal = () => {
-    if (cmsModal) cmsModal.classList.add("hidden");
-    currentEditingElement = null;
-    currentEditingKey = null;
-  };
-
-  if (btnCancelCms) btnCancelCms.onclick = closeCmsModal;
-  if (btnCloseCmsModal) btnCloseCmsModal.onclick = closeCmsModal;
-
-  if (btnSaveCms) {
-    btnSaveCms.onclick = async () => {
-      if (!currentEditingElement || !currentEditingKey) return;
-      btnSaveCms.disabled = true;
-      btnSaveCms.textContent = "Guardando...";
-
-      try {
-        let nuevoValor = "";
-        if (isEditingImage) {
-          const fileInput = document.getElementById("cmsFileInput");
-          if (fileInput.files.length > 0) {
-            nuevoValor = await uploadImageToSupabase(fileInput.files[0]);
-            currentEditingElement.src = nuevoValor;
-          } else {
-            nuevoValor = currentEditingElement.src;
-          }
-        } else {
-          nuevoValor = document.getElementById("cmsTextInput").value;
-          currentEditingElement.innerHTML = nuevoValor;
-        }
-
-        await supabase.from("cms_content").upsert({
-          clave: currentEditingKey,
-          valor: nuevoValor,
-          actualizado_el: new Date().toISOString()
-        });
-
-        closeCmsModal();
-      } catch (err) {
-        alert("Error al guardar en base de datos: " + err.message);
-      } finally {
-        btnSaveCms.disabled = false;
-        btnSaveCms.textContent = "Guardar Cambios en Base de Datos";
-      }
-    };
-  }
-
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", inicializarSistemaCompleto);
