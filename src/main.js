@@ -411,18 +411,23 @@ window.filtrarPortafolio = function(filtro, btnElement) {
   const contenedor = document.getElementById("portfolioList") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  const contenedorBotones = btnElement?.parentElement || document.getElementById("portfolioFilterContainer");
+  // 1. Limpieza total de estilos en todos los botones del portafolio
+  const contenedorBotones = document.getElementById("portfolioFilterContainer") || btnElement?.parentElement;
   if (contenedorBotones) {
-    contenedorBotones.querySelectorAll("button").forEach(b => {
-      b.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+    const todosBotones = contenedorBotones.querySelectorAll("button, .port-tab-btn");
+    todosBotones.forEach(b => {
+      b.classList.remove("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm", "text-white");
       b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
     });
+
+    // 2. Activar exclusivamente el botón pulsado
     if (btnElement) {
       btnElement.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
-      btnElement.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+      btnElement.classList.add("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
     }
   }
 
+  // 3. Filtrar artículos
   const articulos = contenedor.querySelectorAll(".project-card, article[data-cat]");
   let visibles = 0;
 
@@ -451,18 +456,23 @@ window.filtrarServicios = function(categoria, btnElement) {
   const contenedor = document.getElementById("servicesGrid") || document.getElementById("moduleContainer");
   if (!contenedor) return;
 
-  const contenedorBotones = btnElement?.parentElement || document.getElementById("servicesFilterGroup");
+  // 1. Limpieza total de estilos en todos los botones de servicios
+  const contenedorBotones = document.getElementById("servicesFilterGroup") || btnElement?.parentElement;
   if (contenedorBotones) {
-    contenedorBotones.querySelectorAll("button").forEach(b => {
-      b.classList.remove("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+    const todosBotones = contenedorBotones.querySelectorAll("button, .svc-tab-btn");
+    todosBotones.forEach(b => {
+      b.classList.remove("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm", "text-white");
       b.classList.add("bg-white", "text-slate-600", "border", "border-slate-200");
     });
+
+    // 2. Activar exclusivamente el botón pulsado
     if (btnElement) {
       btnElement.classList.remove("bg-white", "text-slate-600", "border", "border-slate-200");
-      btnElement.classList.add("bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
+      btnElement.classList.add("active-tab", "bg-[#00a8e8]", "text-[#002b49]", "shadow-sm");
     }
   }
 
+  // 3. Filtrar tarjetas
   const articulos = contenedor.querySelectorAll(".svc-card, article[data-cat]");
   let visibles = 0;
 
@@ -483,13 +493,6 @@ window.filtrarServicios = function(categoria, btnElement) {
     counterText.textContent = `Mostrando ${visibles} especialidad${visibles !== 1 ? 'es' : ''}`;
   }
 };
-
-  // 3. Actualizar el contador dinámico "Mostrando X obras principales"
-  const counterText = document.getElementById("portCounterText");
-  if (counterText) {
-    counterText.textContent = `Mostrando ${visibles} obra${visibles !== 1 ? 's' : ''} ${filtro === 'all' ? 'principales' : 'filtradas'}`;
-  }
-;
 
 // =============================================================================
 // MODULO 4: VISTA COTIZACIÓN
