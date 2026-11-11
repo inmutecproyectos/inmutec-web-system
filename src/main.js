@@ -853,7 +853,10 @@ window.cargarHistorialProformas = async function() {
       .order("creado_el", { ascending: false })
       .limit(20);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error al consultar historial:", error);
+      return;
+    }
 
     if (badge) badge.textContent = `${historial ? historial.length : 0} registrada(s)`;
 
@@ -864,7 +867,6 @@ window.cargarHistorialProformas = async function() {
 
     tbody.innerHTML = "";
     historial.forEach(item => {
-      // Pasamos directamente el número de proforma como texto garantizado
       const numProf = String(item.numero_proforma || "").trim();
       const tr = document.createElement("tr");
       tr.className = "hover:bg-slate-800/50 transition";
@@ -874,25 +876,25 @@ window.cargarHistorialProformas = async function() {
         <td class="py-2.5 px-3 font-semibold text-white max-w-[200px] truncate">${item.cliente || '-'}</td>
         <td class="py-2.5 px-2 text-right font-mono font-bold text-cyan-300">${item.total || '-'}</td>
         <td class="py-2.5 px-3 text-center space-x-1.5 whitespace-nowrap">
-          <button type="button" onclick="window.eliminarProformaHistorial('${numProf}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar de la base de datos">
-            <i class="fa-solid fa-trash-can"></i>
+          <button type="button" data-del-proforma="${numProf}" class="btn-borrar-proforma px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition cursor-pointer" title="Eliminar de la base de datos">
+            <i class="fa-solid fa-trash-can pointer-events-none"></i>
           </button>
         </td>
       `;
       tbody.appendChild(tr);
     });
   } catch (err) {
-    console.error("Error al cargar historial desde Supabase:", err);
+    console.error("Error inesperado en cargarHistorialProformas:", err);
   }
 };
 
 // =============================================================================
-// 7. ELIMINAR PROFORMA DIRECTAMENTE EN SUPABASE (INFALIBLE)
+// 7. ELIMINAR PROFORMA CON DIAGNÓSTICO EN PANTALLA
 // =============================================================================
 window.eliminarProformaHistorial = async function(numeroProforma) {
   const numLimpio = String(numeroProforma || "").trim();
   if (!numLimpio) {
-    alert("Error: Identificador de proforma no válido.");
+    alert("Error: No se recibió ningún número de proforma para borrar.");
     return;
   }
 
@@ -900,8 +902,8 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
   if (!confirmar) return;
 
   try {
-    // Usamos .select() para confirmar que la fila existió y fue eliminada
-    const { data, error } = await supabase
+    // Intento 1: Eliminar por coincidencia exacta de numero_proforma
+    let { data, error } = await supabase
       .from("proformas")
       .delete()
       .eq("numero_proforma", numLimpio)
@@ -909,26 +911,37 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
 
     if (error) throw error;
 
+    // Si por formato numérico en la BD no coincidió el string exacto, intentar por integer
     if (!data || data.length === 0) {
-      alert(`Aviso: No se encontró la proforma Nº ${numLimpio} en la base de datos o fue bloqueada por permisos RLS.`);
-      return;
+      const numInt = parseInt(numLimpio, 10);
+      if (!isNaN(numInt)) {
+        const intento2 = await supabase
+          .from("proformas")
+          .delete()
+          .eq("numero_correlativo", numInt)
+          .select();
+        
+        if (!intento2.error && intento2.data && intento2.data.length > 0) {
+          data = intento2.data;
+        }
+      }
     }
 
-    alert(`¡Proforma Nº ${numLimpio} eliminada con éxito de la base de datos!`);
+    if (!data || data.length === 0) {
+      alert(`La base de datos respondió sin filas eliminadas para la proforma ${numLimpio}. Posiblemente ya no existe.`);
+    } else {
+      alert(`¡Proforma Nº ${numLimpio} eliminada con éxito de Supabase!`);
+    }
 
-    // 1. Refrescar la tabla del historial en tiempo real
+    // Refrescar tabla y correlativo en pantalla
     await window.cargarHistorialProformas();
-
-    // 2. Refrescar el número correlativo sugerido en la cabecera
     if (typeof window.obtenerSiguienteNumeroProforma === "function") {
       await window.obtenerSiguienteNumeroProforma();
     }
   } catch (err) {
-    console.error("Error al eliminar en Supabase:", err);
-    alert("Error al eliminar de la base de datos: " + (err.message || JSON.stringify(err)));
+    alert("Error devuelto por Supabase al borrar: " + (err.message || JSON.stringify(err)));
   }
 };
-
 // 8. Plantillas de partidas técnicas
 window.aplicarPlantillaServicio = function(servicio) {
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
@@ -1697,3 +1710,13 @@ if (document.readyState === "loading") {
 } else {
   inicializarSistemaCompleto();
 }
+
+// Captura segura de clic en botón de eliminar proforma
+    const btnDel = e.target.closest(".btn-borrar-proforma, [data-del-proforma]");
+    if (btnDel) {
+      e.preventDefault();
+      e.stopPropagation();
+      const numProf = btnDel.getAttribute("data-del-proforma");
+      window.eliminarProformaHistorial(numProf);
+      return;
+    }
