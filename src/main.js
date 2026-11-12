@@ -802,22 +802,22 @@ window.guardarProformaOficial = async function() {
     const doc = document.getElementById("prof_edit_doc")?.value.trim() || "-";
     const lugar = document.getElementById("prof_edit_lugar")?.value.trim() || "Huancayo";
     const asunto = document.getElementById("prof_edit_asunto")?.value.trim() || "PROPUESTA TÉCNICA";
-const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+    const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
 
-const { error } = await supabase
-  .from("proformas")
-  .insert([
-    {
-      numero_proforma: numero,
-      numero_correlativo: correlativo,
-      cliente: cliente,
-      ruc_dni: doc,
-      lugar: lugar,
-      total: total, // Se guarda directamente como texto
-      items: JSON.parse(JSON.stringify(window.itemsProformaAdmin)),
-      creado_el: new Date().toISOString()
-    }
-  ]);
+    const { error } = await supabase
+      .from("proformas")
+      .insert([
+        {
+          numero_proforma: numero,
+          numero_correlativo: correlativo,
+          cliente: cliente,
+          ruc_dni: doc,
+          lugar: lugar,
+          total: total,
+          items: JSON.parse(JSON.stringify(window.itemsProformaAdmin)),
+          creado_el: new Date().toISOString()
+        }
+      ]);
 
     if (error) throw error;
 
@@ -902,7 +902,6 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
   if (!confirmar) return;
 
   try {
-    // Intento 1: Eliminar por coincidencia exacta de numero_proforma
     let { data, error } = await supabase
       .from("proformas")
       .delete()
@@ -911,7 +910,6 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
 
     if (error) throw error;
 
-    // Si por formato numérico en la BD no coincidió el string exacto, intentar por integer
     if (!data || data.length === 0) {
       const numInt = parseInt(numLimpio, 10);
       if (!isNaN(numInt)) {
@@ -933,7 +931,6 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
       alert(`¡Proforma Nº ${numLimpio} eliminada con éxito de Supabase!`);
     }
 
-    // Refrescar tabla y correlativo en pantalla
     await window.cargarHistorialProformas();
     if (typeof window.obtenerSiguienteNumeroProforma === "function") {
       await window.obtenerSiguienteNumeroProforma();
@@ -942,7 +939,10 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
     alert("Error devuelto por Supabase al borrar: " + (err.message || JSON.stringify(err)));
   }
 };
-// 8. Plantillas de partidas técnicas
+
+// =============================================================================
+// 8. PLANTILLAS DE PARTIDAS TÉCNICAS
+// =============================================================================
 window.aplicarPlantillaServicio = function(servicio) {
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
     b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
@@ -1012,7 +1012,9 @@ window.aplicarPlantillaServicio = function(servicio) {
   window.bloquearAccionesDespacho();
 };
 
-// 9. Renderizado dinámico de filas
+// =============================================================================
+// 9. RENDERIZADO DINÁMICO DE FILAS
+// =============================================================================
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -1134,7 +1136,9 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// 10. Descargar PDF con calibración A4 perfecta
+// =============================================================================
+// 10. DESCARGAR PDF CON CALIBRACIÓN A4 PERFECTA
+// =============================================================================
 window.descargarProformaPDF = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de poder descargar el PDF oficial.");
@@ -1227,7 +1231,9 @@ window.descargarProformaPDF = function() {
   return nombreArchivo;
 };
 
-// 11. Despacho por WhatsApp
+// =============================================================================
+// 11. DESPACHO POR WHATSAPP
+// =============================================================================
 window.enviarProformaWhatsApp = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de despachar por WhatsApp.");
@@ -1274,7 +1280,9 @@ window.enviarProformaWhatsApp = function() {
   window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
 };
 
-// 12. Despacho por Correo
+// =============================================================================
+// 12. DESPACHO POR CORREO
+// =============================================================================
 window.enviarProformaCorreo = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de despachar por Correo.");
@@ -1605,7 +1613,17 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // 6. Clics de Edición CMS (Solo Administrador)
+    // 6. Eliminar proforma del historial
+    const btnDel = e.target.closest(".btn-borrar-proforma, [data-del-proforma]");
+    if (btnDel) {
+      e.preventDefault();
+      e.stopPropagation();
+      const numProf = btnDel.getAttribute("data-del-proforma");
+      window.eliminarProformaHistorial?.(numProf);
+      return;
+    }
+
+    // 7. Clics de Edición CMS (Solo Administrador)
     if (isAdminLoggedIn) {
       const editableTarget = e.target.closest("[data-cms-key]");
       if (!editableTarget) return;
@@ -1710,13 +1728,3 @@ if (document.readyState === "loading") {
 } else {
   inicializarSistemaCompleto();
 }
-
-// Captura segura de clic en botón de eliminar proforma
-    const btnDel = e.target.closest(".btn-borrar-proforma, [data-del-proforma]");
-    if (btnDel) {
-      e.preventDefault();
-      e.stopPropagation();
-      const numProf = btnDel.getAttribute("data-del-proforma");
-      window.eliminarProformaHistorial(numProf);
-      return;
-    }
