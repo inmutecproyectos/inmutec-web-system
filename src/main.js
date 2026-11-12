@@ -643,7 +643,6 @@ export async function verificarYMontarAdminProforma() {
           document.head.appendChild(script);
         }
 
-        // Consultar a Supabase el correlativo real
         const { numero } = await window.obtenerSiguienteNumeroProforma();
         const badge = document.getElementById("admin_proforma_counter_badge");
         if (badge) {
