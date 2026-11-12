@@ -1231,7 +1231,7 @@ window.descargarProformaPDF = function() {
 };
 
 // =============================================================================
-// 11. DESPACHO POR WHATSAPP
+// 11. DESPACHO POR WHATSAPP (DESCARGA PDF + MENSAJE DIRECTO CORTO)
 // =============================================================================
 window.enviarProformaWhatsApp = function() {
   if (!window.proformaActualGuardada) {
@@ -1240,47 +1240,37 @@ window.enviarProformaWhatsApp = function() {
   }
 
   const inputPhone = document.getElementById("qPhone")?.value.trim() || "";
-  let destinatario = prompt("Ingresa el número celular de WhatsApp del destinatario (9 dígitos):", inputPhone);
+  let destinatario = prompt("Ingresa el número celular de WhatsApp del cliente (9 dígitos):", inputPhone);
 
   if (!destinatario) return;
+
   destinatario = destinatario.replace(/\D/g, "");
+  if (destinatario.startsWith("51") && destinatario.length === 11) {
+    destinatario = destinatario.substring(2);
+  }
 
   if (destinatario.length !== 9 || !destinatario.startsWith("9")) {
-    alert("Número celular no válido. En Perú debe tener 9 dígitos e iniciar con 9.");
+    alert("Número celular no válido. Ingrese un número de 9 dígitos que empiece con 9.");
     return;
   }
 
   window.descargarProformaPDF();
 
-  const cli = document.getElementById("prof_edit_cliente")?.value || "Cliente";
-  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
-  const num = document.getElementById("admin_prof_numero")?.value || "001072";
-  const fec = document.getElementById("prof_vista_fecha")?.textContent || "";
-  const svc = document.getElementById("selectedServiceInput")?.value || "Servicios Integrales";
+  const cli = document.getElementById("prof_edit_cliente")?.value.trim() || "Cliente";
+  const mensaje = `Hola estimado ${cli}, le adjunto su proforma de cotización, estaré al tanto de su respuesta por este medio, gracias.`;
 
-  let txt = `*${CONFIG_INMUTEC.empresaNombre}*\n`;
-  txt += `*PROPUESTA TÉCNICA ECONÓMICA PROFORMA Nº ${num}*\n`;
-  txt += `📅 ${fec}\n\n`;
-  txt += `👤 *Cliente / Empresa:* ${cli}\n`;
-  txt += `🛠 *Especialidad:* ${svc}\n\n`;
-  txt += `*DETALLE DE PARTIDAS:*\n`;
+  const urlWhatsapp = `https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(mensaje)}`;
 
-  window.itemsProformaAdmin.forEach((it, i) => {
-    txt += `${i + 1}. ${it.descripcion.replace(/\n/g, ' ')} (${it.cant} ${it.unidad}) -> S/ ${(it.cant * it.precio).toFixed(2)}\n`;
-  });
-
-  txt += `\n*TOTAL FACTURADO (Inc. IGV):* ${tot}\n`;
-  txt += `\n💳 *Cuentas Bancarias Autorizadas:*\n`;
-  txt += `• BANCO DE LA NACIÓN: 00-421-038902 (CCI: 018-421-00421038902-81)\n`;
-  txt += `• BANCO BBVA: 0011-0235-9302019300-55 (CCI: 011-235-000201930055-93)\n\n`;
-  txt += `📧 Correo Oficial: ${CONFIG_INMUTEC.correoPrincipal}\n`;
-  txt += `📎 Se adjunta la propuesta técnica formal emitida.`;
-
-  window.open(`https://api.whatsapp.com/send?phone=51${destinatario}&text=${encodeURIComponent(txt)}`, "_blank");
+  setTimeout(() => {
+    const win = window.open(urlWhatsapp, "_blank");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      window.location.href = urlWhatsapp;
+    }
+  }, 600);
 };
 
 // =============================================================================
-// 12. DESPACHO POR CORREO
+// 12. DESPACHO POR CORREO (DESCARGA PDF + MENSAJE DIRECTO CORTO)
 // =============================================================================
 window.enviarProformaCorreo = function() {
   if (!window.proformaActualGuardada) {
@@ -1292,6 +1282,8 @@ window.enviarProformaCorreo = function() {
   let emailDestino = prompt("Ingresa el correo electrónico del cliente para el envío:", inputEmail);
 
   if (!emailDestino) return;
+  emailDestino = emailDestino.trim();
+
   const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!regex.test(emailDestino)) {
     alert("Formato de correo no válido.");
@@ -1300,23 +1292,15 @@ window.enviarProformaCorreo = function() {
 
   window.descargarProformaPDF();
 
-  const cli = document.getElementById("prof_edit_cliente")?.value || "Estimados Señores";
-  const tot = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
+  const cli = document.getElementById("prof_edit_cliente")?.value.trim() || "Cliente";
   const num = document.getElementById("admin_prof_numero")?.value || "001072";
 
-  const subject = `Propuesta Técnica Económica Proforma Nº ${num} - INMUTEC E.I.R.L. (${cli})`;
-  const body = `Estimados Señores (${cli}):\n\n` +
-    `Por medio de la presente, remitimos la propuesta técnica económica formal correspondiente a la Proforma Nº ${num}.\n\n` +
-    `Importe Total Facturado (Inc. IGV): ${tot}\n\n` +
-    `El documento formal ha sido emitido con validez oficial.\n\n` +
-    `Atentamente,\n` +
-    `${CONFIG_INMUTEC.gerenteGeneral}\n` +
-    `Gerencia General - ${CONFIG_INMUTEC.empresaNombre}\n` +
-    `Central: ${CONFIG_INMUTEC.centralMovil} / ${CONFIG_INMUTEC.telefonoFijo}\n` +
-    `Correo: ${CONFIG_INMUTEC.correoPrincipal}\n` +
-    `Huancayo - Perú`;
+  const subject = `Proforma de Cotización Nº ${num} - INMUTEC E.I.R.L.`;
+  const body = `Hola estimado ${cli}, le adjunto su proforma de cotización, estaré al tanto de su respuesta por este medio, gracias.`;
 
-  window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  setTimeout(() => {
+    window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }, 600);
 };
 
 // =============================================================================
