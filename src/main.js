@@ -491,29 +491,160 @@ window.filtrarServicios = function(categoria, btnElement) {
 };
 
 // =============================================================================
-// MODULO 4: VISTA COTIZACIÓN
+// MODULO 4: VISTA COTIZACIÓN (VALIDACIÓN ESTRICTA + INTERFAZ CALIBRADA)
 // =============================================================================
 async function initCotizacionModule() {
   const dynamicContainer = document.getElementById("dynamicServiceSection");
   const hiddenSvcInput = document.getElementById("selectedServiceInput");
+  const moduleContainer = document.getElementById("moduleContainer");
+
+  // 1. Limpieza visual automática en la vista de cotización:
+  //    - Reemplaza correos antiguos por el correo oficial actual (inmutecproyectos@gmail.com)
+  //    - Oculta el texto descriptivo debajo del botón verde de WhatsApp
+  if (moduleContainer) {
+    moduleContainer.innerHTML = moduleContainer.innerHTML
+      .replace(/inmuteceirl@gmail\.com/gi, CONFIG_INMUTEC.correoPrincipal)
+      .replace(/gusmarbal@hotmail\.com/gi, CONFIG_INMUTEC.correoPrincipal);
+
+    moduleContainer.querySelectorAll("button, a").forEach(btn => {
+      const txt = (btn.textContent || "").toUpperCase();
+      if (txt.includes("ENVIAR COTIZACIÓN") || txt.includes("COTIZACIÓN A WHATSAPP")) {
+        btn.id = "btnEnviarCotizacionPublica";
+        let sig = btn.nextElementSibling;
+        while (sig) {
+          const nextEl = sig.nextElementSibling;
+          if (sig.tagName === "P" || sig.tagName === "SMALL" || sig.tagName === "SPAN" || sig.tagName === "DIV") {
+            const subTxt = (sig.textContent || "").toLowerCase();
+            if (
+              subTxt.includes("whatsapp") ||
+              subTxt.includes("directa") ||
+              subTxt.includes("atención") ||
+              subTxt.includes("respuesta") ||
+              subTxt.includes("inmediata") ||
+              subTxt.includes("asesor") ||
+              subTxt.length < 180
+            ) {
+              sig.style.display = "none";
+            }
+          }
+          sig = nextEl;
+        }
+      }
+    });
+  }
 
   if (isAdminLoggedIn) {
     await verificarYMontarAdminProforma();
   }
 
+  // 2. Validación en tiempo real: solo números en RUC/DNI y Celular
+  const inputDoc = document.getElementById("qDoc");
+  const inputPhone = document.getElementById("qPhone");
+  const inputRazon = document.getElementById("qRazon");
+  const inputEmail = document.getElementById("qEmail");
+
+  if (inputDoc) {
+    inputDoc.setAttribute("inputmode", "numeric");
+    inputDoc.maxLength = 11;
+    inputDoc.placeholder = "Ingrese los 11 dígitos de su RUC";
+    inputDoc.addEventListener("input", () => {
+      const tipo = document.querySelector("input[name='docType']:checked")?.value || "RUC";
+      const max = tipo === "DNI" ? 8 : 11;
+      inputDoc.value = inputDoc.value.replace(/\D/g, "").slice(0, max);
+      window.sincronizarConProformaAdmin?.();
+    });
+  }
+
+  if (inputPhone) {
+    inputPhone.setAttribute("inputmode", "numeric");
+    inputPhone.maxLength = 9;
+    inputPhone.placeholder = "Ej. 954928201 (9 dígitos)";
+    inputPhone.addEventListener("input", () => {
+      inputPhone.value = inputPhone.value.replace(/\D/g, "").slice(0, 9);
+    });
+  }
+
+  if (inputRazon) {
+    inputRazon.addEventListener("input", () => {
+      // Evita caracteres de control inválidos
+      inputRazon.value = inputRazon.value.replace(/[<>{}[\]\\]/g, "");
+      window.sincronizarConProformaAdmin?.();
+    });
+  }
+
+  if (inputEmail) {
+    inputEmail.type = "email";
+    inputEmail.placeholder = "ejemplo@empresa.com";
+  }
+
+  // 3. Sincronización dinámica al cambiar entre RUC y DNI
+  document.querySelectorAll("input[name='docType']").forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      if (!inputDoc) return;
+      if (e.target.value === "DNI") {
+        inputDoc.placeholder = "Ingrese los 8 dígitos de su DNI";
+        inputDoc.maxLength = 8;
+        inputDoc.value = inputDoc.value.replace(/\D/g, "").slice(0, 8);
+      } else {
+        inputDoc.placeholder = "Ingrese los 11 dígitos de su RUC";
+        inputDoc.maxLength = 11;
+        inputDoc.value = inputDoc.value.replace(/\D/g, "").slice(0, 11);
+      }
+      window.sincronizarConProformaAdmin?.();
+    });
+  });
+
+  // 4. Renderizado de parámetros por especialidad y sincronización visual de tarjetas
   window.renderCotizacionCampos = function(serviceName) {
     if (!dynamicContainer) return;
     if (hiddenSvcInput) hiddenSvcInput.value = serviceName;
 
-    document.querySelectorAll(".svc-selector-btn").forEach(b => {
-      if (b.getAttribute("data-svc") === serviceName) {
-        b.classList.add("active-svc", "border-[#00a8e8]", "bg-cyan-50/50");
-      } else {
-        b.classList.remove("active-svc", "border-[#00a8e8]", "bg-cyan-50/50");
-      }
-    });
+    // Resaltar exclusivamente la tarjeta activa entre las 5 especialidades
+    if (moduleContainer) {
+      moduleContainer.querySelectorAll("button, .cursor-pointer").forEach(card => {
+        if (
+          card.closest("#dynamicServiceSection") ||
+          card.closest("#proformaWorkspaceContainer") ||
+          card.closest("#chatForm")
+        ) return;
 
-    if (serviceName === "Laboratorio") {
+        const txt = (card.textContent || "").trim();
+        const esTarjetaServicio =
+          txt.includes("Internet Dedicado") ||
+          txt.includes("Fibra Óptica") ||
+          txt.includes("Torres & STP") ||
+          txt.includes("Laboratorio RF") ||
+          txt.includes("Domótica & Smart");
+
+        if (esTarjetaServicio) {
+          card.classList.remove(
+            "active-svc",
+            "border-[#00a8e8]",
+            "bg-cyan-50/50",
+            "ring-2",
+            "ring-[#00a8e8]",
+            "border-amber-400",
+            "border-amber-500",
+            "bg-amber-50/40"
+          );
+          card.classList.add("border-slate-200", "bg-white");
+
+          const coincide =
+            (serviceName === "Internet Dedicado" && txt.includes("Internet Dedicado")) ||
+            (serviceName === "Fibra Óptica" && txt.includes("Fibra Óptica")) ||
+            (serviceName === "Torres & STP" && txt.includes("Torres & STP")) ||
+            ((serviceName === "Laboratorio" || serviceName === "Laboratorio RF") && txt.includes("Laboratorio RF")) ||
+            ((serviceName === "Domótica" || serviceName === "Domótica & Smart") && txt.includes("Domótica & Smart"));
+
+          if (coincide) {
+            card.classList.remove("border-slate-200", "bg-white");
+            card.classList.add("active-svc", "border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
+          }
+        }
+      });
+    }
+
+    if (serviceName === "Laboratorio" || serviceName === "Laboratorio RF") {
       dynamicContainer.innerHTML = `
         <div class="border-b border-slate-200 pb-2">
           <span class="text-[10px] font-black uppercase text-[#ef4444] tracking-wider block">Recepción en Laboratorio Técnico RF</span>
@@ -538,7 +669,7 @@ async function initCotizacionModule() {
           <span>Recepción oficial: <strong>${CONFIG_INMUTEC.direccionHuancayo}</strong></span>
         </div>
       `;
-    } else if (serviceName === "Domótica") {
+    } else if (serviceName === "Domótica" || serviceName === "Domótica & Smart") {
       dynamicContainer.innerHTML = `
         <div class="border-b border-amber-200 pb-2 flex items-center justify-between">
           <div>
@@ -619,6 +750,112 @@ async function initCotizacionModule() {
     }
   };
 
+  // 5. Envío validado del formulario público de cotización a WhatsApp
+  window.enviarCotizacionPublicaWhatsApp = async function() {
+    const razon = document.getElementById("qRazon")?.value.trim() || "";
+    const tipoDoc = document.querySelector("input[name='docType']:checked")?.value || "RUC";
+    const numDoc = document.getElementById("qDoc")?.value.trim() || "";
+    const email = document.getElementById("qEmail")?.value.trim() || "";
+    const phone = document.getElementById("qPhone")?.value.trim() || "";
+    const servicio = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
+
+    // Validar Razón Social o Nombre (mínimo 3 caracteres y al menos 2 letras reales, no solo números/símbolos)
+    if (razon.length < 3 || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]{2,}/.test(razon)) {
+      alert("Por favor ingrese un Nombre completo o Razón Social válida (mínimo 3 caracteres con letras).");
+      document.getElementById("qRazon")?.focus();
+      return;
+    }
+
+    // Validar RUC (11 dígitos) o DNI (8 dígitos)
+    if (tipoDoc === "RUC" && !/^\d{11}$/.test(numDoc)) {
+      alert("El número de RUC debe tener exactamente 11 dígitos numéricos.");
+      document.getElementById("qDoc")?.focus();
+      return;
+    }
+    if (tipoDoc === "DNI" && !/^\d{8}$/.test(numDoc)) {
+      alert("El número de DNI debe tener exactamente 8 dígitos numéricos.");
+      document.getElementById("qDoc")?.focus();
+      return;
+    }
+
+    // Validar Correo Electrónico válido
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      alert("Por favor ingrese un correo electrónico válido (ejemplo: contacto@empresa.com).");
+      document.getElementById("qEmail")?.focus();
+      return;
+    }
+
+    // Validar Celular peruano (9 dígitos empezando con 9)
+    if (!/^9\d{8}$/.test(phone)) {
+      alert("Por favor ingrese un número celular válido de 9 dígitos que inicie con 9.");
+      document.getElementById("qPhone")?.focus();
+      return;
+    }
+
+    let detalleExtra = "";
+    if (servicio === "Laboratorio" || servicio === "Laboratorio RF") {
+      const eq = document.getElementById("qLabEquipo")?.value.trim() || "";
+      const cant = document.getElementById("qLabCantidad")?.value || "1";
+      const falla = document.getElementById("qLabFalla")?.value.trim() || "";
+      if (!eq || !falla) {
+        alert("Por favor complete el Tipo de Equipo y el Detalle de la Falla.");
+        return;
+      }
+      detalleExtra = `• *Equipo:* ${eq} (Cant: ${cant})\n• *Falla/Trabajo:* ${falla}`;
+    } else if (servicio === "Domótica" || servicio === "Domótica & Smart") {
+      const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => c.value).join(", ") || "Solución Integral Smart";
+      const tipoEsp = document.getElementById("qDomTipo")?.value || "-";
+      const lugar = document.getElementById("qLugar")?.value.trim() || "";
+      const det = document.getElementById("qDetalles")?.value.trim() || "";
+      if (!lugar || !det) {
+        alert("Por favor indique el Lugar de Implementación y el Detalle del Proyecto.");
+        return;
+      }
+      detalleExtra = `• *Soluciones:* ${checks}\n• *Espacio:* ${tipoEsp}\n• *Lugar:* ${lugar}\n• *Detalle:* ${det}`;
+    } else {
+      const sede = document.getElementById("qSede")?.value || "-";
+      const lugar = document.getElementById("qLugar")?.value.trim() || "";
+      const det = document.getElementById("qDetalles")?.value.trim() || "";
+      if (!lugar || !det) {
+        alert("Por favor indique el Lugar de la Obra y la Descripción Técnica.");
+        return;
+      }
+      detalleExtra = `• *Sede:* ${sede}\n• *Lugar:* ${lugar}\n• *Detalle:* ${det}`;
+    }
+
+    // Respaldo opcional en Supabase
+    try {
+      await supabase.from("cotizaciones_web").insert([{
+        cliente: razon,
+        tipo_doc: tipoDoc,
+        num_doc: numDoc,
+        correo: email,
+        celular: phone,
+        servicio: servicio,
+        detalle: detalleExtra,
+        creado_el: new Date().toISOString()
+      }]);
+    } catch (e) {
+      console.warn("Registro en tabla cotizaciones_web omitido:", e);
+    }
+
+    const msg =
+      `*SOLICITUD DE COTIZACIÓN WEB - INMUTEC E.I.R.L.*\n\n` +
+      `👤 *Cliente / Empresa:* ${razon}\n` +
+      `🪪 *${tipoDoc}:* ${numDoc}\n` +
+      `📧 *Correo:* ${email}\n` +
+      `📱 *Celular:* ${phone}\n` +
+      `🛠 *Especialidad:* ${servicio}\n\n` +
+      `*PARÁMETROS TÉCNICOS:*\n${detalleExtra}`;
+
+    const url = `https://api.whatsapp.com/send?phone=${CONFIG_INMUTEC.whatsappGeneral}&text=${encodeURIComponent(msg)}`;
+    const win = window.open(url, "_blank");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      window.location.href = url;
+    }
+  };
+
   const prefill = sessionStorage.getItem("inmutec_prefill_service") || "Internet Dedicado";
   sessionStorage.removeItem("inmutec_prefill_service");
   window.renderCotizacionCampos(prefill);
@@ -663,7 +900,6 @@ export async function verificarYMontarAdminProforma() {
 
 window.proformaActualGuardada = false;
 
-// 1. Obtener correlativo consultando la base de datos de Supabase
 window.obtenerSiguienteNumeroProforma = async function() {
   const NUMERO_BASE = 1072;
 
@@ -697,7 +933,6 @@ window.obtenerSiguienteNumeroProforma = async function() {
   }
 };
 
-// 2. Fecha y hora automática de Huancayo
 window.generarFechaHoraHuancayo = function() {
   const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SETIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   const ahora = new Date();
@@ -714,7 +949,6 @@ window.generarFechaHoraHuancayo = function() {
   return `HUANCAYO, ${dia} DE ${mes} ${anio} - ${horas}:${minutos} ${ampm}`;
 };
 
-// 3. Abrir / Cerrar Mesa de Proformas
 window.toggleProformaWorkspace = async function() {
   const box = document.getElementById("proformaWorkspaceContainer");
   const txt = document.getElementById("btnToggleProformaText");
@@ -746,7 +980,6 @@ window.toggleProformaWorkspace = async function() {
   }
 };
 
-// 4. Bloquear y desbloquear botones de exportación
 window.bloquearAccionesDespacho = function() {
   window.proformaActualGuardada = false;
   const btns = ["btnDescargarPDF", "btnEnviarWhatsApp", "btnEnviarCorreo"];
@@ -785,7 +1018,6 @@ window.desbloquearAccionesDespacho = function() {
   }
 };
 
-// 5. Guardar Proforma oficial directamente en Supabase
 window.guardarProformaOficial = async function() {
   const btnGuardar = document.getElementById("btnGuardarProforma");
   if (btnGuardar) {
@@ -796,11 +1028,9 @@ window.guardarProformaOficial = async function() {
   try {
     const { numero, correlativo } = await window.obtenerSiguienteNumeroProforma();
 
-    const fecha = document.getElementById("admin_prof_fecha")?.value || window.generarFechaHoraHuancayo();
     const cliente = document.getElementById("prof_edit_cliente")?.value.trim() || "EMPRESA REGISTRADA";
     const doc = document.getElementById("prof_edit_doc")?.value.trim() || "-";
     const lugar = document.getElementById("prof_edit_lugar")?.value.trim() || "Huancayo";
-    const asunto = document.getElementById("prof_edit_asunto")?.value.trim() || "PROPUESTA TÉCNICA";
     const total = document.getElementById("calc_total_admin")?.textContent || "S/ 0.00";
 
     const { error } = await supabase
@@ -837,9 +1067,6 @@ window.guardarProformaOficial = async function() {
   }
 };
 
-// =============================================================================
-// 6. CARGAR HISTORIAL DE PROFORMAS DESDE SUPABASE
-// =============================================================================
 window.cargarHistorialProformas = async function() {
   const tbody = document.getElementById("historial_proformas_body");
   const badge = document.getElementById("historial_count_badge");
@@ -887,9 +1114,6 @@ window.cargarHistorialProformas = async function() {
   }
 };
 
-// =============================================================================
-// 7. ELIMINAR PROFORMA CON DIAGNÓSTICO EN PANTALLA
-// =============================================================================
 window.eliminarProformaHistorial = async function(numeroProforma) {
   const numLimpio = String(numeroProforma || "").trim();
   if (!numLimpio) {
@@ -939,9 +1163,6 @@ window.eliminarProformaHistorial = async function(numeroProforma) {
   }
 };
 
-// =============================================================================
-// 8. PLANTILLAS DE PARTIDAS TÉCNICAS
-// =============================================================================
 window.aplicarPlantillaServicio = function(servicio) {
   document.querySelectorAll(".srv-admin-filter").forEach(b => {
     b.classList.remove("ring-2", "ring-[#00a8e8]", "bg-slate-700");
@@ -1011,9 +1232,6 @@ window.aplicarPlantillaServicio = function(servicio) {
   window.bloquearAccionesDespacho();
 };
 
-// =============================================================================
-// 9. RENDERIZADO DINÁMICO DE FILAS
-// =============================================================================
 window.renderizarItemsAdmin = function() {
   const tbody = document.getElementById("tabla_items_body_admin");
   if (!tbody) return;
@@ -1135,9 +1353,6 @@ window.sincronizarCamposInversos = function(tipo) {
   }
 };
 
-// =============================================================================
-// 10. DESCARGAR PDF CON CALIBRACIÓN A4 PERFECTA
-// =============================================================================
 window.descargarProformaPDF = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de poder descargar el PDF oficial.");
@@ -1230,9 +1445,6 @@ window.descargarProformaPDF = function() {
   return nombreArchivo;
 };
 
-// =============================================================================
-// 11. DESPACHO POR WHATSAPP (DESCARGA PDF + MENSAJE DIRECTO CORTO)
-// =============================================================================
 window.enviarProformaWhatsApp = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de despachar por WhatsApp.");
@@ -1269,9 +1481,6 @@ window.enviarProformaWhatsApp = function() {
   }, 600);
 };
 
-// =============================================================================
-// 12. DESPACHO POR CORREO (DESCARGA PDF + MENSAJE DIRECTO CORTO)
-// =============================================================================
 window.enviarProformaCorreo = function() {
   if (!window.proformaActualGuardada) {
     alert("Debes presionar 'Guardar Proforma' antes de despachar por Correo.");
@@ -1304,36 +1513,56 @@ window.enviarProformaCorreo = function() {
 };
 
 // =============================================================================
-// MODULO 6: CHATBOT ASISTENTE TÉCNICO
+// MODULO 6: CHATBOT ASISTENTE TÉCNICO PRO (MOTOR DE RESPUESTAS COMPLETAS)
 // =============================================================================
 const BOT_KNOWLEDGE = [
   {
-    keys: ["hola", "buen dia", "buenas", "saludos", "que tal", "inicio"],
-    reply: `Hola, te doy la bienvenida a ${CONFIG_INMUTEC.empresaNombre}. Soy tu asistente virtual. ¿En qué especialidad técnica te podemos orientar hoy? Puedes escribir en el teclado o pulsar una de las consultas rápidas.`
+    keys: ["hola", "buen dia", "buenas", "saludos", "que tal", "inicio", "hey", "aló", "alo"],
+    reply: `¡Hola! Bienvenido a <strong>${CONFIG_INMUTEC.empresaNombre}</strong>. Soy tu asistente técnico virtual. Puedo informarte sobre nuestros servicios, precios/cotizaciones, certificaciones NTP 2050, sedes o proyectos ejecutados. ¿Qué deseas consultar?`
   },
   {
-    keys: ["servicios", "cobertura", "que hacen", "especialidad", "catalogo"],
-    reply: "INMUTEC se especializa en 5 divisiones: 1. Internet Dedicado simétrico, 2. Redes de Fibra Óptica (planta externa/interna y OTDR), 3. Montaje de Torres y Puesta a Tierra STP, 4. Laboratorio Técnico de Radiotransmisión y 5. Domótica y Automatización Inteligente."
+    keys: ["servicio", "ofrece", "ofrecen", "cobertura", "que hacen", "especialidad", "catalogo", "trabajo", "realizan", "dedican", "brindan", "soluciones", "venden"],
+    reply: "En <strong>INMUTEC E.I.R.L.</strong> brindamos 5 divisiones especializadas:<br>1. <strong>Internet Dedicado:</strong> Enlaces simétricos 1:1 con IP fija y SLA 99.8%.<br>2. <strong>Fibra Óptica:</strong> Tendido aéreo/canalizado, fusión y certificación OTDR.<br>3. <strong>Torres & STP:</strong> Montaje de estructuras y pozos a tierra bajo norma NTP 2050.<br>4. <strong>Laboratorio RF:</strong> Reparación y calibración de radios Motorola/Kenwood.<br>5. <strong>Domótica & Smart:</strong> Casas/oficinas inteligentes, cerraduras biométricas y cámaras IA."
   },
   {
-    keys: ["norma", "stp", "tierra", "pozo a tierra", "ntp 2050", "telurometro", "pararrayo"],
-    reply: "Diseñamos e implementamos Sistemas de Protección a Tierra (STP) bajo la Norma Técnica Peruana NTP 2050 y el Código Nacional de Electricidad. Garantizamos valores de resistencia por debajo de 5 Ohmios certificados con telurómetro calibrado."
+    keys: ["internet", "dedicado", "simetrico", "ancho de banda", "megas", "mbps", "enlace", "noc", "ip fija"],
+    reply: "Nuestro servicio de <strong>Internet Dedicado Empresarial</strong> garantiza velocidad simétrica 1:1 (misma subida y bajada), IPs públicas fijas, monitoreo NOC 24/7 y respaldo de redundancia con disponibilidad SLA del 99.8%."
   },
   {
-    keys: ["domotica", "smart", "automatizacion", "casa inteligente", "edificio", "cerraduras"],
-    reply: "Nuestra división de Domótica e Inmótica implementa control inteligente de iluminación, cerraduras biométricas, cámaras con IA, sensores perimétricos y automatización de accesos para residencias, empresas e industrias."
+    keys: ["fibra", "optica", "otdr", "mufa", "fusion", "tendido", "adss", "fujikura", "cableado"],
+    reply: "Ejecutamos ingeniería de planta externa e interna en <strong>Fibra Óptica</strong>: tendido ADSS/canalizado, sangrado de mufas troncales, empalmes por fusión con equipos Fujikura (< 0.02 dB) y entrega de protocolos reflectométricos OTDR."
   },
   {
-    keys: ["fibra", "otdr", "mufa", "fusion", "tendido", "wow", "dorsal"],
-    reply: "Contamos con fusionadoras Fujikura de alineación de núcleo y equipos OTDR calibrados. Hemos ejecutado más de 120 km de troncales ópticas para WOW Tel y mantenimiento correctivo en la Red Dorsal Nacional."
+    keys: ["norma", "stp", "tierra", "pozo", "ntp 2050", "telurometro", "pararrayo", "resistencia", "torre", "mastil", "estructura"],
+    reply: "Diseñamos, construimos y certificamos <strong>Sistemas de Protección a Tierra (STP)</strong> y pararrayos bajo la Norma Técnica Peruana <strong>NTP 2050</strong>. Entregamos protocolo firmado con telurómetro calibrado garantizando resistencia menor a 5 Ohmios, además de izaje y mantenimiento de torres."
   },
   {
-    keys: ["laboratorio", "radio", "calibrar", "motorola", "kenwood", "falla"],
-    reply: `En nuestro laboratorio técnico de Huancayo (${CONFIG_INMUTEC.direccionHuancayo}) realizamos peritaje, calibración de frecuencia y potencia en banco RF, así como reparación electrónica de transceptores y repetidoras.`
+    keys: ["domotica", "smart", "automatizacion", "casa inteligente", "edificio", "cerradura", "camara", "iot", "seguridad", "cctv"],
+    reply: "En <strong>Domótica e Inmótica</strong> implementamos iluminación inteligente dimerizable, cerraduras biométricas/digitales, cámaras con analítica IA, sensores perimétricos y automatización de tableros eléctricos con control desde el celular."
   },
   {
-    keys: ["ingeniero", "gerente", "marmanillo", "gustavo", "telefono", "whatsapp", "contacto"],
-    reply: `Puedes comunicarte directamente con el Gerente General, ${CONFIG_INMUTEC.gerenteGeneral}, al número celular / WhatsApp ${CONFIG_INMUTEC.centralMovil}.`
+    keys: ["laboratorio", "radio", "calibrar", "motorola", "kenwood", "falla", "reparacion", "antena", "transceptor", "repetidora"],
+    reply: `En nuestro <strong>Laboratorio Técnico RF</strong> de Huancayo (${CONFIG_INMUTEC.direccionHuancayo}) realizamos diagnóstico en banco de pruebas, ajuste de frecuencia/potencia y reparación con repuestos originales de radios Motorola, Kenwood y repetidoras.`
+  },
+  {
+    keys: ["precio", "costo", "tarifa", "cotiz", "presupuesto", "cuanto cuesta", "proforma", "valor", "cobran"],
+    reply: "Nuestras cotizaciones se calculan a medida según el alcance técnico (metraje de fibra, velocidad del enlace, altura de torre o cantidad de equipos). Completa el formulario de la izquierda y pulsa <strong>ENVIAR COTIZACIÓN A WHATSAPP</strong> para enviarte tu proforma formal hoy mismo."
+  },
+  {
+    keys: ["pago", "cuenta", "banco", "bbva", "nacion", "factura", "igv", "ruc", "detraccion"],
+    reply: `Emitimos Factura Electrónica (RUC: <strong>${CONFIG_INMUTEC.ruc}</strong>). Trabajamos con cuentas corrientes autorizadas en <strong>BBVA</strong> y <strong>Banco de la Nación</strong>, con modalidad estándar 50% adelanto y 50% contra entrega y conformidad técnica.`
+  },
+  {
+    keys: ["cliente", "experiencia", "obra", "proyecto", "wow", "dorsal", "tgp", "huancavelica", "tambo", "garantia", "empresa", "quienes son"],
+    reply: "Somos una empresa de ingeniería con amplia trayectoria ejecutando proyectos críticos para <strong>WOW Tel</strong> (redes troncales), <strong>Red Dorsal Nacional</strong> (Telrad), <strong>Transportadora de Gas del Perú (TGP)</strong>, <strong>DRTC Huancavelica</strong> y municipalidades."
+  },
+  {
+    keys: ["direccion", "ubicacion", "donde estan", "oficina", "sede", "huancayo", "huancavelica", "horario", "atienden"],
+    reply: `Atendemos de Lunes a Sábado de 8:00 AM a 6:30 PM (y soporte NOC 24/7) en nuestras sedes:<br>• <strong>Huancayo:</strong> ${CONFIG_INMUTEC.direccionHuancayo}<br>• <strong>Huancavelica:</strong> ${CONFIG_INMUTEC.direccionHuancavelica}`
+  },
+  {
+    keys: ["ingeniero", "gerente", "marmanillo", "gustavo", "telefono", "whatsapp", "contacto", "correo", "email", "numero", "llamar"],
+    reply: `Puedes comunicarte directamente con el Gerente General, <strong>${CONFIG_INMUTEC.gerenteGeneral}</strong>:<br>• <strong>WhatsApp / Móvil:</strong> ${CONFIG_INMUTEC.centralMovil}<br>• <strong>Fijo:</strong> ${CONFIG_INMUTEC.telefonoFijo}<br>• <strong>Correo oficial:</strong> ${CONFIG_INMUTEC.correoPrincipal}`
   }
 ];
 
@@ -1347,7 +1576,7 @@ function initChatbot() {
         <i class="fa-solid fa-robot"></i>
       </div>
       <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-slate-700 max-w-[88%] leading-relaxed">
-        Hola, soy el asistente técnico de <strong>INMUTEC E.I.R.L.</strong> ¿En qué puedo orientarte hoy? Puedes escribir en el teclado o seleccionar una de las alternativas de abajo.
+        Hola, soy el asistente técnico de <strong>INMUTEC E.I.R.L.</strong> ¿En qué puedo orientarte hoy? Puedes escribir cualquier consulta sobre servicios, precios, normas o sedes, o elegir una opción rápida abajo.
       </div>
     </div>
   `;
@@ -1395,26 +1624,28 @@ function appendBotMessage(text, sender, isButton = false) {
 
 function processBotQuery(userText) {
   const clean = userText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  let match = null;
+  let bestMatch = null;
+  let maxHits = 0;
 
   for (const item of BOT_KNOWLEDGE) {
-    if (item.keys.some(k => clean.includes(k))) {
-      match = item.reply;
-      break;
+    const hits = item.keys.filter(k => clean.includes(k)).length;
+    if (hits > maxHits) {
+      maxHits = hits;
+      bestMatch = item.reply;
     }
   }
 
   setTimeout(() => {
-    if (match) {
-      appendBotMessage(match, "bot");
+    if (bestMatch) {
+      appendBotMessage(bestMatch, "bot");
     } else {
       appendBotMessage(
-        "Para brindarte una propuesta o peritaje técnico exacto sobre este requerimiento, es conveniente que uno de nuestros ingenieros revise los detalles.",
+        "Para brindarte una propuesta o peritaje técnico exacto sobre este requerimiento, uno de nuestros ingenieros puede atenderte directamente por WhatsApp.",
         "bot",
         true
       );
     }
-  }, 250);
+  }, 200);
 }
 
 // =============================================================================
@@ -1572,13 +1803,25 @@ async function inicializarSistemaCompleto() {
           e.preventDefault();
           e.stopPropagation();
 
-          svcCardBtn.parentElement?.querySelectorAll("button, div").forEach(el => {
-            el.classList.remove("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
-          });
-          svcCardBtn.classList.add("border-[#00a8e8]", "bg-cyan-50/50", "ring-2", "ring-[#00a8e8]");
-
           window.renderCotizacionCampos?.(svcName);
           window.aplicarPlantillaServicio?.(svcName);
+          return;
+        }
+      }
+
+      // 4B. Botón verde "ENVIAR COTIZACIÓN A WHATSAPP" del formulario público
+      const btnCotPublica = e.target.closest("#btnEnviarCotizacionPublica, button[type='submit']");
+      if (
+        btnCotPublica &&
+        btnCotPublica.closest("#moduleContainer") &&
+        !btnCotPublica.closest("#proformaWorkspaceContainer") &&
+        !btnCotPublica.closest("#chatForm")
+      ) {
+        const txtBtn = (btnCotPublica.textContent || "").toUpperCase();
+        if (txtBtn.includes("ENVIAR COTIZACIÓN") || txtBtn.includes("COTIZACIÓN A WHATSAPP")) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.enviarCotizacionPublicaWhatsApp?.();
           return;
         }
       }
@@ -1651,6 +1894,18 @@ async function inicializarSistemaCompleto() {
       appendBotMessage(msg, "user");
       input.value = "";
       processBotQuery(msg);
+      return;
+    }
+
+    // Interceptar submit nativo del formulario de cotización si existe <form>
+    if (
+      e.target &&
+      e.target.closest("#moduleContainer") &&
+      window.location.hash.includes("cotizacion") &&
+      !e.target.closest("#proformaWorkspaceContainer")
+    ) {
+      e.preventDefault();
+      window.enviarCotizacionPublicaWhatsApp?.();
     }
   });
 
