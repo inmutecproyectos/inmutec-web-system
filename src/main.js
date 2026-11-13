@@ -1723,7 +1723,7 @@ async function inicializarSistemaCompleto() {
         }
       } catch (err) {
         if (errSpan) {
-          errSpan.textContent = "Credenciales incorrectas de Supabase.";
+          errSpan.textContent = "Credenciales incorrectas.";
           errSpan.classList.remove("hidden");
         }
       }
