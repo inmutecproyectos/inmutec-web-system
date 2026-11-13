@@ -494,17 +494,20 @@ window.filtrarServicios = function(categoria, btnElement) {
 // MODULO 4: VISTA COTIZACIÓN (VALIDACIÓN ESTRICTA + INTERFAZ CALIBRADA)
 // =============================================================================
 async function initCotizacionModule() {
-  const dynamicContainer = document.getElementById("dynamicServiceSection");
-  const hiddenSvcInput = document.getElementById("selectedServiceInput");
   const moduleContainer = document.getElementById("moduleContainer");
 
-  // 1. Limpieza visual automática en la vista de cotización:
-  //    - Reemplaza correos antiguos por el correo oficial actual (inmutecproyectos@gmail.com)
-  //    - Oculta el texto descriptivo debajo del botón verde de WhatsApp
+  // 1. Limpieza visual segura sin destruir referencias del DOM
   if (moduleContainer) {
-    moduleContainer.innerHTML = moduleContainer.innerHTML
-      .replace(/inmuteceirl@gmail\.com/gi, CONFIG_INMUTEC.correoPrincipal)
-      .replace(/gusmarbal@hotmail\.com/gi, CONFIG_INMUTEC.correoPrincipal);
+    moduleContainer.querySelectorAll("*").forEach(el => {
+      if (el.children.length === 0 && el.textContent) {
+        if (el.textContent.includes("inmuteceirl@gmail.com")) {
+          el.textContent = el.textContent.replace(/inmuteceirl@gmail\.com/gi, CONFIG_INMUTEC.correoPrincipal);
+        }
+        if (el.textContent.includes("gusmarbal@hotmail.com")) {
+          el.textContent = el.textContent.replace(/gusmarbal@hotmail\.com/gi, CONFIG_INMUTEC.correoPrincipal);
+        }
+      }
+    });
 
     moduleContainer.querySelectorAll("button, a").forEach(btn => {
       const txt = (btn.textContent || "").toUpperCase();
@@ -514,18 +517,7 @@ async function initCotizacionModule() {
         while (sig) {
           const nextEl = sig.nextElementSibling;
           if (sig.tagName === "P" || sig.tagName === "SMALL" || sig.tagName === "SPAN" || sig.tagName === "DIV") {
-            const subTxt = (sig.textContent || "").toLowerCase();
-            if (
-              subTxt.includes("whatsapp") ||
-              subTxt.includes("directa") ||
-              subTxt.includes("atención") ||
-              subTxt.includes("respuesta") ||
-              subTxt.includes("inmediata") ||
-              subTxt.includes("asesor") ||
-              subTxt.length < 180
-            ) {
-              sig.style.display = "none";
-            }
+            sig.style.display = "none";
           }
           sig = nextEl;
         }
@@ -566,7 +558,6 @@ async function initCotizacionModule() {
 
   if (inputRazon) {
     inputRazon.addEventListener("input", () => {
-      // Evita caracteres de control inválidos
       inputRazon.value = inputRazon.value.replace(/[<>{}[\]\\]/g, "");
       window.sincronizarConProformaAdmin?.();
     });
@@ -580,28 +571,32 @@ async function initCotizacionModule() {
   // 3. Sincronización dinámica al cambiar entre RUC y DNI
   document.querySelectorAll("input[name='docType']").forEach(radio => {
     radio.addEventListener("change", (e) => {
-      if (!inputDoc) return;
+      const docEl = document.getElementById("qDoc");
+      if (!docEl) return;
       if (e.target.value === "DNI") {
-        inputDoc.placeholder = "Ingrese los 8 dígitos de su DNI";
-        inputDoc.maxLength = 8;
-        inputDoc.value = inputDoc.value.replace(/\D/g, "").slice(0, 8);
+        docEl.placeholder = "Ingrese los 8 dígitos de su DNI";
+        docEl.maxLength = 8;
+        docEl.value = docEl.value.replace(/\D/g, "").slice(0, 8);
       } else {
-        inputDoc.placeholder = "Ingrese los 11 dígitos de su RUC";
-        inputDoc.maxLength = 11;
-        inputDoc.value = inputDoc.value.replace(/\D/g, "").slice(0, 11);
+        docEl.placeholder = "Ingrese los 11 dígitos de su RUC";
+        docEl.maxLength = 11;
+        docEl.value = docEl.value.replace(/\D/g, "").slice(0, 11);
       }
       window.sincronizarConProformaAdmin?.();
     });
   });
 
-  // 4. Renderizado de parámetros por especialidad y sincronización visual de tarjetas
+  // 4. Renderizado de parámetros por especialidad (busca el contenedor en vivo)
   window.renderCotizacionCampos = function(serviceName) {
+    const dynamicContainer = document.getElementById("dynamicServiceSection");
+    const hiddenSvcInput = document.getElementById("selectedServiceInput");
+    const modContainer = document.getElementById("moduleContainer");
+
     if (!dynamicContainer) return;
     if (hiddenSvcInput) hiddenSvcInput.value = serviceName;
 
-    // Resaltar exclusivamente la tarjeta activa entre las 5 especialidades
-    if (moduleContainer) {
-      moduleContainer.querySelectorAll("button, .cursor-pointer").forEach(card => {
+    if (modContainer) {
+      modContainer.querySelectorAll("button, .cursor-pointer").forEach(card => {
         if (
           card.closest("#dynamicServiceSection") ||
           card.closest("#proformaWorkspaceContainer") ||
@@ -759,14 +754,12 @@ async function initCotizacionModule() {
     const phone = document.getElementById("qPhone")?.value.trim() || "";
     const servicio = document.getElementById("selectedServiceInput")?.value || "Internet Dedicado";
 
-    // Validar Razón Social o Nombre (mínimo 3 caracteres y al menos 2 letras reales, no solo números/símbolos)
     if (razon.length < 3 || !/[a-zA-ZáéíóúÁÉÍÓÚñÑ]{2,}/.test(razon)) {
       alert("Por favor ingrese un Nombre completo o Razón Social válida (mínimo 3 caracteres con letras).");
       document.getElementById("qRazon")?.focus();
       return;
     }
 
-    // Validar RUC (11 dígitos) o DNI (8 dígitos)
     if (tipoDoc === "RUC" && !/^\d{11}$/.test(numDoc)) {
       alert("El número de RUC debe tener exactamente 11 dígitos numéricos.");
       document.getElementById("qDoc")?.focus();
@@ -778,7 +771,6 @@ async function initCotizacionModule() {
       return;
     }
 
-    // Validar Correo Electrónico válido
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
       alert("Por favor ingrese un correo electrónico válido (ejemplo: contacto@empresa.com).");
@@ -786,7 +778,6 @@ async function initCotizacionModule() {
       return;
     }
 
-    // Validar Celular peruano (9 dígitos empezando con 9)
     if (!/^9\d{8}$/.test(phone)) {
       alert("Por favor ingrese un número celular válido de 9 dígitos que inicie con 9.");
       document.getElementById("qPhone")?.focus();
@@ -824,7 +815,6 @@ async function initCotizacionModule() {
       detalleExtra = `• *Sede:* ${sede}\n• *Lugar:* ${lugar}\n• *Detalle:* ${det}`;
     }
 
-    // Respaldo opcional en Supabase
     try {
       await supabase.from("cotizaciones_web").insert([{
         cliente: razon,
