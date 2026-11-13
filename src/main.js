@@ -642,8 +642,8 @@ async function initCotizacionModule() {
     if (serviceName === "Laboratorio" || serviceName === "Laboratorio RF") {
       dynamicContainer.innerHTML = `
         <div class="border-b border-slate-200 pb-2">
-          <span class="text-[10px] font-black uppercase text-[#ef4444] tracking-wider block">Recepción en Laboratorio Técnico RF</span>
-          <p class="text-[11px] text-slate-500">Ingresa las especificaciones del equipo para banco de pruebas y calibración.</p>
+          <span class="text-[10px] font-black uppercase text-[#ef4444] tracking-wider block">Recepción y Soporte en Laboratorio Técnico RF</span>
+          <p class="text-[11px] text-slate-500">Ingresa las especificaciones del equipo y la dirección donde se ejecutará el requerimiento.</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -656,12 +656,12 @@ async function initCotizacionModule() {
           </div>
         </div>
         <div>
+          <label class="font-bold text-slate-700 block mb-1">Dirección / Lugar donde se ejecutará el servicio *</label>
+          <input id="qLugar" type="text" placeholder="Ej. Jr. Real 450 - El Tambo, Huancayo / Planta minera..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs" oninput="window.sincronizarConProformaAdmin()">
+        </div>
+        <div>
           <label class="font-bold text-slate-700 block mb-1">Detalle de la Falla o Trabajo Requerido *</label>
           <textarea id="qLabFalla" rows="3" placeholder="Indicar si no enciende, pérdida de potencia, calibración de frecuencia o mantenimiento..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#00a8e8] bg-white text-xs"></textarea>
-        </div>
-        <div class="flex items-center space-x-2 text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200">
-          <i class="fa-solid fa-location-dot text-[#00a8e8]"></i>
-          <span>Recepción oficial: <strong>${CONFIG_INMUTEC.direccionHuancayo}</strong></span>
         </div>
       `;
     } else if (serviceName === "Domótica" || serviceName === "Domótica & Smart") {
@@ -788,12 +788,24 @@ async function initCotizacionModule() {
     if (servicio === "Laboratorio" || servicio === "Laboratorio RF") {
       const eq = document.getElementById("qLabEquipo")?.value.trim() || "";
       const cant = document.getElementById("qLabCantidad")?.value || "1";
+      const lugar = document.getElementById("qLugar")?.value.trim() || "";
       const falla = document.getElementById("qLabFalla")?.value.trim() || "";
-      if (!eq || !falla) {
-        alert("Por favor complete el Tipo de Equipo y el Detalle de la Falla.");
+      if (!eq) {
+        alert("Por favor ingrese el Tipo de Equipo y Marca.");
+        document.getElementById("qLabEquipo")?.focus();
         return;
       }
-      detalleExtra = `• *Equipo:* ${eq} (Cant: ${cant})\n• *Falla/Trabajo:* ${falla}`;
+      if (lugar.length < 4) {
+        alert("Por favor ingrese la dirección o lugar exacto donde se ejecutará el servicio.");
+        document.getElementById("qLugar")?.focus();
+        return;
+      }
+      if (!falla) {
+        alert("Por favor ingrese el detalle de la falla o trabajo requerido.");
+        document.getElementById("qLabFalla")?.focus();
+        return;
+      }
+      detalleExtra = `• *Equipo:* ${eq} (Cant: ${cant})\n• *Dirección / Lugar:* ${lugar}\n• *Falla/Trabajo:* ${falla}`;
     } else if (servicio === "Domótica" || servicio === "Domótica & Smart") {
       const checks = Array.from(document.querySelectorAll(".chk-domo-item:checked")).map(c => c.value).join(", ") || "Solución Integral Smart";
       const tipoEsp = document.getElementById("qDomTipo")?.value || "-";
