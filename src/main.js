@@ -98,16 +98,16 @@ export async function loadModule(moduleName) {
     return;
   }
 
-  await applyCmsValuesToView();
-
-  if (isAdminLoggedIn) {
-    enableAdminEditMode();
-  }
-
   if (modKey === "inicio") {
     initInicioModule();
   } else if (modKey === "cotizacion") {
     await initCotizacionModule();
+  }
+
+  await applyCmsValuesToView();
+
+  if (isAdminLoggedIn) {
+    enableAdminEditMode();
   }
 }
 
@@ -1887,7 +1887,6 @@ async function inicializarSistemaCompleto() {
       return;
     }
 
-    // Interceptar submit nativo del formulario de cotización si existe <form>
     if (
       e.target &&
       e.target.closest("#moduleContainer") &&
